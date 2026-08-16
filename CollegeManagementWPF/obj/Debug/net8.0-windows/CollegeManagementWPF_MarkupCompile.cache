@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\App.xaml
-11666230836
+20876971359
 
-15-194477397
+24-268324459
 207271221802
-Resources\NavStyles.xaml;Views\DashboardPage.xaml;Views\DropoutPage.xaml;Views\HomePage.xaml;Views\LoginWindow.xaml;Views\MigrationPage.xaml;Views\ModernDialog.xaml;Views\PlaceholderPage.xaml;Views\StudentFeesPage.xaml;Views\StudentMarksPage.xaml;Views\StudentRegistrationPage.xaml;
+Resources\NavStyles.xaml;Views\AlumniPage.xaml;Views\AttachMarkListWindow.xaml;Views\COCRecordPage.xaml;Views\CoursesPage.xaml;Views\DashboardPage.xaml;Views\DepartmentsPage.xaml;Views\DropoutPage.xaml;Views\EmployeePage.xaml;Views\HomePage.xaml;Views\LevelsPage.xaml;Views\LibraryPage.xaml;Views\LoginWindow.xaml;Views\MigrationPage.xaml;Views\ModernDialog.xaml;Views\PlaceholderPage.xaml;Views\StreamsPage.xaml;Views\StudentFeesPage.xaml;Views\StudentMarksPage.xaml;Views\StudentRegistrationPage.xaml;
 
 False
 

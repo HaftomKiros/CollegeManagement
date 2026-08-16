@@ -23,15 +23,15 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="bd" Background="{TemplateBinding Background}"
                                 CornerRadius="7" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter x:Name="cp" VerticalAlignment="Center"
-                                TextElement.Foreground="{TemplateBinding Foreground}"/>
+                            <Grid TextElement.Foreground="{TemplateBinding Foreground}">
+                                <ContentPresenter x:Name="cp" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="bd" Property="Background"
                                         Value="{DynamicResource SubBtnHoverBg}"/>
                                 <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="cp" Property="TextElement.Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -57,7 +57,9 @@
                         <Border x:Name="bd" Background="{TemplateBinding Background}"
                                 CornerRadius="10" Padding="{TemplateBinding Padding}"
                                 BorderThickness="0">
-                            <ContentPresenter VerticalAlignment="Center"/>
+                            <Grid TextElement.Foreground="{TemplateBinding Foreground}">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -161,11 +163,11 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanStudents" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="StudentRegistration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonAdd24" FontSize="13" Foreground="#2ECC71" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Registration" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="StudentMarks" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Marks" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="StudentFees" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Money24" FontSize="13" Foreground="#34D399" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Fees" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="DropoutStudents" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonDelete24" FontSize="13" Foreground="#F87171" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Dropout Students" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="COCRecord" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="13" Foreground="#C084FC" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC Record" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="StudentRegistration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonAdd24" FontSize="13" Foreground="#2ECC71" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Registration" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="StudentMarks" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Marks" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="StudentFees" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Money24" FontSize="13" Foreground="#34D399" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Student Fees" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="DropoutStudents" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonDelete24" FontSize="13" Foreground="#F87171" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Dropout Students" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="COCRecord" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="13" Foreground="#C084FC" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC Record" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush2" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnDepts" Tag="Departments" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -177,10 +179,10 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanDepts" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="Departments" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Building24" FontSize="13" Foreground="#67E8F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Departments" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="Streams" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="BranchFork24" FontSize="13" Foreground="#38BDF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Streams" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="Levels" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="LayerDiagonal24" FontSize="13" Foreground="#60A5FA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Levels" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="Courses" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="BookOpen24" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Courses" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="Departments" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Building24" FontSize="13" Foreground="#67E8F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Departments" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="Streams" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="BranchFork24" FontSize="13" Foreground="#38BDF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Streams" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="Levels" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="LayerDiagonal24" FontSize="13" Foreground="#60A5FA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Levels" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="Courses" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="BookOpen24" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Courses" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush3" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnEmp" Tag="Employees" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -191,7 +193,7 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanEmp" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="RegisterEmployee" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonAdd24" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Employee" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="RegisterEmployee" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonAdd24" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Employee" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush4" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnAlumni" Tag="Alumni" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -202,7 +204,7 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanAlumni" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="RegisterAlumni" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PeopleCommunity24" FontSize="13" Foreground="#38BDF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Alumni" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="RegisterAlumni" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PeopleCommunity24" FontSize="13" Foreground="#38BDF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Alumni" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush5" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnLib" Tag="Library" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -213,7 +215,7 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanLib" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="Library" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Library24" FontSize="13" Foreground="#4ADE80" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Library" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="Library" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Library24" FontSize="13" Foreground="#4ADE80" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Library" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush6" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnReports" Tag="Reports" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -224,10 +226,10 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanReports" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="TVETTranscript" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="13" Foreground="#C084FC" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="TVET Transcript" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="MarkList" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Mark List" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="AttendanceSheet" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="CalendarLtr24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Attendance Sheet" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="COCList" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC List" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="TVETTranscript" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="13" Foreground="#C084FC" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="TVET Transcript" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="MarkList" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Mark List" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="AttendanceSheet" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="CalendarLtr24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Attendance Sheet" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="COCList" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC List" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                             <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush7" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnAdmins" Tag="Admins" Style="{StaticResource SectionBtn}" Click="Section_Click">
@@ -238,8 +240,8 @@
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanAdmins" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="ManageAdmins" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="13" Foreground="#E879F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Manage Admins" VerticalAlignment="Center"/></StackPanel></Button>
-                                <Button Tag="Migration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowSync24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="BLOB Migration" VerticalAlignment="Center"/></StackPanel></Button>
+                                <Button Tag="ManageAdmins" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="13" Foreground="#E879F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Manage Admins" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="Migration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowSync24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="BLOB Migration" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -267,11 +269,16 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <StackPanel x:Name="SearchPanel" Orientation="Horizontal" Margin="0,0,14,0" Visibility="Collapsed">
-                                <Border CornerRadius="5" Height="30" Width="220" BorderThickness="1" BorderBrush="#1E3A6A" Margin="0,0,5,0">
-                                    <Border.Background><SolidColorBrush Color="#060C18"/></Border.Background>
+                                <Border x:Name="SearchBoxBorder" CornerRadius="5" Height="30" Width="220" BorderThickness="1" Margin="0,0,5,0">
+                                    <Border.BorderBrush><SolidColorBrush x:Name="SearchBorderColor" Color="#1E3A6A"/></Border.BorderBrush>
+                                    <Border.Background><DynamicResource ResourceKey="RegSearchBg"/></Border.Background>
                                     <Grid Margin="8,0">
-                                        <TextBlock x:Name="TopSearchHint" Text="Search by ID or name..." Foreground="#2A4A7A" FontSize="11" VerticalAlignment="Center" FontFamily="Segoe UI" IsHitTestVisible="False"/>
-                                        <TextBox x:Name="TopSearchBox" Background="Transparent" BorderThickness="0" Foreground="White" FontSize="11" VerticalContentAlignment="Center" FontFamily="Segoe UI" TextChanged="TopSearch_TextChanged"/>
+                                        <TextBlock x:Name="TopSearchHint" Text="Search by ID or name..." FontSize="11" VerticalAlignment="Center" FontFamily="Segoe UI" IsHitTestVisible="False">
+                                            <TextBlock.Foreground><SolidColorBrush x:Name="SearchHintFg" Color="#2A4A7A"/></TextBlock.Foreground>
+                                        </TextBlock>
+                                        <TextBox x:Name="TopSearchBox" Background="Transparent" BorderThickness="0" FontSize="11" VerticalContentAlignment="Center" FontFamily="Segoe UI" TextChanged="TopSearch_TextChanged">
+                                            <TextBox.Foreground><SolidColorBrush x:Name="SearchFg" Color="White"/></TextBox.Foreground>
+                                        </TextBox>
                                     </Grid>
                                 </Border>
                                 <Button Content="Search" Click="TopSearch_Click" Height="30" FontSize="11" FontFamily="Segoe UI" Foreground="White" BorderThickness="0" Cursor="Hand" Padding="12,0">

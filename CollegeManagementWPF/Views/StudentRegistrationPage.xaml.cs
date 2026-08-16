@@ -39,11 +39,46 @@ namespace CollegeManagementWPF.Views
             InitializeComponent();
             TxtGpa10.PreviewTextInput += GpaField_PreviewTextInput;
             TxtGpa12.PreviewTextInput += GpaField_PreviewTextInput;
+            ThemeManager.ThemeChanged += ApplyTheme;
+            ApplyTheme();
             Loaded += async (s, e) =>
             {
                 await LoadDepartmentsAsync();
                 await LoadGridAsync(BASE_QUERY);
             };
+        }
+
+        private void ApplyTheme()
+        {
+            bool dark = ThemeManager.IsDark;
+
+            // Page background
+            SetGrad("PageBg1", dark ? "#0A1526" : "#EEF2F7");
+            SetGrad("PageBg2", dark ? "#060E1C" : "#E2E8F0");
+
+            // Form card
+            SetBrush("FormCardBg",     dark ? "#070F1E" : "#FFFFFF");
+            SetBrush("FormCardBorder", dark ? "#1E3A6A" : "#CBD5E1");
+
+            // Photo card
+            SetBrush("PhotoCardBg",     dark ? "#050B16" : "#F8FAFC");
+            SetBrush("PhotoCardBorder", dark ? "#1E3A6A" : "#CBD5E1");
+
+            // Table card
+            SetBrush("TableCardBg",     dark ? "#050B16" : "#FFFFFF");
+            SetBrush("TableCardBorder", dark ? "#1E3A6A" : "#CBD5E1");
+        }
+
+        private void SetBrush(string name, string hex)
+        {
+            if (FindName(name) is System.Windows.Media.SolidColorBrush b)
+                b.Color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+        }
+
+        private void SetGrad(string name, string hex)
+        {
+            if (FindName(name) is System.Windows.Media.GradientStop g)
+                g.Color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
         }
 
         // Load departments into CmbDeptID and CmbFDept
@@ -140,6 +175,7 @@ namespace CollegeManagementWPF.Views
         {
             try
             {
+                if (RegLoadingOverlay != null) RegLoadingOverlay.Visibility = Visibility.Visible;
                 var table = await Task.Run(() =>
                 {
                     var conn    = _db.GetConnection();
@@ -159,6 +195,7 @@ namespace CollegeManagementWPF.Views
                 MessageBox.Show("Database error:\n\n" + ex.Message,
                     "DB Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+            finally { if (RegLoadingOverlay != null) RegLoadingOverlay.Visibility = Visibility.Collapsed; }
         }
 
         private void BtnSearch_Click(object sender, RoutedEventArgs e) { }

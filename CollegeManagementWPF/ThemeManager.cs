@@ -48,6 +48,25 @@ namespace CollegeManagementWPF
             Application.Current.Resources["SectionBtnHoverBg"] = new SolidColorBrush(
                 _isDark ? Color.FromRgb(0x14,0x30,0x5A) : Color.FromRgb(0x1E,0x3A,0x8A));
 
+            // Registration page form colors
+            // Page/form colors
+            Application.Current.Resources["RegLabelFg"]          = new SolidColorBrush(_isDark ? Color.FromRgb(0x55,0x77,0xAA) : Color.FromRgb(0x47,0x55,0x69));
+            Application.Current.Resources["RegInputBg"]          = new SolidColorBrush(_isDark ? Color.FromRgb(0x0F,0x1E,0x36) : Colors.White);
+            Application.Current.Resources["RegInputFg"]          = new SolidColorBrush(_isDark ? Colors.White : Color.FromRgb(0x0F,0x17,0x2A));
+            Application.Current.Resources["RegInputBorder"]      = new SolidColorBrush(_isDark ? Color.FromRgb(0x1E,0x3A,0x6A) : Color.FromRgb(0xCB,0xD5,0xE1));
+            Application.Current.Resources["RegCardInnerBg"]      = new SolidColorBrush(_isDark ? Color.FromRgb(0x07,0x0F,0x1E) : Colors.White);
+            Application.Current.Resources["RegTableBg"]          = new SolidColorBrush(_isDark ? Color.FromRgb(0x05,0x0B,0x16) : Colors.White);
+            Application.Current.Resources["RegPhotoBg"]          = new SolidColorBrush(_isDark ? Color.FromRgb(0x0A,0x16,0x28) : Color.FromRgb(0xF1,0xF5,0xF9));
+            Application.Current.Resources["RegBrowseBg"]         = new SolidColorBrush(_isDark ? Color.FromRgb(0x1A,0x3A,0x6A) : Color.FromRgb(0x1D,0x4E,0xD8));
+            Application.Current.Resources["RegPhotoPlaceholder"] = new SolidColorBrush(_isDark ? Color.FromRgb(0x2A,0x4A,0x7A) : Color.FromRgb(0x94,0xA3,0xB8));
+            Application.Current.Resources["RegSearchBg"]         = new SolidColorBrush(_isDark ? Color.FromRgb(0x06,0x0C,0x18) : Color.FromRgb(0xF8,0xFA,0xFF));
+            // Table colors
+            Application.Current.Resources["TableRowBg"]      = new SolidColorBrush(_isDark ? Color.FromRgb(0x0D,0x1E,0x3A) : Colors.White);
+            Application.Current.Resources["TableRowFg"]      = new SolidColorBrush(_isDark ? Color.FromRgb(0xE8,0xF0,0xFF) : Color.FromRgb(0x0F,0x17,0x2A));
+            Application.Current.Resources["TableRowHoverBg"] = new SolidColorBrush(_isDark ? Color.FromRgb(0x0F,0x22,0x40) : Color.FromRgb(0xEF,0xF6,0xFF));
+            Application.Current.Resources["TableHeaderBg"]   = new SolidColorBrush(_isDark ? Color.FromRgb(0x0A,0x16,0x28) : Color.FromRgb(0xF1,0xF5,0xF9));
+            Application.Current.Resources["TableHeaderFg"]   = new SolidColorBrush(_isDark ? Color.FromRgb(0x4A,0x9A,0xEE) : Color.FromRgb(0x1D,0x4E,0xD8));
+
             ThemeChanged?.Invoke();
         }
 

@@ -14,6 +14,21 @@
             <SolidColorBrush x:Key="SubBtnHoverBg" Color="#112240"/>
             <SolidColorBrush x:Key="SubBtnHoverFg" Color="White"/>
             <SolidColorBrush x:Key="SectionBtnHoverBg" Color="#14305A"/>
+            <SolidColorBrush x:Key="RegLabelFg"          Color="#5577AA"/>
+            <SolidColorBrush x:Key="RegInputBg"          Color="#0F1E36"/>
+            <SolidColorBrush x:Key="RegInputFg"          Color="White"/>
+            <SolidColorBrush x:Key="RegInputBorder"      Color="#1E3A6A"/>
+            <SolidColorBrush x:Key="RegCardInnerBg"      Color="#070F1E"/>
+            <SolidColorBrush x:Key="RegTableBg"          Color="#050B16"/>
+            <SolidColorBrush x:Key="RegPhotoBg"          Color="#0A1628"/>
+            <SolidColorBrush x:Key="RegBrowseBg"         Color="#1A3A6A"/>
+            <SolidColorBrush x:Key="RegPhotoPlaceholder" Color="#2A4A7A"/>
+            <SolidColorBrush x:Key="RegSearchBg"         Color="#060C18"/>
+            <SolidColorBrush x:Key="TableRowBg"          Color="#0D1E3A"/>
+            <SolidColorBrush x:Key="TableRowFg"          Color="#E8F0FF"/>
+            <SolidColorBrush x:Key="TableRowHoverBg"     Color="#0F2240"/>
+            <SolidColorBrush x:Key="TableHeaderBg"       Color="#0A1628"/>
+            <SolidColorBrush x:Key="TableHeaderFg"       Color="#4A9AEE"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

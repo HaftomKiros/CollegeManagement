@@ -6,8 +6,8 @@
 
     <Page.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A1526" Offset="0"/>
-            <GradientStop Color="#060E1C" Offset="1"/>
+            <GradientStop x:Name="PageBg1" Color="#0A1526" Offset="0"/>
+            <GradientStop x:Name="PageBg2" Color="#060E1C" Offset="1"/>
         </LinearGradientBrush>
     </Page.Background>
 
@@ -15,12 +15,14 @@
         <local:AddOneConverter x:Key="AddOneConverter"/>
         <Style x:Key="FL" TargetType="TextBlock">
             <Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#5577AA"/><Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/><Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Margin" Value="0,0,0,3"/>
         </Style>
         <Style x:Key="WI" TargetType="TextBox">
-            <Setter Property="Background" Value="#0F1E36"/><Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#1E3A6A"/><Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource RegInputBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Height" Value="28"/><Setter Property="Padding" Value="6,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -35,7 +37,7 @@
             </Setter>
         </Style>
         <Style x:Key="DD" TargetType="ComboBox">
-            <Setter Property="Background" Value="#0F1E36"/><Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
             <Setter Property="FontSize" Value="12"/><Setter Property="Height" Value="28"/>
             <Setter Property="BorderBrush" Value="#1E3A6A"/><Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -53,7 +55,7 @@
                                 </Grid>
                             </Border>
                             <Popup IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" Placement="Bottom" PopupAnimation="Slide">
-                                <Border Background="#0F1E36" BorderBrush="#1E3A6A" BorderThickness="1" CornerRadius="0,0,4,4" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
+                                <Border Background="{DynamicResource RegInputBg}" BorderBrush="{DynamicResource RegInputBorder}" BorderThickness="1" CornerRadius="0,0,4,4" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
                                     <ScrollViewer SnapsToDevicePixels="True"><StackPanel IsItemsHost="True"/></ScrollViewer>
                                 </Border>
                             </Popup>
@@ -63,7 +65,7 @@
             </Setter>
             <Style.Resources>
                 <Style TargetType="ComboBoxItem">
-                    <Setter Property="Background" Value="#0F1E36"/><Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
                     <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="12"/>
                     <Setter Property="Padding" Value="8,5"/>
                     <Style.Triggers>
@@ -73,8 +75,7 @@
                 </Style>
             </Style.Resources>
         </Style>
-        <Style x:Key="TC" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#E8F0FF"/>
+        <Style x:Key="TC" TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="8,0"/>
         </Style>
@@ -106,9 +107,10 @@
         </Grid.RowDefinitions>
 
         <!-- Form area: left = fields, right = photo -->
-        <Border Grid.Row="0" CornerRadius="10" Padding="14,12" Margin="0,0,0,8"
-                BorderThickness="1" BorderBrush="#1E3A6A">
-            <Border.Background><SolidColorBrush Color="#070F1E"/></Border.Background>
+        <Border Grid.Row="0" x:Name="FormCard" CornerRadius="10" Padding="14,12" Margin="0,0,0,8"
+                BorderThickness="1">
+            <Border.BorderBrush><SolidColorBrush x:Name="FormCardBorder" Color="#1E3A6A"/></Border.BorderBrush>
+            <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -216,7 +218,7 @@
                                 <Button Grid.Column="1" Click="BrowsePhoto_Click" Width="28" Height="28" Cursor="Hand" BorderThickness="0" ToolTip="Browse Photo">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="bd" CornerRadius="4" Background="#1A3A6A" BorderThickness="1" BorderBrush="#1E3A6A">
+                                            <Border x:Name="bd" CornerRadius="4" Background="{DynamicResource RegBrowseBg}" BorderThickness="1" BorderBrush="#1E3A6A">
                                                 <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#4A9AEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -238,7 +240,7 @@
                                 <Button Grid.Column="1" Click="BrowseAttach_Click" Width="28" Height="28" Cursor="Hand" BorderThickness="0" ToolTip="Browse Attachment">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="bd" CornerRadius="4" Background="#1A3A6A" BorderThickness="1" BorderBrush="#1E3A6A">
+                                            <Border x:Name="bd" CornerRadius="4" Background="{DynamicResource RegBrowseBg}" BorderThickness="1" BorderBrush="#1E3A6A">
                                                 <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#4A9AEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -265,19 +267,21 @@
                 </StackPanel>
 
                 <!-- Right: photo card + info -->
-                <Border Grid.Column="1" CornerRadius="10" BorderThickness="1" BorderBrush="#1E3A6A" Background="#050B16">
+                <Border Grid.Column="1" x:Name="PhotoCard" CornerRadius="10" BorderThickness="1">
+                    <Border.BorderBrush><DynamicResource ResourceKey="RegInputBg"/></Border.BorderBrush>
+                    <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
                     <StackPanel>
 
                         <!-- Photo frame -->
                         <Border CornerRadius="8" ClipToBounds="True" Margin="8,8,8,0"
-                                Height="148" Background="#0A1628"
+                                Height="148" Background="{DynamicResource RegPhotoBg}"
                                 BorderThickness="1" BorderBrush="#1A3A6A">
                             <Grid>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="32"
                                                Foreground="#1E3A6A" HorizontalAlignment="Center"/>
                                     <TextBlock x:Name="PhotoPlaceholder" Text="No Photo"
-                                               Foreground="#2A4A7A" FontSize="10.5" FontFamily="Segoe UI"
+                                               Foreground="{DynamicResource RegPhotoPlaceholder}" FontSize="10.5" FontFamily="Segoe UI"
                                                HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Image x:Name="ImgPreview" Stretch="UniformToFill" Visibility="Collapsed"/>
@@ -297,7 +301,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" CornerRadius="8" BorderThickness="1"
-                                                BorderBrush="#1E3A6A" Background="#0A1830">
+                                                BorderBrush="{DynamicResource RegInputBorder}" Background="{DynamicResource RegPhotoBg}">
                                             <TextBlock x:Name="ic" Text="&#xE896;" FontFamily="Segoe MDL2 Assets"
                                                        FontSize="15" Foreground="#4A9AEE"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -326,7 +330,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" CornerRadius="8" BorderThickness="1"
-                                                BorderBrush="#1E3A6A" Background="#0A1830">
+                                                BorderBrush="{DynamicResource RegInputBorder}" Background="{DynamicResource RegPhotoBg}">
                                             <TextBlock x:Name="ic" Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets"
                                                        FontSize="15" Foreground="#4A9AEE"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -348,7 +352,7 @@
                         </StackPanel>
 
                         <!-- Divider -->
-                        <Border Height="1" Background="#0F1E36" Margin="8,8,8,0"/>
+                        <Border Height="1" Background="{DynamicResource RegInputBorder}" Margin="8,8,8,0"/>
 
                         <!-- Collapsible info panel -->
                         <StackPanel Margin="8,4,8,6">
@@ -465,18 +469,19 @@
         </Grid>
 
         <!-- Data grid -->
-        <Border Grid.Row="2" CornerRadius="8" BorderThickness="1" BorderBrush="#1E3A6A" ClipToBounds="True">
-            <Border.Background><SolidColorBrush Color="#050B16"/></Border.Background>
+        <Grid Grid.Row="2">
+            <Border x:Name="TableCard" CornerRadius="8" BorderThickness="1" ClipToBounds="True">
+                <Border.BorderBrush><SolidColorBrush x:Name="TableCardBorder" Color="#1E3A6A"/></Border.BorderBrush>
+                <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
             <DataGrid x:Name="GridStudents" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
                       EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                      Background="Transparent" RowBackground="#0D1E3A" AlternatingRowBackground="#0D1E3A"
+                      Background="Transparent" RowBackground="{DynamicResource TableRowBg}" AlternatingRowBackground="{DynamicResource TableRowBg}"
                       BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#0E1C30"
-                      ColumnHeaderHeight="32" RowHeight="28" FontSize="11.5" FontFamily="Segoe UI" Foreground="#E8F0FF"
-                      SelectionChanged="GridStudents_SelectionChanged">
+                      ColumnHeaderHeight="32" RowHeight="28" FontSize="11.5" FontFamily="Segoe UI" Foreground="{DynamicResource TableRowFg}" SelectionChanged="GridStudents_SelectionChanged">
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#0A1628"/>
-                        <Setter Property="Foreground" Value="#4A9AEE"/>
+                        <Setter Property="Background" Value="{DynamicResource TableHeaderBg}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TableHeaderFg}"/>
                         <Setter Property="FontWeight" Value="Bold"/>
                         <Setter Property="Padding" Value="8,0"/>
                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
@@ -485,8 +490,7 @@
                 </DataGrid.ColumnHeaderStyle>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
-                        <Setter Property="Foreground" Value="#E8F0FF"/>
-                        <Setter Property="Background" Value="#0D1E3A"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="Background" Value="{DynamicResource TableRowBg}"/>
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="#1A3A6B"/>
@@ -500,8 +504,7 @@
                 </DataGrid.RowStyle>
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
-                        <Setter Property="Foreground" Value="#E8F0FF"/>
-                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="BorderThickness" Value="0"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                         <Setter Property="Template">
@@ -543,5 +546,15 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+        <!-- Loading overlay -->
+        <Border x:Name="RegLoadingOverlay" Visibility="Collapsed" CornerRadius="8">
+            <Border.Background><SolidColorBrush Color="#A0000000"/></Border.Background>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ui:ProgressRing IsIndeterminate="True" Width="44" Height="44"/>
+                <TextBlock Text="Loading..." Foreground="White" FontSize="13"
+                           FontFamily="Segoe UI" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+        </Grid>
     </Grid>
 </Page>

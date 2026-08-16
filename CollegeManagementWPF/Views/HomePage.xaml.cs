@@ -162,6 +162,17 @@ namespace CollegeManagementWPF.Views
                     dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E)
                          : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9));
 
+            // ── Search box ────────────────────────────────────────────────────
+            if (FindName("SearchBorderColor") is System.Windows.Media.SolidColorBrush sbc)
+                sbc.Color = dark ? System.Windows.Media.Color.FromRgb(0x1E,0x3A,0x6A)
+                                 : System.Windows.Media.Color.FromRgb(0x93,0xC5,0xFD);
+            if (FindName("SearchHintFg") is System.Windows.Media.SolidColorBrush shf)
+                shf.Color = dark ? System.Windows.Media.Color.FromRgb(0x2A,0x4A,0x7A)
+                                 : System.Windows.Media.Color.FromRgb(0x94,0xA3,0xB8);
+            if (FindName("SearchFg") is System.Windows.Media.SolidColorBrush sf)
+                sf.Color = dark ? System.Windows.Media.Colors.White
+                                : System.Windows.Media.Color.FromRgb(0x0F,0x17,0x2A);
+
             // ── Toggle button ────────────────────────────────────────────────
             if (BtnThemeToggle != null)
             {
@@ -202,8 +213,16 @@ namespace CollegeManagementWPF.Views
                     StudentMarksPage        => new StudentMarksPage(),
                     StudentFeesPage         => new StudentFeesPage(),
                     DropoutPage             => new DropoutPage(),
+                    COCRecordPage           => new COCRecordPage(),
+                    DepartmentsPage         => new DepartmentsPage(),
+                    StreamsPage             => new StreamsPage(),
+                    LevelsPage              => new LevelsPage(),
+                    CoursesPage             => new CoursesPage(),
+                    AlumniPage              => new AlumniPage(),
+                    EmployeePage            => new EmployeePage(),
+                    LibraryPage             => new LibraryPage(),
                     MigrationPage           => new MigrationPage(),
-                    _                       => new DashboardPage()
+                    _                       => ContentFrame.Content
                 });
         }
 
@@ -282,11 +301,8 @@ namespace CollegeManagementWPF.Views
             TxtPageSubTitle.Visibility = string.IsNullOrEmpty(sub)
                 ? Visibility.Collapsed : Visibility.Visible;
 
-            // Show search bar only for list pages
-            bool hasSearch = tag is "StudentRegistration" or "StudentMarks" or "StudentFees"
-                or "DropoutStudents" or "COCRecord" or "Departments" or "Streams"
-                or "Levels" or "Courses" or "RegisterEmployee" or "RegisterAlumni"
-                or "Library" or "ManageAdmins";
+            // Show search bar only for Student Registration
+            bool hasSearch = tag == "StudentRegistration";
             SearchPanel.Visibility = hasSearch ? Visibility.Visible : Visibility.Collapsed;
             if (TopSearchBox != null) TopSearchBox.Text = "";
 
@@ -297,6 +313,14 @@ namespace CollegeManagementWPF.Views
                 "StudentMarks"        => new StudentMarksPage(),
                 "StudentFees"         => new StudentFeesPage(),
                 "DropoutStudents"     => new DropoutPage(),
+                "COCRecord"           => new COCRecordPage(),
+                "Departments"         => new DepartmentsPage(),
+                "Streams"             => new StreamsPage(),
+                "Levels"              => new LevelsPage(),
+                "Courses"             => new CoursesPage(),
+                "RegisterEmployee"    => new EmployeePage(),
+                "RegisterAlumni"      => new AlumniPage(),
+                "Library"             => new LibraryPage(),
                 "Migration"           => new MigrationPage(),
                 _                     => new PlaceholderPage(TxtPageTitle.Text)
             });
