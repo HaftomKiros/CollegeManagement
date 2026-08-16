@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "tXpcmpLuN4I=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\SymbolDumper\\SymbolDumper.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\IN-TECH\\.nuget\\packages\\wpf-ui\\3.0.5\\wpf-ui.3.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}
