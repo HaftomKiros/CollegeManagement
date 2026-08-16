@@ -55,3 +55,4 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\DropoutPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\StudentFeesPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\StudentMarksPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\CollegeManagementWPF.sourcelink.json

@@ -8,7 +8,6 @@ namespace CollegeManagementWPF
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Catch all unhandled exceptions and write to a log file
             AppDomain.CurrentDomain.UnhandledException += (s, ex) =>
             {
                 File.WriteAllText("crash.log", ex.ExceptionObject.ToString());
@@ -23,6 +22,7 @@ namespace CollegeManagementWPF
             };
 
             base.OnStartup(e);
+            ThemeManager.Apply(); // ensure correct theme dict is loaded
         }
     }
 }

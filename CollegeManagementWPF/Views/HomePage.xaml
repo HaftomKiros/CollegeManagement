@@ -10,40 +10,63 @@
     WindowBackdropType="Mica" Background="#0D1B3E">
     <ui:FluentWindow.Resources>
         <Style x:Key="SubBtn" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#6B8CAE"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#334155"/>
             <Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="BorderThickness" Value="0"/><Setter Property="Height" Value="36"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Padding" Value="14,0,12,0"/><Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="10,1,10,1"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="7" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center"/>
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="cp" VerticalAlignment="Center"
+                                TextElement.Foreground="{TemplateBinding Foreground}"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Background" Value="#112240"/><Setter Property="Foreground" Value="#E2EAF4"/></Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background"
+                                        Value="{DynamicResource SubBtnHoverBg}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="cp" Property="TextElement.Foreground" Value="White"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <Style x:Key="SectionBtn" TargetType="Button">
-            <Setter Property="Background" Value="#0D1F3C"/><Setter Property="Foreground" Value="#C8DCF0"/>
-            <Setter Property="FontSize" Value="13"/><Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="50"/><Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="12,0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#0D1F3C"/>
+            <Setter Property="Foreground" Value="#C8DCF0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Margin" Value="8,3,8,0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="10" Padding="{TemplateBinding Padding}"
+                                BorderThickness="0">
                             <ContentPresenter VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Background" Value="#14305A"/><Setter Property="Foreground" Value="White"/></Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource SectionBtnHoverBg}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.8"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -55,11 +78,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="Wukro St. Mary College - Management System" Foreground="White">
+        <ui:TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="Wukro St. Mary College - Management System" Foreground="White" ButtonsForeground="White">
             <ui:TitleBar.Icon><ui:ImageIcon Source="/Assets/app.ico"/></ui:TitleBar.Icon>
             <ui:TitleBar.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#1A1F8C" Offset="0"/><GradientStop Color="#0F3460" Offset="1"/>
+                    <GradientStop x:Name="TitleG1" Color="#1A1F8C" Offset="0"/>
+                    <GradientStop x:Name="TitleG2" Color="#0F3460" Offset="1"/>
                 </LinearGradientBrush>
             </ui:TitleBar.Background>
         </ui:TitleBar>
@@ -68,14 +92,14 @@
                 <ColumnDefinition Width="258"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0">
+            <Border Grid.Column="0" x:Name="SidebarBorder">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                         <GradientStop Color="#0A1628" Offset="0"/><GradientStop Color="#070E1C" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
                 <DockPanel>
-                    <Border DockPanel.Dock="Top" Padding="16,18,16,14">
+                    <Border DockPanel.Dock="Top" x:Name="SidebarHeaderBorder" Padding="16,18,16,14">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                 <GradientStop Color="#0D1F3C" Offset="0"/><GradientStop Color="#0A1628" Offset="1"/>
@@ -85,8 +109,8 @@
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Image Source="/Assets/st_mary_logo.png" Width="40" Height="40" Margin="0,0,12,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="St. Mary College" FontSize="13" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
-                                    <TextBlock Text="Management System" FontSize="10" Foreground="#2A4A7A" FontFamily="Segoe UI"/>
+                                    <TextBlock x:Name="TxtCollegeName" Text="St. Mary College" FontSize="13" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock x:Name="TxtCollegeSub" Text="Management System" FontSize="10" Foreground="#2A4A7A" FontFamily="Segoe UI"/>
                                 </StackPanel>
                             </StackPanel>
                             <Rectangle Height="1">
@@ -125,6 +149,7 @@
                                     </StackPanel>
                                 </Button>
                             </Border>
+                            <Rectangle x:Name="Sep1" Height="1" Margin="16,4,16,4"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush1" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnStudents" Tag="Students" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -142,6 +167,7 @@
                                 <Button Tag="DropoutStudents" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonDelete24" FontSize="13" Foreground="#F87171" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Dropout Students" VerticalAlignment="Center"/></StackPanel></Button>
                                 <Button Tag="COCRecord" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="13" Foreground="#C084FC" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC Record" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush2" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnDepts" Tag="Departments" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -156,6 +182,7 @@
                                 <Button Tag="Levels" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="LayerDiagonal24" FontSize="13" Foreground="#60A5FA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Levels" VerticalAlignment="Center"/></StackPanel></Button>
                                 <Button Tag="Courses" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="BookOpen24" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Courses" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush3" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnEmp" Tag="Employees" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#1A1A2A" Margin="0,0,10,0"><ui:SymbolIcon Symbol="PeopleTeam24" FontSize="15" Foreground="#818CF8" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
@@ -166,6 +193,7 @@
                             <StackPanel x:Name="PanEmp" Visibility="Collapsed" Margin="0,2,0,4">
                                 <Button Tag="RegisterEmployee" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PersonAdd24" FontSize="13" Foreground="#818CF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Employee" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush4" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnAlumni" Tag="Alumni" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#0D1E2A" Margin="0,0,10,0"><ui:SymbolIcon Symbol="PeopleCommunity24" FontSize="15" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
@@ -176,6 +204,7 @@
                             <StackPanel x:Name="PanAlumni" Visibility="Collapsed" Margin="0,2,0,4">
                                 <Button Tag="RegisterAlumni" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="PeopleCommunity24" FontSize="13" Foreground="#38BDF8" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Register Alumni" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush5" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnLib" Tag="Library" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#0D2A1A" Margin="0,0,10,0"><ui:SymbolIcon Symbol="Library24" FontSize="15" Foreground="#4ADE80" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
@@ -186,6 +215,7 @@
                             <StackPanel x:Name="PanLib" Visibility="Collapsed" Margin="0,2,0,4">
                                 <Button Tag="Library" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Library24" FontSize="13" Foreground="#4ADE80" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Library" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush6" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnReports" Tag="Reports" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#1A1020" Margin="0,0,10,0"><ui:SymbolIcon Symbol="DocumentPdf24" FontSize="15" Foreground="#C084FC" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
@@ -199,6 +229,7 @@
                                 <Button Tag="AttendanceSheet" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="CalendarLtr24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Attendance Sheet" VerticalAlignment="Center"/></StackPanel></Button>
                                 <Button Tag="COCList" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ClipboardTaskListLtr20" FontSize="13" Foreground="#A78BFA" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="COC List" VerticalAlignment="Center"/></StackPanel></Button>
                             </StackPanel>
+                            <Rectangle Height="1" Margin="16,2,16,2"><Rectangle.Fill><SolidColorBrush x:Name="SepBrush7" Color="#1A3A5A"/></Rectangle.Fill></Rectangle>
                             <Button x:Name="BtnAdmins" Tag="Admins" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#2A0A2A" Margin="0,0,10,0"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="15" Foreground="#E879F9" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
@@ -218,7 +249,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="58"/><RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border Grid.Row="0" BorderThickness="0,0,0,1">
+                <Border Grid.Row="0" x:Name="TopBarBorder" BorderThickness="0,0,0,1">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="#0D1B3E" Offset="0"/><GradientStop Color="#0A1628" Offset="1"/>
@@ -256,17 +287,51 @@
                                     </Button.Template>
                                 </Button>
                             </StackPanel>
-                            <Border CornerRadius="20" Padding="12,5" BorderThickness="1" BorderBrush="#1A3A6B">
-                                <Border.Background><SolidColorBrush Color="#0D1B3E"/></Border.Background>
+                            <!-- Theme toggle -->
+                            <Button x:Name="BtnThemeToggle" Click="BtnThemeToggle_Click"
+                                    Width="36" Height="36" Cursor="Hand" Margin="0,0,10,0"
+                                    BorderThickness="0" Background="Transparent"
+                                    ToolTip="Switch to Light Mode">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" CornerRadius="10" BorderThickness="1.5"
+                                                BorderBrush="#1E3A6A" Background="#0A1830">
+                                            <TextBlock x:Name="ThemeIcon" Text="&#xE708;"
+                                                       FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                                       Foreground="#4A9AEE"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="#1A3A6B"/>
+                                                <Setter TargetName="bd" Property="BorderBrush" Value="#4A9AEE"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="bd" Property="Opacity" Value="0.7"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <!-- Administrator badge -->
+                            <Border x:Name="AdminBadge" CornerRadius="20" Padding="10,6" BorderThickness="1.5">
+                                <Border.BorderBrush><SolidColorBrush x:Name="AdminBadgeBorder" Color="#1A3A6B"/></Border.BorderBrush>
+                                <Border.Background><SolidColorBrush x:Name="AdminBadgeBg" Color="#0D1B3E"/></Border.Background>
                                 <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="22" Height="22" Margin="0,0,8,0">
-                                        <Ellipse.Fill>
+                                    <Border Width="24" Height="24" CornerRadius="12" Margin="0,0,8,0">
+                                        <Border.Background>
                                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#2244CC" Offset="0"/><GradientStop Color="#1166AA" Offset="1"/>
+                                                <GradientStop Color="#2244CC" Offset="0"/>
+                                                <GradientStop Color="#1166AA" Offset="1"/>
                                             </LinearGradientBrush>
-                                        </Ellipse.Fill>
-                                    </Ellipse>
-                                    <TextBlock Text="Administrator" FontSize="12" Foreground="#88AACC" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                                        </Border.Background>
+                                        <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock x:Name="TxtAdminLabel" Text="Administrator" FontSize="12"
+                                               FontWeight="SemiBold" FontFamily="Segoe UI" VerticalAlignment="Center">
+                                        <TextBlock.Foreground><SolidColorBrush x:Name="AdminLabelFg" Color="#88AACC"/></TextBlock.Foreground>
+                                    </TextBlock>
                                 </StackPanel>
                             </Border>
                         </StackPanel>

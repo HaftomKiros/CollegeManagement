@@ -19,6 +19,13 @@
   <ItemGroup>
     <Resource Include="Assets\st_mary_logo.png"/>
     <Resource Include="Assets\app.ico"/>
+    <Resource Include="Themes\Dark.xaml"/>
+    <Resource Include="Themes\Light.xaml"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Themes\Dark.xaml"/>
+    <Page Remove="Themes\Light.xaml"/>
   </ItemGroup>
 
 </Project>

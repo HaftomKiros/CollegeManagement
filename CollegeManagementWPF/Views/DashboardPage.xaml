@@ -2,84 +2,329 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0D1B3E" Offset="0"/>
-            <GradientStop Color="#0A1628" Offset="0.5"/>
-            <GradientStop Color="#071020" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Resources>
+        <Style x:Key="QABtn" TargetType="Button">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="12" Padding="16,14"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.80"/></Trigger>
+                            <Trigger Property="IsPressed"   Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.60"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="28,24">
-            <Border CornerRadius="12" Padding="26,20" Margin="0,0,0,24" BorderThickness="1">
+        <ScrollViewer.Background>
+            <SolidColorBrush x:Name="PageBg" Color="#07101E"/>
+        </ScrollViewer.Background>
+        <StackPanel Margin="28,22,28,28">
+
+            <!-- ══ Welcome Banner ══ -->
+            <Border CornerRadius="16" Padding="28,22" Margin="0,0,0,24" BorderThickness="1">
+                <Border.BorderBrush><SolidColorBrush x:Name="BannerBorderBrush" Color="#3E2A7A"/></Border.BorderBrush>
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#1A2F6E" Offset="0"/>
-                        <GradientStop Color="#0D0B1E" Offset="1"/>
+                        <GradientStop x:Name="BannerG1" Color="#1A2F6E" Offset="0"/>
+                        <GradientStop x:Name="BannerG2" Color="#0D0B3A" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
-                <Border.BorderBrush><SolidColorBrush Color="#2E1A5E"/></Border.BorderBrush>
-                <StackPanel>
-                    <TextBlock Text="Welcome back, Administrator" FontSize="19" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
-                    <TextBlock Text="Here is what is happening at Wukro St. Mary College today." FontSize="11" Foreground="#8877AA" FontFamily="Segoe UI" Margin="0,6,0,0"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Welcome back, Administrator"
+                                   FontSize="21" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Here is what is happening at Wukro St. Mary College today."
+                                   FontSize="11.5" FontFamily="Segoe UI" Margin="0,6,0,0">
+                            <TextBlock.Foreground><SolidColorBrush x:Name="BannerSubFg" Color="#9988BB"/></TextBlock.Foreground>
+                        </TextBlock>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="52" Height="52" CornerRadius="26" VerticalAlignment="Center">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#4A2A9A" Offset="0"/>
+                                <GradientStop Color="#2A1A6A" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                   Foreground="#BB99FF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
-            <UniformGrid Rows="1" Columns="4" Margin="0,0,0,24">
-                <Border Margin="0,0,10,0" CornerRadius="10" Padding="18,14" BorderThickness="1" BorderBrush="#1A3A7A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D1F4A" Offset="0"/><GradientStop Color="#0A1635" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel>
-                        <TextBlock Text="Total Students" FontSize="11" Foreground="#5577AA" FontFamily="Segoe UI"/>
-                        <TextBlock Text="Loading..." FontSize="22" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,0"/>
-                    </StackPanel>
+
+            <!-- ══ Stat Cards ══ -->
+            <UniformGrid Rows="1" Columns="4" Margin="0,0,0,28">
+
+                <!-- Total Students -->
+                <Border CornerRadius="14" Padding="18,16" Margin="0,0,10,0" BorderThickness="1" Cursor="Hand">
+                    <Border.BorderBrush><SolidColorBrush x:Name="C1Border" Color="#1E3A8A"/></Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop x:Name="C1G1" Color="#0D1F4A" Offset="0"/>
+                            <GradientStop x:Name="C1G2" Color="#0A1635" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="TOTAL STUDENTS" FontSize="9.5" FontWeight="SemiBold"
+                                       FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C1Label" Color="#6B9ADA"/></TextBlock.Foreground>
+                            </TextBlock>
+                            <TextBlock x:Name="TxtStudents" Text="—" FontSize="30" FontWeight="Bold"
+                                       Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="9" Margin="0,0,4,0" VerticalAlignment="Center">
+                                    <TextBlock.Foreground><SolidColorBrush x:Name="C1Sub" Color="#3A6AAA"/></TextBlock.Foreground>
+                                </TextBlock>
+                                <TextBlock Text="Registered" FontSize="10" FontFamily="Segoe UI">
+                                    <TextBlock.Foreground><SolidColorBrush x:Name="C1Sub2" Color="#3A6AAA"/></TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <Border.Background><SolidColorBrush x:Name="C1IconBg" Color="#1A3A6A"/></Border.Background>
+                            <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C1Icon" Color="#60A5FA"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
                 </Border>
-                <Border Margin="5,0" CornerRadius="10" Padding="18,14" BorderThickness="1" BorderBrush="#1A5A2A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D2A1A" Offset="0"/><GradientStop Color="#071A10" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel>
-                        <TextBlock Text="Courses" FontSize="11" Foreground="#337755" FontFamily="Segoe UI"/>
-                        <TextBlock Text="Loading..." FontSize="22" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,0"/>
-                    </StackPanel>
+
+                <!-- Courses -->
+                <Border CornerRadius="14" Padding="18,16" Margin="5,0" BorderThickness="1" Cursor="Hand">
+                    <Border.BorderBrush><SolidColorBrush x:Name="C2Border" Color="#166534"/></Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop x:Name="C2G1" Color="#0D2A1A" Offset="0"/>
+                            <GradientStop x:Name="C2G2" Color="#071A10" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="COURSES" FontSize="9.5" FontWeight="SemiBold"
+                                       FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C2Label" Color="#22AA66"/></TextBlock.Foreground>
+                            </TextBlock>
+                            <TextBlock x:Name="TxtCourses" Text="—" FontSize="30" FontWeight="Bold"
+                                       Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
+                            <TextBlock Text="Active" FontSize="10" FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C2Sub" Color="#166534"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <Border.Background><SolidColorBrush x:Name="C2IconBg" Color="#14532D"/></Border.Background>
+                            <TextBlock Text="&#xE82D;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C2Icon" Color="#4ADE80"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
                 </Border>
-                <Border Margin="5,0" CornerRadius="10" Padding="18,14" BorderThickness="1" BorderBrush="#5A3A0A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A1E08" Offset="0"/><GradientStop Color="#1A1205" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel>
-                        <TextBlock Text="Instructors" FontSize="11" Foreground="#7A5A22" FontFamily="Segoe UI"/>
-                        <TextBlock Text="Loading..." FontSize="22" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,0"/>
-                    </StackPanel>
+
+                <!-- Instructors -->
+                <Border CornerRadius="14" Padding="18,16" Margin="5,0" BorderThickness="1" Cursor="Hand">
+                    <Border.BorderBrush><SolidColorBrush x:Name="C3Border" Color="#92400E"/></Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop x:Name="C3G1" Color="#2A1E08" Offset="0"/>
+                            <GradientStop x:Name="C3G2" Color="#1A1205" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="INSTRUCTORS" FontSize="9.5" FontWeight="SemiBold"
+                                       FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C3Label" Color="#D97706"/></TextBlock.Foreground>
+                            </TextBlock>
+                            <TextBlock x:Name="TxtInstructors" Text="—" FontSize="30" FontWeight="Bold"
+                                       Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
+                            <TextBlock Text="Teaching Staff" FontSize="10" FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C3Sub" Color="#92400E"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <Border.Background><SolidColorBrush x:Name="C3IconBg" Color="#78350F"/></Border.Background>
+                            <TextBlock Text="&#xE7EF;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C3Icon" Color="#FCD34D"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
                 </Border>
-                <Border Margin="10,0,0,0" CornerRadius="10" Padding="18,14" BorderThickness="1" BorderBrush="#5A1A1A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A0D0D" Offset="0"/><GradientStop Color="#1A0707" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel>
-                        <TextBlock Text="Fees Pending" FontSize="11" Foreground="#7A3333" FontFamily="Segoe UI"/>
-                        <TextBlock Text="Loading..." FontSize="22" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,0"/>
-                    </StackPanel>
+
+                <!-- Fees Pending -->
+                <Border CornerRadius="14" Padding="18,16" Margin="10,0,0,0" BorderThickness="1" Cursor="Hand">
+                    <Border.BorderBrush><SolidColorBrush x:Name="C4Border" Color="#991B1B"/></Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop x:Name="C4G1" Color="#2A0D0D" Offset="0"/>
+                            <GradientStop x:Name="C4G2" Color="#1A0707" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="FEES PENDING" FontSize="9.5" FontWeight="SemiBold"
+                                       FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C4Label" Color="#EF4444"/></TextBlock.Foreground>
+                            </TextBlock>
+                            <TextBlock x:Name="TxtFees" Text="—" FontSize="30" FontWeight="Bold"
+                                       Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
+                            <TextBlock Text="Unpaid Records" FontSize="10" FontFamily="Segoe UI">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C4Sub" Color="#991B1B"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <Border.Background><SolidColorBrush x:Name="C4IconBg" Color="#7F1D1D"/></Border.Background>
+                            <TextBlock Text="&#xE7C4;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Foreground><SolidColorBrush x:Name="C4Icon" Color="#F87171"/></TextBlock.Foreground>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
                 </Border>
             </UniformGrid>
-            <TextBlock Text="Quick Access" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI" Margin="0,0,0,12"/>
-            <UniformGrid Rows="2" Columns="3">
-                <Border Margin="0,0,8,8" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#2A2A5A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#1A1A3A" Offset="0"/><GradientStop Color="#0D1128" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="Register Student" FontSize="12" Foreground="#CCDDFF" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
+
+            <!-- ══ Quick Access ══ -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                <Border Width="4" Height="18" CornerRadius="2" Margin="0,0,10,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#6366F1" Offset="0"/>
+                            <GradientStop Color="#8B5CF6" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
                 </Border>
-                <Border Margin="4,0,4,8" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#1A4A2A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D2A1A" Offset="0"/><GradientStop Color="#071A10" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="Enter Marks" FontSize="12" Foreground="#AAFFCC" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
-                </Border>
-                <Border Margin="8,0,0,8" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#4A3A0A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A1E08" Offset="0"/><GradientStop Color="#1A1205" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="Attendance Sheet" FontSize="12" Foreground="#FFE8AA" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
-                </Border>
-                <Border Margin="0,0,8,0" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#4A1A1A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A0D0D" Offset="0"/><GradientStop Color="#1A0707" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="Student Fees" FontSize="12" Foreground="#FFCCCC" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
-                </Border>
-                <Border Margin="4,0" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#1A3A4A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D1E2A" Offset="0"/><GradientStop Color="#07121A" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="Manage Courses" FontSize="12" Foreground="#AAEEFF" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
-                </Border>
-                <Border Margin="8,0,0,0" CornerRadius="8" Padding="14" Cursor="Hand" BorderThickness="1" BorderBrush="#3A1A4A">
-                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#1A0D2A" Offset="0"/><GradientStop Color="#10071A" Offset="1"/></LinearGradientBrush></Border.Background>
-                    <StackPanel Orientation="Horizontal"><TextBlock Text="COC Records" FontSize="12" Foreground="#DDAAFF" FontFamily="Segoe UI" VerticalAlignment="Center"/></StackPanel>
-                </Border>
+                <TextBlock x:Name="TxtQALabel" Text="Quick Access" FontSize="14" FontWeight="SemiBold"
+                           FontFamily="Segoe UI" VerticalAlignment="Center">
+                    <TextBlock.Foreground><SolidColorBrush x:Name="QALabelFg" Color="White"/></TextBlock.Foreground>
+                </TextBlock>
+            </StackPanel>
+
+            <UniformGrid Rows="2" Columns="3" x:Name="QAGrid">
+
+                <!-- Register Student -->
+                <Button Style="{StaticResource QABtn}" Margin="0,0,8,8" Click="QA_Click" Tag="StudentRegistration">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#1A1A3A" Offset="0"/><GradientStop Color="#0D1128" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#2E2E5A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#1A2A5A" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xED53;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Register Student" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Add new student" FontSize="10" Foreground="#4A6A9A" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#2A4A7A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
+                <!-- Enter Marks -->
+                <Button Style="{StaticResource QABtn}" Margin="4,0,4,8" Click="QA_Click" Tag="StudentMarks">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D2A1A" Offset="0"/><GradientStop Color="#071A10" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#1A4A2A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#0D3A1A" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE70A;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#4ADE80" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Enter Marks" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Record student marks" FontSize="10" Foreground="#226A44" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#1A4A2A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
+                <!-- Attendance Sheet -->
+                <Button Style="{StaticResource QABtn}" Margin="8,0,0,8" Click="QA_Click" Tag="AttendanceSheet">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A1E08" Offset="0"/><GradientStop Color="#1A1205" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#4A3A0A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#3A2A08" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#FCD34D" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Attendance Sheet" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="View attendance" FontSize="10" Foreground="#7A5A22" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#4A3A0A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
+                <!-- Student Fees -->
+                <Button Style="{StaticResource QABtn}" Margin="0,0,8,0" Click="QA_Click" Tag="StudentFees">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A0D0D" Offset="0"/><GradientStop Color="#1A0707" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#4A1A1A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#3A0D0D" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE7C4;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#F87171" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Student Fees" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Manage fee records" FontSize="10" Foreground="#7A3333" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#4A1A1A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
+                <!-- Manage Courses -->
+                <Button Style="{StaticResource QABtn}" Margin="4,0" Click="QA_Click" Tag="Courses">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0D1E2A" Offset="0"/><GradientStop Color="#07121A" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#1A3A4A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#0D2A3A" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE736;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Manage Courses" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Add, edit courses" FontSize="10" Foreground="#1A4A5A" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#1A3A4A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
+                <!-- COC Records -->
+                <Button Style="{StaticResource QABtn}" Margin="8,0,0,0" Click="QA_Click" Tag="COCRecord">
+                    <Button.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#1A0D2A" Offset="0"/><GradientStop Color="#10071A" Offset="1"/></LinearGradientBrush></Button.Background>
+                    <Button.BorderBrush><SolidColorBrush Color="#3A1A4A"/></Button.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="10" Background="#2A0D3A" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#C084FC" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="COC Records" FontSize="13" FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Certificate of competency" FontSize="10" Foreground="#5A2A7A" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#3A1A4A" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+
             </UniformGrid>
         </StackPanel>
     </ScrollViewer>

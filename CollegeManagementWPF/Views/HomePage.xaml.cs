@@ -43,6 +43,173 @@ namespace CollegeManagementWPF.Views
             InitializeComponent();
             ContentFrame.Navigate(new DashboardPage());
             TxtPageSubTitle.Visibility = Visibility.Collapsed;
+            ThemeManager.ThemeChanged += ApplyThemeToShell;
+            ApplyThemeToShell();
+        }
+
+        private void ApplyThemeToShell()
+        {
+            bool dark = ThemeManager.IsDark;
+
+            // ── Title bar buttons always white (title bar is always blue) ─────
+            if (AppTitleBar != null)
+            {
+                AppTitleBar.Foreground = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Colors.White);
+                AppTitleBar.ButtonsForeground = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Colors.White);
+            }
+            // Title bar gradient
+            if (FindName("TitleG1") is System.Windows.Media.GradientStop tg1)
+                tg1.Color = dark
+                    ? System.Windows.Media.Color.FromRgb(0x1A,0x1F,0x8C)
+                    : System.Windows.Media.Color.FromRgb(0x1D,0x40,0xAF);
+            if (FindName("TitleG2") is System.Windows.Media.GradientStop tg2)
+                tg2.Color = dark
+                    ? System.Windows.Media.Color.FromRgb(0x0F,0x34,0x60)
+                    : System.Windows.Media.Color.FromRgb(0x1E,0x3A,0x8A);
+
+            // Window background
+            Background = new System.Windows.Media.SolidColorBrush(ThemeManager.WinBg);
+
+            // ── Sidebar ──────────────────────────────────────────────────────
+            if (FindName("SidebarBorder") is System.Windows.Controls.Border sb)
+                sb.Background = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Color.FromRgb(0x0A,0x16,0x28)
+                         : System.Windows.Media.Colors.White);
+
+            // Sidebar header (logo area)
+            if (FindName("SidebarHeaderBorder") is System.Windows.Controls.Border shb)
+                shb.Background = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1F,0x3C)
+                         : System.Windows.Media.Color.FromRgb(0xF8,0xFA,0xFF));
+
+            // College name text
+            if (FindName("TxtCollegeName") is WpfTextBlock cn)
+                cn.Foreground = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Colors.White
+                         : System.Windows.Media.Color.FromRgb(0x0F,0x17,0x2A));
+
+            // College subtitle text
+            if (FindName("TxtCollegeSub") is WpfTextBlock cs)
+                cs.Foreground = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Color.FromRgb(0x2A,0x4A,0x7A)
+                         : System.Windows.Media.Color.FromRgb(0x64,0x74,0x8B));
+
+            // Section button text + background
+            var sectionBg  = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1F,0x3C)
+                                  : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9);
+            var sectionFg  = dark ? System.Windows.Media.Color.FromRgb(0xC8,0xDC,0xF0)
+                                  : System.Windows.Media.Color.FromRgb(0x0F,0x17,0x2A);
+            var sectionHov = dark ? System.Windows.Media.Color.FromRgb(0x14,0x30,0x5A)
+                                  : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+
+            foreach (var name in new[]{"BtnStudents","BtnDepts","BtnEmp","BtnAlumni","BtnLib","BtnReports","BtnAdmins"})
+                if (FindName(name) is WpfButton bb)
+                {
+                    bb.Background = new System.Windows.Media.SolidColorBrush(sectionBg);
+                    bb.Foreground = new System.Windows.Media.SolidColorBrush(sectionFg);
+                }
+
+            // Chevron text blocks
+            var chevFg = dark ? System.Windows.Media.Color.FromRgb(0x2A,0x4A,0x7A)
+                              : System.Windows.Media.Color.FromRgb(0x94,0xA3,0xB8);
+            foreach (var name in new[]{"ChevStudents","ChevDepts","ChevEmp","ChevAlumni","ChevLib","ChevReports","ChevAdmins"})
+                if (FindName(name) is WpfTextBlock ct)
+                    ct.Foreground = new System.Windows.Media.SolidColorBrush(chevFg);
+
+            // Sub-button text
+            var subFgColor = dark ? System.Windows.Media.Color.FromRgb(0x6B,0x8C,0xAE)
+                                  : System.Windows.Media.Color.FromRgb(0x33,0x41,0x55);
+            foreach (var panelName in new[]{"PanStudents","PanDepts","PanEmp","PanAlumni","PanLib","PanReports","PanAdmins"})
+                if (FindName(panelName) is StackPanel pan)
+                    foreach (var child in pan.Children)
+                        if (child is WpfButton subBtn)
+                        {
+                            subBtn.Foreground = new System.Windows.Media.SolidColorBrush(subFgColor);
+                            subBtn.Background = new System.Windows.Media.SolidColorBrush(
+                                dark ? System.Windows.Media.Colors.Transparent
+                                     : System.Windows.Media.Colors.Transparent);
+                        }
+
+            // Separator lines
+            var sepColor = dark
+                ? System.Windows.Media.Color.FromRgb(0x1A,0x3A,0x5A)
+                : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+            foreach (var n in new[]{"SepBrush1","SepBrush2","SepBrush3","SepBrush4","SepBrush5","SepBrush6","SepBrush7"})
+                if (FindName(n) is System.Windows.Media.SolidColorBrush sb2) sb2.Color = sepColor;
+
+            // ── Top content bar ──────────────────────────────────────────────
+            if (FindName("TopBarBorder") is System.Windows.Controls.Border tb)
+            {
+                if (dark)
+                    tb.Background = new System.Windows.Media.LinearGradientBrush(
+                        System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E),
+                        System.Windows.Media.Color.FromRgb(0x0A,0x16,0x28), 0);
+                else
+                    tb.Background = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromRgb(0xF8,0xFA,0xFF));
+            }
+
+            if (TxtPageTitle != null)
+                TxtPageTitle.Foreground = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Colors.White
+                         : System.Windows.Media.Color.FromRgb(0x0F,0x17,0x2A));
+
+            // ── Content frame ────────────────────────────────────────────────
+            if (ContentFrame != null)
+                ContentFrame.Background = new System.Windows.Media.SolidColorBrush(
+                    dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E)
+                         : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9));
+
+            // ── Toggle button ────────────────────────────────────────────────
+            if (BtnThemeToggle != null)
+            {
+                BtnThemeToggle.ToolTip = ThemeManager.ToggleTip;
+                if (BtnThemeToggle.Template?.FindName("ThemeIcon", BtnThemeToggle)
+                        is System.Windows.Controls.TextBlock ic)
+                    ic.Text = ThemeManager.ToggleIcon;
+                // Update toggle button border/bg for light mode
+                if (BtnThemeToggle.Template?.FindName("bd", BtnThemeToggle)
+                        is System.Windows.Controls.Border tbBd)
+                {
+                    tbBd.Background = new System.Windows.Media.SolidColorBrush(
+                        dark ? System.Windows.Media.Color.FromRgb(0x0A,0x18,0x30)
+                             : System.Windows.Media.Color.FromRgb(0xEF,0xF6,0xFF));
+                    tbBd.BorderBrush = new System.Windows.Media.SolidColorBrush(
+                        dark ? System.Windows.Media.Color.FromRgb(0x1E,0x3A,0x6A)
+                             : System.Windows.Media.Color.FromRgb(0x93,0xC5,0xFD));
+                }
+            }
+
+            // ── Administrator badge ───────────────────────────────────────────
+            if (FindName("AdminBadgeBg") is System.Windows.Media.SolidColorBrush abBg)
+                abBg.Color = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E)
+                                  : System.Windows.Media.Color.FromRgb(0xEF,0xF6,0xFF);
+            if (FindName("AdminBadgeBorder") is System.Windows.Media.SolidColorBrush abBrd)
+                abBrd.Color = dark ? System.Windows.Media.Color.FromRgb(0x1A,0x3A,0x6B)
+                                   : System.Windows.Media.Color.FromRgb(0x93,0xC5,0xFD);
+            if (FindName("AdminLabelFg") is System.Windows.Media.SolidColorBrush alf)
+                alf.Color = dark ? System.Windows.Media.Color.FromRgb(0x88,0xAA,0xCC)
+                                 : System.Windows.Media.Color.FromRgb(0x1E,0x40,0xAF);
+
+            // ── Reload current page ──────────────────────────────────────────
+            if (ContentFrame?.Content != null)
+                ContentFrame.Navigate(ContentFrame.Content switch
+                {
+                    DashboardPage           => (object)new DashboardPage(),
+                    StudentRegistrationPage => new StudentRegistrationPage(),
+                    StudentMarksPage        => new StudentMarksPage(),
+                    StudentFeesPage         => new StudentFeesPage(),
+                    DropoutPage             => new DropoutPage(),
+                    MigrationPage           => new MigrationPage(),
+                    _                       => new DashboardPage()
+                });
+        }
+
+        private void BtnThemeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            ThemeManager.Toggle();
         }
 
         // Toggle section expand/collapse — accordion: close others when one opens
@@ -156,6 +323,24 @@ namespace CollegeManagementWPF.Views
         {
             new LoginWindow().Show();
             this.Close();
+        }
+
+        // Called by DashboardPage quick access buttons
+        public void NavigateTo(string tag, System.Windows.Controls.Page page)
+        {
+            TxtPageTitle.Text = tag switch
+            {
+                "StudentRegistration" => "Student Registration",
+                "StudentMarks"        => "Student Marks",
+                "StudentFees"         => "Student Fees",
+                "AttendanceSheet"     => "Attendance Sheet",
+                "Courses"             => "Courses",
+                "COCRecord"           => "COC Record",
+                _                     => tag
+            };
+            TxtPageSubTitle.Visibility = Visibility.Collapsed;
+            SearchPanel.Visibility     = Visibility.Collapsed;
+            ContentFrame.Navigate(page);
         }
     }
 }

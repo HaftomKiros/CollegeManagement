@@ -8,7 +8,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
+                <ResourceDictionary Source="Themes/Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Sub-button hover colors (updated at runtime by ThemeManager) -->
+            <SolidColorBrush x:Key="SubBtnHoverBg" Color="#112240"/>
+            <SolidColorBrush x:Key="SubBtnHoverFg" Color="White"/>
+            <SolidColorBrush x:Key="SectionBtnHoverBg" Color="#14305A"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
