@@ -88,3 +88,9 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\RolesPermissionsPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AssignPathPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AssignPathPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\ClosedXML.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\DocumentFormat.OpenXml.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\ExcelNumberFormat.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\Irony.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\SixLabors.Fonts.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\XLParser.dll

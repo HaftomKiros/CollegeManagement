@@ -357,22 +357,12 @@ namespace CollegeManagementWPF.Views
             this.Close();
         }
 
-        // Called by DashboardPage quick access buttons
-        public void NavigateTo(string tag, System.Windows.Controls.Page page)
+        // Called by DashboardPage quick access buttons — reuses same nav logic
+        public void NavigateTo(string tag)
         {
-            TxtPageTitle.Text = tag switch
-            {
-                "StudentRegistration" => "Student Registration",
-                "StudentMarks"        => "Student Marks",
-                "StudentFees"         => "Student Fees",
-                "AttendanceSheet"     => "Attendance Sheet",
-                "Courses"             => "Courses",
-                "COCRecord"           => "COC Record",
-                _                     => tag
-            };
-            TxtPageSubTitle.Visibility = Visibility.Collapsed;
-            SearchPanel.Visibility     = Visibility.Collapsed;
-            ContentFrame.Navigate(page);
+            // Simulate a NavButton_Click by delegating to the same handler logic
+            var fakeBtn = new System.Windows.Controls.Button { Tag = tag };
+            NavButton_Click(fakeBtn, new RoutedEventArgs());
         }
     }
 }

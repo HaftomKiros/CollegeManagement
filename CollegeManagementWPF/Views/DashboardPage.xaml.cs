@@ -20,7 +20,7 @@ namespace CollegeManagementWPF.Views
             Loaded += async (s, e) => await LoadStatsAsync();
         }
 
-        // ── Theme ─────────────────────────────────────────────────────────────
+        // ── Theme ──────────────────────────────────────────────────────────────
         private void ApplyTheme()
         {
             bool dark = ThemeManager.IsDark;
@@ -39,43 +39,49 @@ namespace CollegeManagementWPF.Views
             SetBrush("QALabelFg", dark ? "White" : "#0F172A");
 
             // Stat cards
-            ApplyStatCard("C1", dark, "#0D1F4A","#0A1635","#1E3A8A","#6B9ADA","#3A6AAA","#1A3A6A","#60A5FA",
-                                      "#EFF6FF","#FFFFFF","#BFDBFE","#1D4ED8","#3B82F6","#DBEAFE","#1D4ED8", TxtStudents, dark);
-            ApplyStatCard("C2", dark, "#0D2A1A","#071A10","#166534","#22AA66","#166534","#14532D","#4ADE80",
-                                      "#F0FDF4","#FFFFFF","#86EFAC","#15803D","#16A34A","#DCFCE7","#15803D", TxtCourses, dark);
-            ApplyStatCard("C3", dark, "#2A1E08","#1A1205","#92400E","#D97706","#92400E","#78350F","#FCD34D",
-                                      "#FFFBEB","#FFFFFF","#FDE68A","#B45309","#D97706","#FEF3C7","#92400E", TxtInstructors, dark);
-            ApplyStatCard("C4", dark, "#2A0D0D","#1A0707","#991B1B","#EF4444","#991B1B","#7F1D1D","#F87171",
-                                      "#FFF1F2","#FFFFFF","#FECACA","#DC2626","#EF4444","#FEE2E2","#DC2626", TxtFees, dark);
+            ApplyStatCard("C1", dark,
+                dG1:"#0D1F4A", dG2:"#0A1635", dBrd:"#1E3A8A", dLbl:"#6B9ADA", dSub:"#3A6AAA", dIcBg:"#1A3A6A", dIc:"#60A5FA",
+                lG1:"#EFF6FF", lG2:"#FFFFFF",  lBrd:"#BFDBFE", lLbl:"#1D4ED8", lSub:"#3B82F6", lIcBg:"#DBEAFE", lIc:"#1D4ED8",
+                numTb: TxtStudents);
+            ApplyStatCard("C2", dark,
+                dG1:"#0D2A1A", dG2:"#071A10", dBrd:"#166534", dLbl:"#22AA66", dSub:"#166534", dIcBg:"#14532D", dIc:"#4ADE80",
+                lG1:"#F0FDF4", lG2:"#FFFFFF",  lBrd:"#86EFAC", lLbl:"#15803D", lSub:"#16A34A", lIcBg:"#DCFCE7", lIc:"#15803D",
+                numTb: TxtDepartments);
+            ApplyStatCard("C3", dark,
+                dG1:"#2A1E08", dG2:"#1A1205", dBrd:"#92400E", dLbl:"#D97706", dSub:"#92400E", dIcBg:"#78350F", dIc:"#FCD34D",
+                lG1:"#FFFBEB", lG2:"#FFFFFF",  lBrd:"#FDE68A", lLbl:"#B45309", lSub:"#D97706", lIcBg:"#FEF3C7", lIc:"#92400E",
+                numTb: TxtStreams);
+            ApplyStatCard("C4", dark,
+                dG1:"#2A0D0D", dG2:"#1A0707", dBrd:"#991B1B", dLbl:"#EF4444", dSub:"#991B1B", dIcBg:"#7F1D1D", dIc:"#F87171",
+                lG1:"#FFF1F2", lG2:"#FFFFFF",  lBrd:"#FECACA", lLbl:"#DC2626", lSub:"#EF4444", lIcBg:"#FEE2E2", lIc:"#DC2626",
+                numTb: TxtEmployees);
 
-            // Quick access cards
             ApplyQACards(dark);
         }
 
         private void ApplyStatCard(string prefix, bool dark,
             string dG1, string dG2, string dBrd, string dLbl, string dSub, string dIcBg, string dIc,
             string lG1, string lG2, string lBrd, string lLbl, string lSub, string lIcBg, string lIc,
-            TextBlock? numTb, bool isDark)
+            TextBlock? numTb)
         {
-            SetGradient(prefix+"G1",   isDark ? dG1   : lG1);
-            SetGradient(prefix+"G2",   isDark ? dG2   : lG2);
-            SetBrush(prefix+"Border",  isDark ? dBrd  : lBrd);
-            SetBrush(prefix+"Label",   isDark ? dLbl  : lLbl);
-            SetBrush(prefix+"Sub",     isDark ? dSub  : lSub);
-            SetBrush(prefix+"Sub2",    isDark ? dSub  : lSub);
-            SetBrush(prefix+"IconBg",  isDark ? dIcBg : lIcBg);
-            SetBrush(prefix+"Icon",    isDark ? dIc   : lIc);
+            SetGradient(prefix + "G1",    dark ? dG1   : lG1);
+            SetGradient(prefix + "G2",    dark ? dG2   : lG2);
+            SetBrush   (prefix + "Border",dark ? dBrd  : lBrd);
+            SetBrush   (prefix + "Label", dark ? dLbl  : lLbl);
+            SetBrush   (prefix + "Sub",   dark ? dSub  : lSub);
+            SetBrush   (prefix + "Sub2",  dark ? dSub  : lSub);
+            SetBrush   (prefix + "IconBg",dark ? dIcBg : lIcBg);
+            SetBrush   (prefix + "Icon",  dark ? dIc   : lIc);
             if (numTb != null)
-                numTb.Foreground = new SolidColorBrush(isDark ? Colors.White : Color.FromRgb(0x0F,0x17,0x2A));
+                numTb.Foreground = new SolidColorBrush(dark ? Colors.White : Color.FromRgb(0x0F,0x17,0x2A));
         }
 
         private void ApplyQACards(bool dark)
         {
             if (QAGrid == null) return;
 
-            // (bg1dark, bg2dark, borddark, icBgDark,  bg1light, bg2light, bordlight, icBgLight)
-            var cards = new (string dBg1,string dBg2,string dBrd,string dIcBg,
-                             string lBg1,string lBg2,string lBrd,string lIcBg)[]
+            var cards = new (string dBg1, string dBg2, string dBrd, string dIcBg,
+                             string lBg1, string lBg2, string lBrd, string lIcBg)[]
             {
                 ("#1A1A3A","#0D1128","#2E2E5A","#1A2A5A",  "#EFF6FF","#FFFFFF","#BFDBFE","#DBEAFE"),
                 ("#0D2A1A","#071A10","#1A4A2A","#0D3A1A",  "#F0FDF4","#FFFFFF","#86EFAC","#DCFCE7"),
@@ -85,15 +91,17 @@ namespace CollegeManagementWPF.Views
                 ("#1A0D2A","#10071A","#3A1A4A","#2A0D3A",  "#FAF5FF","#FFFFFF","#DDD6FE","#EDE9FE"),
             };
 
-            var titleFg = dark ? Colors.White : Color.FromRgb(0x0F,0x17,0x2A);
+            var titleFg = dark ? Colors.White              : Color.FromRgb(0x0F,0x17,0x2A);
             var subFg   = dark ? Color.FromRgb(0x4A,0x6A,0x9A) : Color.FromRgb(0x64,0x74,0x8B);
             var arrowFg = dark ? Color.FromRgb(0x2A,0x4A,0x7A) : Color.FromRgb(0x94,0xA3,0xB8);
 
             int idx = 0;
             foreach (UIElement child in QAGrid.Children)
             {
-                if (child is not Button btn || idx >= cards.Length) { if (child is Button) idx++; continue; }
-                var (dBg1,dBg2,dBrd,dIcBg,lBg1,lBg2,lBrd,lIcBg) = cards[idx];
+                if (child is not Button btn) continue;
+                if (idx >= cards.Length) break;
+
+                var (dBg1,dBg2,dBrd,dIcBg,lBg1,lBg2,lBrd,lIcBg) = cards[idx++];
 
                 btn.Background = new LinearGradientBrush(
                     (Color)ColorConverter.ConvertFromString(dark ? dBg1 : lBg1),
@@ -101,7 +109,6 @@ namespace CollegeManagementWPF.Views
                 btn.BorderBrush = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString(dark ? dBrd : lBrd));
 
-                // Update inner grid children
                 if (btn.Content is Grid g)
                     foreach (UIElement el in g.Children)
                     {
@@ -111,12 +118,10 @@ namespace CollegeManagementWPF.Views
                         else if (el is StackPanel sp)
                             foreach (UIElement spEl in sp.Children)
                                 if (spEl is TextBlock tb2)
-                                    tb2.Foreground = new SolidColorBrush(
-                                        tb2.FontSize >= 12 ? titleFg : subFg);
+                                    tb2.Foreground = new SolidColorBrush(tb2.FontSize >= 12 ? titleFg : subFg);
                         else if (el is TextBlock atb)
                             atb.Foreground = new SolidColorBrush(arrowFg);
                     }
-                idx++;
             }
         }
 
@@ -132,37 +137,44 @@ namespace CollegeManagementWPF.Views
                 g.Color = (Color)ColorConverter.ConvertFromString(hex);
         }
 
-        // ── Load stats ─────────────────────────────────────────────────────────
         private async Task LoadStatsAsync()
         {
+            Dispatcher.Invoke(() => {
+                TxtStudents.Text = TxtDepartments.Text = TxtStreams.Text = TxtEmployees.Text = "...";
+            });
+
             try
             {
-                var (students, courses, instructors, fees) = await Task.Run(() =>
+                var result = await Task.Run(() =>
                 {
                     var conn = _db.GetConnection();
+                    if (conn == null) throw new Exception("DB connection returned null");
                     conn.Open();
-                    int s = Count(conn, "SELECT COUNT(DISTINCT student_id) FROM ecc_dof_wukrostmarycollege.student_profile");
-                    int c = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.courses");
-                    int i = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employees");
-                    int f = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_fee");
+                    int students    = Count(conn, "SELECT COUNT(DISTINCT student_id) FROM ecc_dof_wukrostmarycollege.student_profile");
+                    int departments = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.departments");
+                    int streams     = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.streams");
+                    int employees   = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile");
                     conn.Close();
-                    return (s, c, i, f);
+                    return (students, departments, streams, employees);
                 });
-                TxtStudents.Text    = students.ToString("N0");
-                TxtCourses.Text     = courses.ToString("N0");
-                TxtInstructors.Text = instructors.ToString("N0");
-                TxtFees.Text        = fees.ToString("N0");
+
+                TxtStudents.Text    = result.students.ToString("N0");
+                TxtDepartments.Text = result.departments.ToString("N0");
+                TxtStreams.Text     = result.streams.ToString("N0");
+                TxtEmployees.Text   = result.employees.ToString("N0");
             }
-            catch
+            catch (Exception ex)
             {
-                TxtStudents.Text = TxtCourses.Text = TxtInstructors.Text = TxtFees.Text = "—";
+                TxtStudents.Text = TxtDepartments.Text = TxtStreams.Text = TxtEmployees.Text = "—";
+                System.IO.File.WriteAllText("dashboard_error.log", ex.ToString());
             }
         }
 
         private static int Count(MySqlConnection conn, string sql)
         {
             using var cmd = new MySqlCommand(sql, conn);
-            return Convert.ToInt32(cmd.ExecuteScalar());
+            var result = cmd.ExecuteScalar();
+            return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
         }
 
         // ── Quick Access navigation ─────────────────────────────────────────────
@@ -170,19 +182,8 @@ namespace CollegeManagementWPF.Views
         {
             if (sender is not Button btn) return;
             string tag = btn.Tag?.ToString() ?? "";
-            var home = Window.GetWindow(this) as HomePage;
-            if (home == null) return;
-            Page page = tag switch
-            {
-                "StudentRegistration" => new StudentRegistrationPage(),
-                "StudentMarks"        => new StudentMarksPage(),
-                "StudentFees"         => new StudentFeesPage(),
-                "AttendanceSheet"     => new PlaceholderPage("Attendance Sheet"),
-                "Courses"             => new PlaceholderPage("Courses"),
-                "COCRecord"           => new PlaceholderPage("COC Record"),
-                _                     => new PlaceholderPage(tag)
-            };
-            home.NavigateTo(tag, page);
+            if (Window.GetWindow(this) is not HomePage home) return;
+            home.NavigateTo(tag);
         }
     }
 }

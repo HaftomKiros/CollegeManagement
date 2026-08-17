@@ -385,11 +385,18 @@
 
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Filter" Click="BtnFilter_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                    <Button Click="BtnPrint_Click" Style="{StaticResource AB}" Height="32" Padding="14,0">
+                    <Button Click="BtnPrint_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,8,0">
                         <Button.Background><SolidColorBrush Color="#335577"/></Button.Background>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
                             <TextBlock Text="Print" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="BtnExportExcel_Click" Style="{StaticResource AB}" Height="32" Padding="14,0">
+                        <Button.Background><SolidColorBrush Color="#1A5A2A"/></Button.Background>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Export" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

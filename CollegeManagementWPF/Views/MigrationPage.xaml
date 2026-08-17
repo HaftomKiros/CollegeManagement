@@ -3,10 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop x:Name="PageBg1" Color="#0D1B3E" Offset="0"/>
-            <GradientStop x:Name="PageBg2" Color="#07101E" Offset="1"/>
-        </LinearGradientBrush>
+        <DynamicResource ResourceKey="PageBgBrush"/>
     </Page.Background>
     <StackPanel Margin="40,30" MaxWidth="700">
         <!-- Title -->

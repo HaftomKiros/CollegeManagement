@@ -41,6 +41,24 @@ namespace CollegeManagementWPF
             ApplicationThemeManager.Apply(
                 _isDark ? ApplicationTheme.Dark : ApplicationTheme.Light);
 
+            // Swap Light.xaml / Dark.xaml merged dictionary so DynamicResource
+            // brushes like PageBgBrush resolve to the correct theme values.
+            var mergedDicts = Application.Current.Resources.MergedDictionaries;
+            var themeUri = new Uri(
+                _isDark ? "Themes/Dark.xaml" : "Themes/Light.xaml",
+                UriKind.Relative);
+            // Remove the current theme dictionary
+            for (int i = mergedDicts.Count - 1; i >= 0; i--)
+            {
+                var src = mergedDicts[i].Source?.OriginalString ?? "";
+                if (src.Contains("Dark.xaml") || src.Contains("Light.xaml"))
+                {
+                    mergedDicts.RemoveAt(i);
+                    break;
+                }
+            }
+            mergedDicts.Add(new ResourceDictionary { Source = themeUri });
+
             // Update sub-button hover colors (replace, not mutate — XAML brushes are frozen)
             Application.Current.Resources["SubBtnHoverBg"] = new SolidColorBrush(
                 _isDark ? Color.FromRgb(0x11,0x22,0x40) : Color.FromRgb(0x1E,0x3A,0x8A));

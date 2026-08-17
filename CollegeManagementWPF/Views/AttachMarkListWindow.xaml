@@ -43,7 +43,18 @@
                                     <ToggleButton BorderThickness="0" Background="Transparent" IsChecked="{Binding IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" ClickMode="Press" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                         <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent" BorderThickness="0"/></ControlTemplate></ToggleButton.Template>
                                     </ToggleButton>
-                                    <ContentPresenter IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" Margin="8,0,24,0" VerticalAlignment="Center"/>
+                                    <!-- Editable text box (shown when IsEditable=True) -->
+                                    <TextBox x:Name="PART_EditableTextBox"
+                                             Background="Transparent" BorderThickness="0"
+                                             Foreground="{TemplateBinding Foreground}"
+                                             FontSize="{TemplateBinding FontSize}"
+                                             Margin="6,0,24,0" VerticalAlignment="Center"
+                                             IsReadOnly="{TemplateBinding IsReadOnly}"
+                                             Visibility="Collapsed"/>
+                                    <!-- Non-editable display (shown when IsEditable=False) -->
+                                    <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
+                                             Content="{TemplateBinding SelectionBoxItem}"
+                                             Margin="8,0,24,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="#4A7ACC" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,7,0" IsHitTestVisible="False"/>
                                 </Grid>
                             </Border>
@@ -53,6 +64,12 @@
                                 </Border>
                             </Popup>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEditable" Value="True">
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -108,20 +125,23 @@
                 <!-- Row 1 -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
                     <TextBlock Text="Department ID" Style="{StaticResource LB}"/>
-                    <TextBox x:Name="TxtDeptID" Style="{StaticResource TF}"/>
+                    <ComboBox x:Name="CmbDeptID" Style="{StaticResource CB}" IsEditable="True"
+                              SelectionChanged="CmbDeptID_SelectionChanged"/>
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="1">
                     <TextBlock Text="Stream ID" Style="{StaticResource LB}"/>
-                    <TextBox x:Name="TxtStreamID" Style="{StaticResource TF}"/>
+                    <ComboBox x:Name="CmbStreamID" Style="{StaticResource CB}" IsEditable="True"
+                              SelectionChanged="CmbStreamID_SelectionChanged"/>
                 </StackPanel>
                 <!-- Row 2 -->
                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
                     <TextBlock Text="Level ID" Style="{StaticResource LB}"/>
-                    <TextBox x:Name="TxtLevelID" Style="{StaticResource TF}"/>
+                    <ComboBox x:Name="CmbLevelID" Style="{StaticResource CB}" IsEditable="True"
+                              SelectionChanged="CmbLevelID_SelectionChanged"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="1">
                     <TextBlock Text="Module Code" Style="{StaticResource LB}"/>
-                    <TextBox x:Name="TxtModCode" Style="{StaticResource TF}"/>
+                    <ComboBox x:Name="CmbModCode" Style="{StaticResource CB}" IsEditable="True"/>
                 </StackPanel>
                 <!-- Row 3 -->
                 <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,8,0">
@@ -197,10 +217,10 @@
             <StackPanel>
                 <TextBlock Text="Search By:" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI"
                            Foreground="{DynamicResource RegInputFg}" Margin="0,0,0,10"/>
-                <TextBlock Text="Dept ID"        Style="{StaticResource LB}"/><TextBox x:Name="TxtSDept"   Style="{StaticResource TF}" Margin="0,0,0,6"/>
-                <TextBlock Text="Stream ID"      Style="{StaticResource LB}"/><TextBox x:Name="TxtSStream" Style="{StaticResource TF}" Margin="0,0,0,6"/>
-                <TextBlock Text="Level ID"       Style="{StaticResource LB}"/><TextBox x:Name="TxtSLevel"  Style="{StaticResource TF}" Margin="0,0,0,6"/>
-                <TextBlock Text="Module Code"    Style="{StaticResource LB}"/><TextBox x:Name="TxtSModule" Style="{StaticResource TF}" Margin="0,0,0,6"/>
+                <TextBlock Text="Dept ID"        Style="{StaticResource LB}"/><ComboBox x:Name="TxtSDept"   Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSDept_SelectionChanged"/>
+                <TextBlock Text="Stream ID"      Style="{StaticResource LB}"/><ComboBox x:Name="TxtSStream" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
+                <TextBlock Text="Level ID"       Style="{StaticResource LB}"/><ComboBox x:Name="TxtSLevel"  Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
+                <TextBlock Text="Module Code"    Style="{StaticResource LB}"/><ComboBox x:Name="TxtSModule" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
                 <TextBlock Text="Admission Type" Style="{StaticResource LB}"/>
                 <ComboBox x:Name="CmbSAdmType" Style="{StaticResource CB}" Margin="0,0,0,6">
                     <ComboBoxItem Content="Regular" IsSelected="True"/>

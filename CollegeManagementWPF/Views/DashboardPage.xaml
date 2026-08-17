@@ -83,11 +83,10 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="TOTAL STUDENTS" FontSize="9.5" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI">
+                            <TextBlock Text="TOTAL STUDENTS" FontSize="9.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C1Label" Color="#6B9ADA"/></TextBlock.Foreground>
                             </TextBlock>
-                            <TextBlock x:Name="TxtStudents" Text="—" FontSize="30" FontWeight="Bold"
+                            <TextBlock x:Name="TxtStudents" Text="..." FontSize="30" FontWeight="Bold"
                                        Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="9" Margin="0,0,4,0" VerticalAlignment="Center">
@@ -108,7 +107,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Courses -->
+                <!-- Total Departments -->
                 <Border CornerRadius="14" Padding="18,16" Margin="5,0" BorderThickness="1" Cursor="Hand">
                     <Border.BorderBrush><SolidColorBrush x:Name="C2Border" Color="#166534"/></Border.BorderBrush>
                     <Border.Background>
@@ -120,11 +119,10 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="COURSES" FontSize="9.5" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI">
+                            <TextBlock Text="DEPARTMENTS" FontSize="9.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C2Label" Color="#22AA66"/></TextBlock.Foreground>
                             </TextBlock>
-                            <TextBlock x:Name="TxtCourses" Text="—" FontSize="30" FontWeight="Bold"
+                            <TextBlock x:Name="TxtDepartments" Text="..." FontSize="30" FontWeight="Bold"
                                        Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
                             <TextBlock Text="Active" FontSize="10" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C2Sub" Color="#166534"/></TextBlock.Foreground>
@@ -132,7 +130,7 @@
                         </StackPanel>
                         <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
                             <Border.Background><SolidColorBrush x:Name="C2IconBg" Color="#14532D"/></Border.Background>
-                            <TextBlock Text="&#xE82D;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                            <TextBlock Text="&#xE825;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                        HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C2Icon" Color="#4ADE80"/></TextBlock.Foreground>
                             </TextBlock>
@@ -140,7 +138,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Instructors -->
+                <!-- Total Streams -->
                 <Border CornerRadius="14" Padding="18,16" Margin="5,0" BorderThickness="1" Cursor="Hand">
                     <Border.BorderBrush><SolidColorBrush x:Name="C3Border" Color="#92400E"/></Border.BorderBrush>
                     <Border.Background>
@@ -152,19 +150,18 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="INSTRUCTORS" FontSize="9.5" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI">
+                            <TextBlock Text="STREAMS" FontSize="9.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C3Label" Color="#D97706"/></TextBlock.Foreground>
                             </TextBlock>
-                            <TextBlock x:Name="TxtInstructors" Text="—" FontSize="30" FontWeight="Bold"
+                            <TextBlock x:Name="TxtStreams" Text="..." FontSize="30" FontWeight="Bold"
                                        Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
-                            <TextBlock Text="Teaching Staff" FontSize="10" FontFamily="Segoe UI">
+                            <TextBlock Text="Programs" FontSize="10" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C3Sub" Color="#92400E"/></TextBlock.Foreground>
                             </TextBlock>
                         </StackPanel>
                         <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
                             <Border.Background><SolidColorBrush x:Name="C3IconBg" Color="#78350F"/></Border.Background>
-                            <TextBlock Text="&#xE7EF;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                            <TextBlock Text="&#xE736;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                        HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C3Icon" Color="#FCD34D"/></TextBlock.Foreground>
                             </TextBlock>
@@ -172,7 +169,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Fees Pending -->
+                <!-- Total Employees -->
                 <Border CornerRadius="14" Padding="18,16" Margin="10,0,0,0" BorderThickness="1" Cursor="Hand">
                     <Border.BorderBrush><SolidColorBrush x:Name="C4Border" Color="#991B1B"/></Border.BorderBrush>
                     <Border.Background>
@@ -184,19 +181,18 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="FEES PENDING" FontSize="9.5" FontWeight="SemiBold"
-                                       FontFamily="Segoe UI">
+                            <TextBlock Text="EMPLOYEES" FontSize="9.5" FontWeight="SemiBold" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C4Label" Color="#EF4444"/></TextBlock.Foreground>
                             </TextBlock>
-                            <TextBlock x:Name="TxtFees" Text="—" FontSize="30" FontWeight="Bold"
+                            <TextBlock x:Name="TxtEmployees" Text="..." FontSize="30" FontWeight="Bold"
                                        Foreground="White" FontFamily="Segoe UI" Margin="0,4,0,2"/>
-                            <TextBlock Text="Unpaid Records" FontSize="10" FontFamily="Segoe UI">
+                            <TextBlock Text="Staff Members" FontSize="10" FontFamily="Segoe UI">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C4Sub" Color="#991B1B"/></TextBlock.Foreground>
                             </TextBlock>
                         </StackPanel>
                         <Border Grid.Column="1" Width="46" Height="46" CornerRadius="12" VerticalAlignment="Center" Margin="8,0,0,0">
                             <Border.Background><SolidColorBrush x:Name="C4IconBg" Color="#7F1D1D"/></Border.Background>
-                            <TextBlock Text="&#xE7C4;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                            <TextBlock Text="&#xE7EF;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                        HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock.Foreground><SolidColorBrush x:Name="C4Icon" Color="#F87171"/></TextBlock.Foreground>
                             </TextBlock>

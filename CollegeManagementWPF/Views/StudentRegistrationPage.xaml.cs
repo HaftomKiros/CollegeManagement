@@ -26,6 +26,8 @@ namespace CollegeManagementWPF.Views
     {
         private string _selectedCell  = "";
         private string _selectedLevel = "";
+        private bool   _newPhotoSelected  = false;  // true only when user browses a new file
+        private bool   _newAttachSelected = false;
         private DBConnect _db = new DBConnect();
 
         private const string BASE_QUERY =
@@ -206,10 +208,44 @@ namespace CollegeManagementWPF.Views
         public void ExternalSearch(string term)
         {
             if (string.IsNullOrWhiteSpace(term))
+            {
                 _ = LoadGridAsync(BASE_QUERY);
+                return;
+            }
+
+            term = term.Trim();
+            var parts = term.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string where;
+            if (parts.Length == 1)
+            {
+                // Single word — search ID or any name field
+                string p = parts[0].Replace("'", "''");
+                where = $" WHERE student_id LIKE '%{p}%'" +
+                        $" OR first_name LIKE '%{p}%'" +
+                        $" OR father_name LIKE '%{p}%'" +
+                        $" OR grand_father_name LIKE '%{p}%'";
+            }
+            else if (parts.Length == 2)
+            {
+                // Two words: first=first_name, second=father_name OR father=second, grand=third
+                string p0 = parts[0].Replace("'", "''");
+                string p1 = parts[1].Replace("'", "''");
+                where = $" WHERE (first_name LIKE '%{p0}%' AND father_name LIKE '%{p1}%')" +
+                        $" OR (first_name LIKE '%{p0}%' AND grand_father_name LIKE '%{p1}%')";
+            }
             else
-                _ = LoadGridAsync(BASE_QUERY +
-                    $" WHERE student_id LIKE '%{term}%' OR first_name LIKE '%{term}%'");
+            {
+                // Three+ words: first=first_name, second=father_name, rest=grand_father_name
+                string p0 = parts[0].Replace("'", "''");
+                string p1 = parts[1].Replace("'", "''");
+                string p2 = string.Join(" ", parts, 2, parts.Length - 2).Replace("'", "''");
+                where = $" WHERE first_name LIKE '%{p0}%'" +
+                        $" AND father_name LIKE '%{p1}%'" +
+                        $" AND grand_father_name LIKE '%{p2}%'";
+            }
+
+            _ = LoadGridAsync(BASE_QUERY + where);
         }
 
         // ── Row click → fill form (async photo load) ─────────────────────────
@@ -271,8 +307,8 @@ namespace CollegeManagementWPF.Views
                     using var reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
-                        string pp = reader["photo_path"]?.ToString()      ?? "";
-                        string ap = reader["attachment_path"]?.ToString() ?? "";
+                        string pp = reader["photo_path"]?.ToString()?.Trim()      ?? "";
+                        string ap = reader["attachment_path"]?.ToString()?.Trim() ?? "";
                         Dispatcher.Invoke(() =>
                         {
                             TxtPhoto.Text  = !string.IsNullOrEmpty(pp) ? pp : "[No photo stored]";
@@ -342,7 +378,7 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@lvl", lvl);
                     using var r = cmd.ExecuteReader();
                     string? path = null;
-                    if (r.Read()) path = r["photo_path"]?.ToString();
+                    if (r.Read()) path = r["photo_path"]?.ToString()?.Trim();
                     conn.Close();
                     return path != null && File.Exists(path) ? File.ReadAllBytes(path) : null;
                 });
@@ -383,7 +419,7 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@lvl", lvl);
                     using var r = cmd.ExecuteReader();
                     string? path = null;
-                    if (r.Read()) path = r["attachment_path"]?.ToString();
+                    if (r.Read()) path = r["attachment_path"]?.ToString()?.Trim();
                     conn.Close();
                     return path != null && File.Exists(path) ? File.ReadAllBytes(path) : null;
                 });
@@ -402,6 +438,7 @@ namespace CollegeManagementWPF.Views
             var dlg = new OpenFileDialog { Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp" };
             if (dlg.ShowDialog() != true) return;
             TxtPhoto.Text = dlg.FileName;
+            _newPhotoSelected = true;
             try
             {
                 var bmp = new BitmapImage(new Uri(dlg.FileName));
@@ -415,7 +452,7 @@ namespace CollegeManagementWPF.Views
         private void BrowseAttach_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog { Filter = "Documents|*.pdf;*.docx;*.doc;*.*" };
-            if (dlg.ShowDialog() == true) TxtAttach.Text = dlg.FileName;
+            if (dlg.ShowDialog() == true) { TxtAttach.Text = dlg.FileName; _newAttachSelected = true; }
         }
 
         // ── REGISTER ─────────────────────────────────────────────────────────
@@ -458,18 +495,25 @@ namespace CollegeManagementWPF.Views
 
             try
             {
-                // Validate file paths exist
-                if (!File.Exists(TxtPhoto.Text))
+                // Validate: only require new file browse if no existing path in DB
+                string existingPhoto  = (!_newPhotoSelected && TxtPhoto.Text != "" && !TxtPhoto.Text.StartsWith("[")) ? TxtPhoto.Text : "";
+                string existingAttach = (!_newAttachSelected && TxtAttach.Text != "" && !TxtAttach.Text.StartsWith("[")) ? TxtAttach.Text : "";
+
+                // If user hasn't browsed new files, check we have something
+                if (!_newPhotoSelected && string.IsNullOrEmpty(existingPhoto))
+                { ShowMsg("Please browse and select a photo file.", false); return; }
+                if (!_newAttachSelected && string.IsNullOrEmpty(existingAttach))
+                { ShowMsg("Please browse and select an attachment file.", false); return; }
+
+                // If new files were browsed, validate they exist on disk
+                if (_newPhotoSelected && !File.Exists(TxtPhoto.Text))
                 { ShowMsg("Photo file not found. Please browse and select a valid file.", false); return; }
-                if (!File.Exists(TxtAttach.Text))
+                if (_newAttachSelected && !File.Exists(TxtAttach.Text))
                 { ShowMsg("Attachment file not found. Please attach a valid file.", false); return; }
 
-                // Copy files to app storage folder
-                string storageBase = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "StMaryCollege", "students");
-                Directory.CreateDirectory(Path.Combine(storageBase, "photos"));
-                Directory.CreateDirectory(Path.Combine(storageBase, "attachments"));
+                // Prepare storage paths
+                Directory.CreateDirectory(AppSettings.Current.PhotosPath);
+                Directory.CreateDirectory(AppSettings.Current.AttachmentsPath);
 
                 string sid=TxtStudID.Text.Trim(), did=GetDeptID(),
                        stid=GetStreamID(), lvl=GetCombo(CmbLevel),
@@ -480,13 +524,29 @@ namespace CollegeManagementWPF.Views
                        kb=TxtKebele.Text.Trim(), g10=TxtGpa10.Text.Trim(),
                        g12=TxtGpa12.Text.Trim(), ph=TxtPhone.Text.Trim();
 
-                string photoExt  = Path.GetExtension(TxtPhoto.Text);
-                string attachExt = Path.GetExtension(TxtAttach.Text);
-                string photoPath  = Path.Combine(storageBase, "photos",      $"{sid}_L{lvl}{photoExt}");
-                string attachPath = Path.Combine(storageBase, "attachments", $"{sid}_L{lvl}{attachExt}");
+                string photoPath, attachPath;
 
-                File.Copy(TxtPhoto.Text,  photoPath,  overwrite: true);
-                File.Copy(TxtAttach.Text, attachPath, overwrite: true);
+                if (_newPhotoSelected)
+                {
+                    string photoExt = Path.GetExtension(TxtPhoto.Text);
+                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                       .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                       .Replace("<","_").Replace(">","_").Replace("|","_");
+                    photoPath = Path.Combine(AppSettings.Current.PhotosPath, $"{safeId}_L{lvl}{photoExt}");
+                    File.Copy(TxtPhoto.Text, photoPath, overwrite: true);
+                }
+                else { photoPath = existingPhoto; }
+
+                if (_newAttachSelected)
+                {
+                    string attachExt = Path.GetExtension(TxtAttach.Text);
+                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                       .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                       .Replace("<","_").Replace(">","_").Replace("|","_");
+                    attachPath = Path.Combine(AppSettings.Current.AttachmentsPath, $"{safeId}_L{lvl}{attachExt}");
+                    File.Copy(TxtAttach.Text, attachPath, overwrite: true);
+                }
+                else { attachPath = existingAttach; }
 
                 await Task.Run(() =>
                 {
@@ -513,6 +573,7 @@ namespace CollegeManagementWPF.Views
                 });
 
                 ShowMsg("Saved successfully!", true);
+                _newPhotoSelected = false; _newAttachSelected = false;
                 await LoadGridAsync(BASE_QUERY);
                 ClearForm();
             }
@@ -539,15 +600,33 @@ namespace CollegeManagementWPF.Views
 
             try
             {
-                byte[]? imgBytes    = TxtPhoto.Text  != "" ? File.ReadAllBytes(TxtPhoto.Text)  : null;
-                byte[]? attachBytes = TxtAttach.Text != "" ? File.ReadAllBytes(TxtAttach.Text) : null;
-
+                // Determine new file paths — only copy if user browsed a new file
                 string sid=_selectedCell, lvl=_selectedLevel, did=GetDeptID(),
                        stid=GetStreamID(), fn=TxtFName.Text, mn=TxtMName.Text,
                        ln=TxtLName.Text, sex=GetCombo(CmbSex), ay=TxtAdmYear.Text,
                        pt=GetCombo(CmbProgram), at=GetCombo(CmbAdmType),
                        wr=TxtWereda.Text, kb=TxtKebele.Text,
                        g10=TxtGpa10.Text, g12=TxtGpa12.Text, ph=TxtPhone.Text;
+
+                string? newPP = null, newAP = null;
+                if (_newPhotoSelected && File.Exists(TxtPhoto.Text))
+                {
+                    Directory.CreateDirectory(AppSettings.Current.PhotosPath);
+                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                       .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                       .Replace("<","_").Replace(">","_").Replace("|","_");
+                    newPP = Path.Combine(AppSettings.Current.PhotosPath, $"{safeId}_L{lvl}{Path.GetExtension(TxtPhoto.Text)}");
+                    File.Copy(TxtPhoto.Text, newPP, overwrite: true);
+                }
+                if (_newAttachSelected && File.Exists(TxtAttach.Text))
+                {
+                    Directory.CreateDirectory(AppSettings.Current.AttachmentsPath);
+                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                       .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                       .Replace("<","_").Replace(">","_").Replace("|","_");
+                    newAP = Path.Combine(AppSettings.Current.AttachmentsPath, $"{safeId}_L{lvl}{Path.GetExtension(TxtAttach.Text)}");
+                    File.Copy(TxtAttach.Text, newAP, overwrite: true);
+                }
 
                 await Task.Run(() =>
                 {
@@ -556,8 +635,8 @@ namespace CollegeManagementWPF.Views
                         "grand_father_name=@ln,gender=@sex,admission_date=@ay," +
                         "program_type=@pt,admission_type=@at,wereda=@wr,kebele=@kb," +
                         "gpa_grade_10th=@g10,gpa_grade_12th=@g12,mobile_number1=@ph" +
-                        (imgBytes    != null ? ",photo=@img"      : "") +
-                        (attachBytes != null ? ",attachment=@att" : "") +
+                        (newPP != null ? ",photo_path=@pp" : "") +
+                        (newAP != null ? ",attachment_path=@ap" : "") +
                         " WHERE student_id=@sid AND level=@lvl";
 
                     var conn = _db.GetConnection();
@@ -571,13 +650,14 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@at",  at);   cmd.Parameters.AddWithValue("@wr",   wr);
                     cmd.Parameters.AddWithValue("@kb",  kb);   cmd.Parameters.AddWithValue("@g10",  g10);
                     cmd.Parameters.AddWithValue("@g12", g12);  cmd.Parameters.AddWithValue("@ph",   ph);
-                    if (imgBytes    != null) cmd.Parameters.AddWithValue("@img", imgBytes);
-                    if (attachBytes != null) cmd.Parameters.AddWithValue("@att", attachBytes);
+                    if (newPP != null) cmd.Parameters.AddWithValue("@pp", newPP);
+                    if (newAP != null) cmd.Parameters.AddWithValue("@ap", newAP);
                     cmd.ExecuteNonQuery();
                     conn.Close();
                 });
 
                 ShowMsg("Update successful!", true);
+                _newPhotoSelected = false; _newAttachSelected = false;
                 await LoadGridAsync(BASE_QUERY);
             }
             catch (Exception ex) { ShowMsg("Error: " + ex.Message, false); }
@@ -655,31 +735,49 @@ namespace CollegeManagementWPF.Views
             string sid = TxtStudID.Text.Trim();
             if (string.IsNullOrEmpty(sid)) { ShowMsg("Enter a Student ID to enroll.", false); return; }
 
-            // Validation: both files required
-            if (string.IsNullOrEmpty(TxtPhoto.Text) || string.IsNullOrEmpty(TxtAttach.Text))
-            {
-                ShowMsg("Please select a photo and an attachment!", false);
-                return;
-            }
+            // Photo/attachment are optional on enroll — only copy if user browsed a new file
+            string? newPhotoPath  = (_newPhotoSelected  && File.Exists(TxtPhoto.Text))  ? TxtPhoto.Text  : null;
+            string? newAttachPath = (_newAttachSelected && File.Exists(TxtAttach.Text)) ? TxtAttach.Text : null;
 
             try
             {
-                byte[] imgBytes    = File.ReadAllBytes(TxtPhoto.Text);
-                byte[] attachBytes = File.ReadAllBytes(TxtAttach.Text);
-
                 string? errorMsg = await Task.Run(() =>
                 {
                     var conn = _db.GetConnection();
                     conn.Open();
+
+                    // Count existing levels for this student
                     using var countCmd = new MySqlCommand(
                         "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_profile WHERE student_id=@id", conn);
                     countCmd.Parameters.AddWithValue("@id", sid);
                     int count = Convert.ToInt32(countCmd.ExecuteScalar());
-                    conn.Close();
 
-                    if (count == 0) return "No such student has been registered!";
+                    if (count == 0) { conn.Close(); return "No such student has been registered!"; }
 
                     int nextLvl = count + 1;
+
+                    // Get stream_id and max level from streams table
+                    using var streamCmd = new MySqlCommand(
+                        "SELECT sp.stream_id, s.no_of_levels " +
+                        "FROM ecc_dof_wukrostmarycollege.student_profile sp " +
+                        "JOIN ecc_dof_wukrostmarycollege.streams s ON sp.stream_id = s.stream_id " +
+                        "WHERE sp.student_id=@id AND sp.level=@lvl", conn);
+                    streamCmd.Parameters.AddWithValue("@id",  sid);
+                    streamCmd.Parameters.AddWithValue("@lvl", count.ToString());
+                    using var sr = streamCmd.ExecuteReader();
+                    int maxLevel = 0;
+                    if (sr.Read())
+                        int.TryParse(sr["no_of_levels"]?.ToString(), out maxLevel);
+                    sr.Close();
+
+                    // Check if already at max level
+                    if (maxLevel > 0 && count >= maxLevel)
+                    {
+                        conn.Close();
+                        return $"The Maximum Level is {maxLevel}. This student has completed all levels and cannot be enrolled further.";
+                    }
+
+                    conn.Close();
                     conn.Open();
                     using var selCmd = new MySqlCommand(
                         "SELECT dept_id,stream_id,first_name,father_name,grand_father_name,gender," +
@@ -700,13 +798,38 @@ namespace CollegeManagementWPF.Views
                            g12=r["gpa_grade_12th"].ToString()!, ph=r["mobile_number1"].ToString()!;
                     r.Close(); conn.Close();
 
+                    // Copy new files if provided, otherwise carry forward the old paths
+                    string? existingPhoto  = null, existingAttach = null;
+                    conn.Open();
+                    using var pathCmd = new MySqlCommand(
+                        "SELECT photo_path, attachment_path FROM ecc_dof_wukrostmarycollege.student_profile WHERE student_id=@id AND level=@lvl", conn);
+                    pathCmd.Parameters.AddWithValue("@id", sid);
+                    pathCmd.Parameters.AddWithValue("@lvl", count.ToString());
+                    using var pr = pathCmd.ExecuteReader();
+                    if (pr.Read()) { existingPhoto = pr["photo_path"]?.ToString()?.Trim(); existingAttach = pr["attachment_path"]?.ToString()?.Trim(); }
+                    pr.Close(); conn.Close();
+
+                    string? pp = existingPhoto, ap = existingAttach;
+                    if (newPhotoPath != null)
+                    {
+                        Directory.CreateDirectory(AppSettings.Current.PhotosPath);
+                        pp = Path.Combine(AppSettings.Current.PhotosPath, $"{sid}_L{nextLvl}{Path.GetExtension(newPhotoPath)}");
+                        File.Copy(newPhotoPath, pp, overwrite: true);
+                    }
+                    if (newAttachPath != null)
+                    {
+                        Directory.CreateDirectory(AppSettings.Current.AttachmentsPath);
+                        ap = Path.Combine(AppSettings.Current.AttachmentsPath, $"{sid}_L{nextLvl}{Path.GetExtension(newAttachPath)}");
+                        File.Copy(newAttachPath, ap, overwrite: true);
+                    }
+
                     conn.Open();
                     using var insCmd = new MySqlCommand(
                         "INSERT INTO ecc_dof_wukrostmarycollege.student_profile " +
                         "(student_id,dept_id,stream_id,level,first_name,father_name,grand_father_name," +
                         "gender,admission_date,program_type,admission_type,wereda,kebele," +
-                        "gpa_grade_10th,gpa_grade_12th,mobile_number1,photo,attachment) " +
-                        "VALUES(@sid,@did,@stid,@lvl,@fn,@mn,@ln,@sx,@ay,@pt,@at,@wr,@kb,@g10,@g12,@ph,@img,@att)", conn);
+                        "gpa_grade_10th,gpa_grade_12th,mobile_number1,photo_path,attachment_path) " +
+                        "VALUES(@sid,@did,@stid,@lvl,@fn,@mn,@ln,@sx,@ay,@pt,@at,@wr,@kb,@g10,@g12,@ph,@pp,@ap)", conn);
                     insCmd.Parameters.AddWithValue("@sid",  sid);   insCmd.Parameters.AddWithValue("@did",  did);
                     insCmd.Parameters.AddWithValue("@stid", stid);  insCmd.Parameters.AddWithValue("@lvl",  nextLvl.ToString());
                     insCmd.Parameters.AddWithValue("@fn",   fn);    insCmd.Parameters.AddWithValue("@mn",   mn);
@@ -715,8 +838,8 @@ namespace CollegeManagementWPF.Views
                     insCmd.Parameters.AddWithValue("@at",   at);    insCmd.Parameters.AddWithValue("@wr",   wr);
                     insCmd.Parameters.AddWithValue("@kb",   kb);    insCmd.Parameters.AddWithValue("@g10",  g10);
                     insCmd.Parameters.AddWithValue("@g12",  g12);   insCmd.Parameters.AddWithValue("@ph",   ph);
-                    insCmd.Parameters.AddWithValue("@img",  imgBytes);
-                    insCmd.Parameters.AddWithValue("@att",  attachBytes);
+                    insCmd.Parameters.AddWithValue("@pp",   (object?)pp ?? DBNull.Value);
+                    insCmd.Parameters.AddWithValue("@ap",   (object?)ap ?? DBNull.Value);
                     insCmd.ExecuteNonQuery();
                     conn.Close();
                     return null;
@@ -724,6 +847,7 @@ namespace CollegeManagementWPF.Views
 
                 if (errorMsg != null) { ShowMsg(errorMsg, false); return; }
                 ShowMsg("Enrolled to next level!", true);
+                _newPhotoSelected = false; _newAttachSelected = false;
                 await LoadGridAsync(BASE_QUERY);
             }
             catch (Exception ex) { ShowMsg("Error: " + ex.Message, false); }
@@ -736,12 +860,18 @@ namespace CollegeManagementWPF.Views
             string lvl  = GetCombo(CmbFLevel);
             string at   = GetCombo(CmbFAdmType);
 
-            if (string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(lvl) || string.IsNullOrEmpty(at))
+            // Build WHERE clause from only the filled fields
+            var conditions = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(dept)) conditions.Add($"dept_id='{dept.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(lvl))  conditions.Add($"level='{lvl.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(at))   conditions.Add($"admission_type='{at.Replace("'","''")}'");
+
+            if (conditions.Count == 0)
             {
-                ShowMsg("Invalid filter parameters!", false);
+                await LoadGridAsync(BASE_QUERY);
                 return;
             }
-            await LoadGridAsync($"{BASE_QUERY} WHERE dept_id='{dept}' AND level='{lvl}' AND admission_type='{at}'");
+            await LoadGridAsync($"{BASE_QUERY} WHERE {string.Join(" AND ", conditions)}");
         }
 
         private async void BtnResetFilter_Click(object sender, RoutedEventArgs e)
@@ -749,67 +879,351 @@ namespace CollegeManagementWPF.Views
 
         private void BtnClear_Click(object sender, RoutedEventArgs e) => ClearForm();
 
-        // ── PRINT — generates PDF via Windows Print Dialog ───────────────────
-        private void BtnPrint_Click(object sender, RoutedEventArgs e)
+        // ── PRINT INDIVIDUAL PROFILE ─────────────────────────────────────────
+        private async void PrintProfile_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_selectedCell))
+            { ShowMsg("Select a student from the list first.", false); return; }
+
+            var pd = new System.Windows.Controls.PrintDialog();
+            try
+            {
+                var server = new System.Printing.LocalPrintServer();
+                foreach (System.Printing.PrintQueue q in server.GetPrintQueues())
+                    if (q.Name.Contains("PDF", StringComparison.OrdinalIgnoreCase))
+                    { pd.PrintQueue = q; break; }
+            }
+            catch { }
+            if (pd.ShowDialog() != true) return;
+
+            ShowOverlay("Building profile... please wait");
+            await Task.Delay(50);
+            try
+            {
+                // Collect field values from form
+                string photoPath = TxtPhoto.Text?.Trim() ?? "";
+                var doc = BuildProfileDocument(
+                    sid:    _selectedCell,
+                    lvl:    _selectedLevel,
+                    fn:     TxtFName.Text,
+                    mn:     TxtMName.Text,
+                    ln:     TxtLName.Text,
+                    dept:   GetDeptID(),
+                    stream: GetStreamID(),
+                    sex:    GetCombo(CmbSex),
+                    prog:   GetCombo(CmbProgram),
+                    admt:   GetCombo(CmbAdmType),
+                    admDate:TxtAdmYear.Text,
+                    wereda: TxtWereda.Text,
+                    kebele: TxtKebele.Text,
+                    gpa10:  TxtGpa10.Text,
+                    gpa12:  TxtGpa12.Text,
+                    phone:  TxtPhone.Text,
+                    photoPath: (!string.IsNullOrEmpty(photoPath) && !photoPath.StartsWith("[") && File.Exists(photoPath)) ? photoPath : null
+                );
+
+                var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
+                paginator.PageSize = new System.Windows.Size(793.7, 1122.5); // A4 portrait
+
+                if (TxtOverlayMsg != null) TxtOverlayMsg.Text = "Printing...";
+                await Task.Delay(30);
+                pd.PrintDocument(paginator, $"Profile_{_selectedCell}");
+                ShowMsg("Profile sent to printer.", true);
+            }
+            catch (Exception ex) { ShowMsg("Print failed: " + ex.Message, false); }
+            finally { HideOverlay(); }
+        }
+
+        private System.Windows.Documents.FlowDocument BuildProfileDocument(
+            string sid, string lvl, string fn, string mn, string ln,
+            string dept, string stream, string sex, string prog, string admt,
+            string admDate, string wereda, string kebele, string gpa10, string gpa12,
+            string phone, string? photoPath)
+        {
+            var doc = new System.Windows.Documents.FlowDocument
+            {
+                FontFamily  = new System.Windows.Media.FontFamily("Segoe UI"),
+                FontSize    = 11,
+                PagePadding = new Thickness(50, 40, 50, 40),
+                ColumnWidth = double.MaxValue,
+                Background  = System.Windows.Media.Brushes.White,
+                Foreground  = System.Windows.Media.Brushes.Black
+            };
+
+            // Header
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run("Wukro St. Mary College"))
+            { FontSize = 18, FontWeight = FontWeights.Bold, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,2) });
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run("Student Profile"))
+            { FontSize = 13, TextAlignment = TextAlignment.Center, Foreground = System.Windows.Media.Brushes.Gray, Margin = new Thickness(0,0,0,16) });
+
+            // Photo + fields side by side
+            var outerTable = new System.Windows.Documents.Table { CellSpacing = 0 };
+            outerTable.Columns.Add(new System.Windows.Documents.TableColumn { Width = new GridLength(120) });
+            outerTable.Columns.Add(new System.Windows.Documents.TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+            var outerRg = new System.Windows.Documents.TableRowGroup();
+            outerTable.RowGroups.Add(outerRg);
+            var outerRow = new System.Windows.Documents.TableRow();
+            outerRg.Rows.Add(outerRow);
+
+            // Photo cell
+            var photoSection = new System.Windows.Documents.Section();
+            if (photoPath != null)
+            {
+                try
+                {
+                    var img = new System.Windows.Controls.Image
+                    {
+                        Source  = new System.Windows.Media.Imaging.BitmapImage(new Uri(photoPath)),
+                        Width   = 110, Height = 130,
+                        Stretch = System.Windows.Media.Stretch.UniformToFill
+                    };
+                    var container = new System.Windows.Documents.BlockUIContainer(img) { Margin = new Thickness(0,0,10,0) };
+                    photoSection.Blocks.Add(container);
+                }
+                catch { photoSection.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("[Photo]"))); }
+            }
+            else
+                photoSection.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("[No Photo]"))
+                { Foreground = System.Windows.Media.Brushes.Gray });
+            outerRow.Cells.Add(new System.Windows.Documents.TableCell(photoSection) { Padding = new Thickness(0,0,14,0) });
+
+            // Info fields cell
+            var infoSection = new System.Windows.Documents.Section();
+            void AddField(string label, string value)
+            {
+                var p = new System.Windows.Documents.Paragraph { Margin = new Thickness(0,0,0,5) };
+                p.Inlines.Add(new System.Windows.Documents.Run(label + ": ") { FontWeight = FontWeights.Bold });
+                p.Inlines.Add(new System.Windows.Documents.Run(value));
+                infoSection.Blocks.Add(p);
+            }
+            AddField("Student ID",     sid);
+            AddField("Full Name",      $"{fn} {mn} {ln}".Trim());
+            AddField("Level",          lvl);
+            AddField("Department",     dept);
+            AddField("Stream",         stream);
+            AddField("Gender",         sex);
+            AddField("Program",        prog);
+            AddField("Admission Type", admt);
+            AddField("Admission Date", admDate);
+            AddField("Wereda",         wereda);
+            AddField("Kebele",         kebele);
+            AddField("GPA Grade 10",   gpa10);
+            AddField("GPA Grade 12",   gpa12);
+            AddField("Mobile",         phone);
+            outerRow.Cells.Add(new System.Windows.Documents.TableCell(infoSection));
+
+            doc.Blocks.Add(outerTable);
+
+            // Footer
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run($"Printed: {DateTime.Now:dd MMM yyyy  HH:mm}"))
+            { FontSize = 8, Foreground = System.Windows.Media.Brushes.Gray, TextAlignment = TextAlignment.Right, Margin = new Thickness(0,20,0,0) });
+
+            return doc;
+        }
+        private async void BtnPrint_Click(object sender, RoutedEventArgs e)
         {
             var view = GridStudents.ItemsSource as System.Data.DataView;
             if (view == null || view.Count == 0)
             { ShowMsg("No data to print.", false); return; }
 
-            // Show "Printing..." blocking modal on separate thread, close after done
-            var owner = Window.GetWindow(this);
-
-            // Build document first
-            var doc = BuildPrintDocument(view);
-            var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
-            paginator.PageSize = new System.Windows.Size(1122.5, 793.7); // A4 landscape 96dpi
-
-            // Show print dialog
+            // Show print dialog FIRST (before building the document — it's fast)
             var pd = new System.Windows.Controls.PrintDialog();
-
-            // Try to pre-select Microsoft Print to PDF
             try
             {
                 var server = new System.Printing.LocalPrintServer();
                 foreach (System.Printing.PrintQueue q in server.GetPrintQueues())
-                {
                     if (q.Name.Contains("PDF", StringComparison.OrdinalIgnoreCase))
                     { pd.PrintQueue = q; break; }
-                }
             }
             catch { }
 
             if (pd.ShowDialog() != true) return;
 
-            // Show "Printing..." progress modal
-            var printingModal = new ModernDialog(
-                "Generating document, please wait...",
-                "Printing", ModernDialog.DialogType.Info)
-            { Owner = owner };
+            // Show overlay and yield so it renders
+            ShowOverlay("Building document... please wait");
+            await Task.Delay(50);
 
-            // Print on background so UI stays responsive; close modal when done
-            Task.Run(() =>
+            try
             {
-                try
+                // Step 1: Extract raw string data on background thread (fast parallel work)
+                string[][] rowData = await Task.Run(() =>
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        pd.PrintDocument(paginator, "Student Registration List");
-                        printingModal.Close();
-                        ShowMsg($"Sent {view.Count} records to printer.", true);
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        printingModal.Close();
-                        ShowMsg("Print failed: " + ex.Message, false);
-                    });
-                }
-            });
+                    var rows = new string[view.Count][];
+                    var items = new System.Data.DataRowView[view.Count];
+                    for (int i = 0; i < view.Count; i++) items[i] = (System.Data.DataRowView)view[i];
 
-            printingModal.ShowDialog(); // blocks UI — closes when print done
+                    // Parallel extraction of string data — 4 workers
+                    System.Threading.Tasks.Parallel.For(0, items.Length,
+                        new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 },
+                        i =>
+                        {
+                            var drv = items[i];
+                            rows[i] = new string[]
+                            {
+                                drv["student_id"]?.ToString() ?? "",
+                                drv["dept_id"]?.ToString() ?? "",
+                                drv["stream_id"]?.ToString() ?? "",
+                                drv["level"]?.ToString() ?? "",
+                                drv["first_name"]?.ToString() ?? "",
+                                drv["father_name"]?.ToString() ?? "",
+                                drv["grand_father_name"]?.ToString() ?? "",
+                                drv["gender"]?.ToString() ?? "",
+                                drv["admission_date"]?.ToString() ?? "",
+                                drv["program_type"]?.ToString() ?? "",
+                                drv["admission_type"]?.ToString() ?? "",
+                                drv["wereda"]?.ToString() ?? "",
+                                drv["kebele"]?.ToString() ?? "",
+                                drv["gpa_grade_10th"]?.ToString() ?? "",
+                                drv["gpa_grade_12th"]?.ToString() ?? "",
+                                drv["mobile_number1"]?.ToString() ?? "",
+                            };
+                        });
+                    return rows;
+                });
+
+                if (TxtOverlayMsg != null) TxtOverlayMsg.Text = "Rendering document...";
+                await Task.Delay(30);
+
+                // Step 2: Build WPF document on UI thread using pre-extracted data
+                var doc = BuildPrintDocumentFromData(rowData);
+                var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
+                paginator.PageSize = new System.Windows.Size(1122.5, 793.7);
+
+                if (TxtOverlayMsg != null) TxtOverlayMsg.Text = "Printing... please wait";
+                await Task.Delay(30);
+
+                pd.PrintDocument(paginator, "Student Registration List");
+                ShowMsg($"Sent {view.Count} records to printer.", true);
+            }
+            catch (Exception ex) { ShowMsg("Print failed: " + ex.Message, false); }
+            finally { HideOverlay(); }
+        }
+
+        // ── EXPORT TO XLSX ────────────────────────────────────────────────────
+        private async void BtnExportExcel_Click(object sender, RoutedEventArgs e)
+        {
+            var view = GridStudents.ItemsSource as System.Data.DataView;
+            if (view == null || view.Count == 0)
+            { ShowMsg("No data to export.", false); return; }
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName   = $"Students_{DateTime.Now:yyyyMMdd_HHmm}",
+                DefaultExt = ".xlsx",
+                Filter     = "Excel Workbook|*.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            ShowOverlay("Exporting to Excel... please wait");
+            try
+            {
+                string path = dlg.FileName;
+                string[] fields  = { "student_id","dept_id","stream_id","level","first_name","father_name",
+                                     "grand_father_name","gender","admission_date","program_type","admission_type",
+                                     "wereda","kebele","gpa_grade_10th","gpa_grade_12th","mobile_number1" };
+                string[] headers = { "Student ID","Dept","Stream","Level","First Name","Father Name",
+                                     "G/Father Name","Gender","Adm Date","Program","Adm Type",
+                                     "Wereda","Kebele","GPA 10","GPA 12","Mobile" };
+
+                await Task.Run(() =>
+                {
+                    using var wb  = new ClosedXML.Excel.XLWorkbook();
+                    var ws = wb.Worksheets.Add("Students");
+
+                    // Header row
+                    for (int c = 0; c < headers.Length; c++)
+                    {
+                        var cell = ws.Cell(1, c + 1);
+                        cell.Value = headers[c];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#1A3A6B");
+                        cell.Style.Font.FontColor       = ClosedXML.Excel.XLColor.White;
+                    }
+
+                    // Data rows
+                    int row = 2;
+                    foreach (System.Data.DataRowView drv in view)
+                    {
+                        for (int c = 0; c < fields.Length; c++)
+                            ws.Cell(row, c + 1).Value = drv[fields[c]]?.ToString() ?? "";
+                        row++;
+                    }
+
+                    // Auto-fit columns
+                    ws.Columns().AdjustToContents();
+                    // Freeze header row
+                    ws.SheetView.FreezeRows(1);
+
+                    wb.SaveAs(path);
+                });
+
+                ShowMsg($"Exported {view.Count} records to:\n{path}", true);
+            }
+            catch (Exception ex) { ShowMsg("Export failed: " + ex.Message, false); }
+            finally { HideOverlay(); }
+        }
+
+        private System.Windows.Documents.FlowDocument BuildPrintDocumentFromData(string[][] rowData)
+        {
+            var doc = new System.Windows.Documents.FlowDocument
+            {
+                FontFamily  = new System.Windows.Media.FontFamily("Segoe UI"),
+                FontSize    = 9,
+                PagePadding = new Thickness(30),
+                ColumnWidth = double.MaxValue,
+                Background  = System.Windows.Media.Brushes.White,
+                Foreground  = System.Windows.Media.Brushes.Black
+            };
+
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run("Wukro St. Mary College"))
+            { FontSize = 16, FontWeight = FontWeights.Bold, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,2) });
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run("Student Registration List"))
+            { FontSize = 12, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,2) });
+            doc.Blocks.Add(new System.Windows.Documents.Paragraph(
+                new System.Windows.Documents.Run($"Printed: {DateTime.Now:dd MMM yyyy  HH:mm}"))
+            { FontSize = 8, Foreground = System.Windows.Media.Brushes.Gray, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,10) });
+
+            string[] headers = { "Student ID","Dept","Stream","Lvl","First Name","Father Name","G/Father","Gender","Adm Date","Program","Adm Type","Wereda","Kebele","GPA10","GPA12","Phone" };
+
+            var table = new System.Windows.Documents.Table { CellSpacing = 0 };
+            foreach (var _ in headers) table.Columns.Add(new System.Windows.Documents.TableColumn());
+
+            var rg = new System.Windows.Documents.TableRowGroup();
+            table.RowGroups.Add(rg);
+
+            // Header row
+            var hRow = new System.Windows.Documents.TableRow
+            { Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(18,52,116)) };
+            foreach (var h in headers)
+                hRow.Cells.Add(new System.Windows.Documents.TableCell(
+                    new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(h))
+                    { FontWeight = FontWeights.Bold, FontSize = 7.5 })
+                { Padding = new Thickness(2,2,2,2), Foreground = System.Windows.Media.Brushes.White });
+            rg.Rows.Add(hRow);
+
+            // Data rows — built from pre-extracted strings (no DB/reflection overhead)
+            var whiteBrush = System.Windows.Media.Brushes.White;
+            var altBrush   = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245,247,250));
+            bool alt = false;
+            foreach (var cols in rowData)
+            {
+                var row = new System.Windows.Documents.TableRow { Background = alt ? altBrush : whiteBrush };
+                alt = !alt;
+                foreach (var val in cols)
+                    row.Cells.Add(new System.Windows.Documents.TableCell(
+                        new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(val))
+                        { FontSize = 7.5 })
+                    { Padding = new Thickness(2,1,2,1) });
+                rg.Rows.Add(row);
+            }
+
+            doc.Blocks.Add(table);
+            return doc;
         }
 
         private System.Windows.Documents.FlowDocument BuildPrintDocument(System.Data.DataView? view)
@@ -912,10 +1326,22 @@ namespace CollegeManagementWPF.Views
             CmbDeptID.SelectedIndex = -1; CmbStreamID.Items.Clear(); TxtAdmYear.Text="";
             TxtWereda.Text=""; TxtKebele.Text=""; TxtGpa10.Text=""; TxtGpa12.Text="";
             TxtPhone.Text=""; TxtPhoto.Text=""; TxtAttach.Text="";
+            _newPhotoSelected = false; _newAttachSelected = false;
             ImgPreview.Visibility       = Visibility.Collapsed;
             PhotoPlaceholder.Visibility = Visibility.Visible;
             _selectedCell = ""; _selectedLevel = "";
             MsgBorder.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowOverlay(string message)
+        {
+            if (TxtOverlayMsg != null) TxtOverlayMsg.Text = message;
+            if (RegLoadingOverlay != null) RegLoadingOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void HideOverlay()
+        {
+            if (RegLoadingOverlay != null) RegLoadingOverlay.Visibility = Visibility.Collapsed;
         }
 
         private void ShowMsg(string msg, bool success)

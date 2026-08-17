@@ -285,39 +285,47 @@ namespace CollegeManagementWPF.Views
         // ── FILTER (exact original OR logic) ─────────────────────────────────
         private async void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
-            string studID = TxtFStudID.Text.Trim();
-            string deptID = (CmbFDept.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? "";
-            string year   = TxtFYear.Text.Trim();
-            string level  = CmbVal(CmbFLevel);
-            // Module: IsEditable combo — use Text property
-            string modCod = CmbFModule.Text?.Trim() ?? "";
+            string studID  = TxtFStudID.Text.Trim();
+            string deptID  = (CmbFDept.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? "";
+            string year    = TxtFYear.Text.Trim();
+            string level   = CmbVal(CmbFLevel);
+            string modCod  = CmbFModule.Text?.Trim() ?? "";
             if (modCod == "(All)" || modCod == "") modCod = "";
+            string admType = (CmbFAdmType.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? "";
+            if (admType == "(All)") admType = "";
 
             if (!string.IsNullOrEmpty(studID))
             {
-                // Filter by Student ID only (original algorithm)
-                await Load(BASE + $" WHERE student_id='{studID}'");
+                // Student ID search — TRIM handles stored leading spaces
+                await Load(BASE + $" WHERE TRIM(student_id)='{studID.Replace("'", "''")}'");
+                return;
             }
-            else if (!string.IsNullOrEmpty(deptID) && !string.IsNullOrEmpty(year) &&
-                     !string.IsNullOrEmpty(level)  && !string.IsNullOrEmpty(modCod))
+
+            // OR branch — build conditions from only filled fields
+            var conditions = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(year))    conditions.Add($"sm.academic_year='{year.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(level))   conditions.Add($"sm.level='{level.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(modCod))  conditions.Add($"sm.module_code='{modCod.Replace("'","''")}'");
+
+            // Dept / admission_type filter goes through student_profile subquery
+            var profileConds = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(deptID))  profileConds.Add($"dept_id='{deptID.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(admType)) profileConds.Add($"admission_type='{admType.Replace("'","''")}'");
+
+            if (profileConds.Count > 0)
+                conditions.Add($"TRIM(sm.student_id) IN (SELECT TRIM(student_id) FROM ecc_dof_wukrostmarycollege.student_profile WHERE {string.Join(" AND ", profileConds)})");
+
+            if (conditions.Count == 0)
             {
-                // Filter by Dept + Year + Level + Module (original algorithm)
-                // Original joins departments table to validate dept exists, filters student_mark
-                await Load(
-                    "SELECT student_id,level,module_code,employee_id,academic_year," +
-                    "score_of_knowledge_test,score_of_practical_test,competence " +
-                    "FROM ecc_dof_wukrostmarycollege.student_mark " +
-                    $"WHERE academic_year='{year}' " +
-                    $"AND level='{level}' " +
-                    $"AND module_code='{modCod}' " +
-                    $"AND student_id IN (" +
-                    $"SELECT student_id FROM ecc_dof_wukrostmarycollege.student_profile " +
-                    $"WHERE dept_id='{deptID}')");
+                await Load(BASE);
+                return;
             }
-            else
-            {
-                Msg("Invalid filter parameters!\nEnter Student ID alone,\nor fill Dept ID + Year + Level + Module Code.", false);
-            }
+
+            await Load(
+                "SELECT sm.student_id,sm.level,sm.module_code,sm.employee_id,sm.academic_year," +
+                "sm.score_of_knowledge_test,sm.score_of_practical_test,sm.competence " +
+                "FROM ecc_dof_wukrostmarycollege.student_mark sm " +
+                $"WHERE {string.Join(" AND ", conditions)}");
         }
 
         private async void BtnFilterReset_Click(object sender, RoutedEventArgs e)
@@ -349,12 +357,140 @@ namespace CollegeManagementWPF.Views
 
         private void BtnClear_Click(object s, RoutedEventArgs e) => Clear();
 
-        private void BtnPrint_Click(object sender, RoutedEventArgs e)
+        private async void BtnPrint_Click(object sender, RoutedEventArgs e)
         {
-            var owner = Window.GetWindow(this);
-            ModernDialog.Show(owner,
-                "Print Mark List requires the Crystal Reports integration from the original application.\nPlease use the MarkList report from the Reports menu.",
-                "Print Mark List", ModernDialog.DialogType.Info);
+            if (Grid1.ItemsSource is not System.Data.DataView view || view.Count == 0)
+            { Msg("No data to print.", false); return; }
+
+            var pd = new System.Windows.Controls.PrintDialog();
+            try
+            {
+                var server = new System.Printing.LocalPrintServer();
+                foreach (System.Printing.PrintQueue q in server.GetPrintQueues())
+                    if (q.Name.Contains("PDF", StringComparison.OrdinalIgnoreCase))
+                    { pd.PrintQueue = q; break; }
+            }
+            catch { }
+            if (pd.ShowDialog() != true) return;
+
+            if (LoadingOverlay != null) { LoadingOverlay.Visibility = Visibility.Visible; }
+            await Task.Delay(50);
+            try
+            {
+                // Extract data on background thread
+                string[][] rowData = await Task.Run(() =>
+                {
+                    string[] fields = { "student_id","level","module_code","employee_id",
+                                        "academic_year","score_of_knowledge_test",
+                                        "score_of_practical_test","competence" };
+                    var items = new System.Data.DataRowView[view.Count];
+                    for (int i = 0; i < view.Count; i++) items[i] = (System.Data.DataRowView)view[i];
+                    var rows = new string[items.Length][];
+                    System.Threading.Tasks.Parallel.For(0, items.Length,
+                        new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 },
+                        i => { rows[i] = System.Array.ConvertAll(fields, f => items[i][f]?.ToString() ?? ""); });
+                    return rows;
+                });
+
+                // Build FlowDocument on UI thread
+                string[] headers = { "Student ID","Level","Module Code","Employee ID",
+                                     "Acad Year","Know Score","Prac Score","Competence" };
+                var doc = new System.Windows.Documents.FlowDocument
+                {
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI"), FontSize = 9,
+                    PagePadding = new Thickness(30), ColumnWidth = double.MaxValue,
+                    Background = System.Windows.Media.Brushes.White, Foreground = System.Windows.Media.Brushes.Black
+                };
+                doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Wukro St. Mary College"))
+                    { FontSize = 16, FontWeight = FontWeights.Bold, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,2) });
+                doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Student Marks List"))
+                    { FontSize = 12, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,2) });
+                doc.Blocks.Add(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run($"Printed: {DateTime.Now:dd MMM yyyy  HH:mm}"))
+                    { FontSize = 8, Foreground = System.Windows.Media.Brushes.Gray, TextAlignment = TextAlignment.Center, Margin = new Thickness(0,0,0,10) });
+
+                var table = new System.Windows.Documents.Table { CellSpacing = 0 };
+                foreach (var _ in headers) table.Columns.Add(new System.Windows.Documents.TableColumn());
+                var rg = new System.Windows.Documents.TableRowGroup(); table.RowGroups.Add(rg);
+                var hRow = new System.Windows.Documents.TableRow { Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(18,52,116)) };
+                foreach (var h in headers)
+                    hRow.Cells.Add(new System.Windows.Documents.TableCell(
+                        new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(h)) { FontWeight = FontWeights.Bold, FontSize = 7.5 })
+                    { Padding = new Thickness(2), Foreground = System.Windows.Media.Brushes.White });
+                rg.Rows.Add(hRow);
+                bool alt = false;
+                var altBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245,247,250));
+                foreach (var cols in rowData)
+                {
+                    var row = new System.Windows.Documents.TableRow { Background = alt ? altBrush : System.Windows.Media.Brushes.White };
+                    alt = !alt;
+                    foreach (var val in cols)
+                        row.Cells.Add(new System.Windows.Documents.TableCell(
+                            new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(val)) { FontSize = 7.5 })
+                        { Padding = new Thickness(2,1,2,1) });
+                    rg.Rows.Add(row);
+                }
+                doc.Blocks.Add(table);
+
+                var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
+                paginator.PageSize = new System.Windows.Size(1122.5, 793.7);
+                pd.PrintDocument(paginator, "Student Marks List");
+                Msg($"Sent {view.Count} records to printer.", true);
+            }
+            catch (Exception ex) { Msg("Print failed: " + ex.Message, false); }
+            finally { if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed; }
+        }
+
+        private async void BtnExportExcel_Click(object sender, RoutedEventArgs e)
+        {
+            if (Grid1.ItemsSource is not System.Data.DataView view || view.Count == 0)
+            { Msg("No data to export.", false); return; }
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName   = $"StudentMarks_{DateTime.Now:yyyyMMdd_HHmm}",
+                DefaultExt = ".xlsx",
+                Filter     = "Excel Workbook|*.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
+            try
+            {
+                string path = dlg.FileName;
+                string[] fields  = { "student_id","level","module_code","employee_id",
+                                     "academic_year","score_of_knowledge_test",
+                                     "score_of_practical_test","competence" };
+                string[] headers = { "Student ID","Level","Module Code","Employee ID",
+                                     "Academic Year","Know Score","Prac Score","Competence" };
+
+                await Task.Run(() =>
+                {
+                    using var wb = new ClosedXML.Excel.XLWorkbook();
+                    var ws = wb.Worksheets.Add("Marks");
+                    for (int c = 0; c < headers.Length; c++)
+                    {
+                        var cell = ws.Cell(1, c + 1);
+                        cell.Value = headers[c];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#1A3A6B");
+                        cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                    }
+                    int row = 2;
+                    foreach (System.Data.DataRowView drv in view)
+                    {
+                        for (int c = 0; c < fields.Length; c++)
+                            ws.Cell(row, c + 1).Value = drv[fields[c]]?.ToString() ?? "";
+                        row++;
+                    }
+                    ws.Columns().AdjustToContents();
+                    ws.SheetView.FreezeRows(1);
+                    wb.SaveAs(path);
+                });
+
+                Msg($"Exported {view.Count} records to:\n{path}", true);
+            }
+            catch (Exception ex) { Msg("Export failed: " + ex.Message, false); }
+            finally { if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed; }
         }
 
         private void Clear()

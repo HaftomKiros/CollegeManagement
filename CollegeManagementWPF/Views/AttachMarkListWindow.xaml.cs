@@ -2,6 +2,7 @@ using CollegeManagementWPF.Data;
 using Microsoft.Win32;
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace CollegeManagementWPF.Views
     {
         private readonly DBConnect _db = new DBConnect();
         private string _selDept="", _selStream="", _selLevel="", _selMod="", _selYear="", _selAdmType="";
+        private bool _loading = false; // suppress cascade events during programmatic fill
 
         private const string BASE =
             "SELECT doc_dept_id,doc_stream_id,doc_level_id,doc_module_code,doc_academic_year,doc_admission_type " +
@@ -22,9 +24,114 @@ namespace CollegeManagementWPF.Views
         public AttachMarkListWindow()
         {
             InitializeComponent();
-            _ = LoadGrid(BASE);
+            Loaded += async (s, e) =>
+            {
+                await LoadDepartments();
+                await LoadGrid(BASE);
+            };
         }
 
+        // ── Cascade loaders ───────────────────────────────────────────────────
+        private async Task LoadDepartments()
+        {
+            var depts = await DbList("SELECT dept_id FROM ecc_dof_wukrostmarycollege.departments ORDER BY dept_id");
+            FillCombo(CmbDeptID, depts);
+            FillCombo(TxtSDept,  depts);
+        }
+
+        private async Task LoadStreams(string deptId, ComboBox streamTarget)
+        {
+            var streams = await DbList(
+                $"SELECT stream_id FROM ecc_dof_wukrostmarycollege.streams WHERE dept_id='{deptId.Replace("'","''")}' ORDER BY stream_id");
+            FillCombo(streamTarget, streams);
+        }
+
+        private async Task LoadLevels(string streamId, ComboBox levelTarget)
+        {
+            // Load level_id from levels table for this stream — these match courses.level_id
+            var levels = await DbList(
+                $"SELECT level_id FROM ecc_dof_wukrostmarycollege.levels WHERE stream_id='{streamId.Replace("'","''")}' ORDER BY level_id");
+            FillCombo(levelTarget, levels);
+        }
+
+        private async Task LoadModules(string deptId, string streamId, string levelId, ComboBox modTarget)
+        {
+            // Load module codes from courses for this level_id
+            var mods = await DbList(
+                $"SELECT module_code FROM ecc_dof_wukrostmarycollege.courses WHERE level_id='{levelId.Replace("'","''")}' ORDER BY module_code");
+            FillCombo(modTarget, mods);
+        }
+
+        private async Task<List<string>> DbList(string sql)
+        {
+            try
+            {
+                return await Task.Run(() =>
+                {
+                    var list = new List<string>();
+                    var conn = _db.GetConnection(); conn.Open();
+                    using var cmd = new MySqlCommand(sql, conn);
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read()) list.Add(r[0]?.ToString() ?? "");
+                    conn.Close(); return list;
+                });
+            }
+            catch { return new List<string>(); }
+        }
+
+        private static void FillCombo(ComboBox c, List<string> items)
+        {
+            c.Items.Clear();
+            foreach (var v in items) c.Items.Add(new ComboBoxItem { Content = v });
+        }
+
+        // ── Cascade event handlers (form) ────────────────────────────────────
+        private async void CmbDeptID_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string dept = GetCmb(CmbDeptID);
+            if (string.IsNullOrEmpty(dept)) return;
+            CmbStreamID.Items.Clear(); CmbLevelID.Items.Clear(); CmbModCode.Items.Clear();
+            await LoadStreams(dept, CmbStreamID);
+        }
+
+        private async void CmbStreamID_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string stream = GetCmb(CmbStreamID);
+            if (string.IsNullOrEmpty(stream)) return;
+            CmbLevelID.Items.Clear(); CmbModCode.Items.Clear();
+            await LoadLevels(stream, CmbLevelID);
+        }
+
+        private async void CmbLevelID_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string dept = GetCmb(CmbDeptID), stream = GetCmb(CmbStreamID), level = GetCmb(CmbLevelID);
+            if (string.IsNullOrEmpty(level)) return;
+            CmbModCode.Items.Clear();
+            await LoadModules(dept, stream, level, CmbModCode);
+        }
+
+        // ── Cascade event handler (search panel) ─────────────────────────────
+        private async void CmbSDept_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string dept = GetCmb(TxtSDept);
+            if (string.IsNullOrEmpty(dept)) return;
+            TxtSStream.Items.Clear(); TxtSLevel.Items.Clear(); TxtSModule.Items.Clear();
+            await LoadStreams(dept, TxtSStream);
+        }
+
+        // ── Helper: get combo text (typed or selected) ────────────────────────
+        private static string GetCmb(ComboBox c)
+        {
+            string? text = c.Text?.Trim();
+            if (!string.IsNullOrEmpty(text)) return text;
+            return (c.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? "";
+        }
+
+        // ── Grid load ────────────────────────────────────────────────────────
         private async Task LoadGrid(string q)
         {
             try
@@ -37,10 +144,11 @@ namespace CollegeManagementWPF.Views
                 });
                 GridDocs.ItemsSource = t.DefaultView;
             }
-            catch (Exception ex) { MessageBox.Show("DB Error: " + ex.Message); }
+            catch (Exception ex) { ModernDialog.Show(this, "DB Error: " + ex.Message, "Error", ModernDialog.DialogType.Error); }
         }
 
-        private void GridDocs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // ── Grid selection: fill form fields ─────────────────────────────────
+        private async void GridDocs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (GridDocs.SelectedItem is not DataRowView r) return;
             _selDept    = r["doc_dept_id"]?.ToString()       ?? "";
@@ -50,20 +158,49 @@ namespace CollegeManagementWPF.Views
             _selYear    = r["doc_academic_year"]?.ToString() ?? "";
             _selAdmType = r["doc_admission_type"]?.ToString()?? "";
 
-            TxtDeptID.Text   = _selDept;
-            TxtStreamID.Text = _selStream;
-            TxtLevelID.Text  = _selLevel;
-            TxtModCode.Text  = _selMod;
-            TxtAcadYear.Text = _selYear;
+            _loading = true;
+            await LoadStreams(_selDept, CmbStreamID);
+            await LoadLevels(_selStream, CmbLevelID);
+            await LoadModules(_selDept, _selStream, _selLevel, CmbModCode);
+
+            CmbDeptID.Text  = _selDept;
+            CmbStreamID.Text= _selStream;
+            CmbLevelID.Text = _selLevel;
+            CmbModCode.Text = _selMod;
+            TxtAcadYear.Text= _selYear;
             SetCombo(CmbAdmType, _selAdmType);
-            TxtFilePath.Text = "";
+            _loading = false;
+
+            // Check if a file is stored and show indicator
+            TxtFilePath.Text = "[Checking file...]";
+            try
+            {
+                bool hasFile = await Task.Run(() =>
+                {
+                    var conn = _db.GetConnection(); conn.Open();
+                    using var cmd = new MySqlCommand(
+                        "SELECT LENGTH(doc_file) FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
+                        "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
+                        "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
+                    cmd.Parameters.AddWithValue("@d",_selDept);  cmd.Parameters.AddWithValue("@s",_selStream);
+                    cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
+                    cmd.Parameters.AddWithValue("@y",_selYear);  cmd.Parameters.AddWithValue("@at",_selAdmType);
+                    var result = cmd.ExecuteScalar();
+                    conn.Close();
+                    return result != null && result != DBNull.Value && Convert.ToInt64(result) > 0;
+                });
+                TxtFilePath.Text = hasFile
+                    ? $"[File attached — {_selMod}_{_selYear}.pdf — click Browse to replace]"
+                    : "[No file stored]";
+            }
+            catch { TxtFilePath.Text = "[Unable to check file]"; }
         }
 
         private void SetCombo(ComboBox c, string v)
         { foreach (ComboBoxItem i in c.Items) if (i.Content?.ToString() == v) { c.SelectedItem = i; return; } }
-        private string CmbVal(ComboBox c) => (c.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+        private string CmbVal(ComboBox c) => (c.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? c.Text?.Trim() ?? "";
 
-        // ── BROWSE ────────────────────────────────────────────────────────────
+        // ── BROWSE ───────────────────────────────────────────────────────────
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog
@@ -74,7 +211,7 @@ namespace CollegeManagementWPF.Views
         // ── DOWNLOAD ─────────────────────────────────────────────────────────
         private async void BtnDownload_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_selDept)) { MessageBox.Show("Select a record first."); return; }
+            if (string.IsNullOrEmpty(_selDept)) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
             var dlg = new SaveFileDialog
             { FileName = $"marklist_{_selDept}_{_selLevel}_{_selYear}", Filter = "PDF Files|*.pdf|Word Files|*.docx|All Files|*.*" };
             if (dlg.ShowDialog() != true) return;
@@ -87,33 +224,32 @@ namespace CollegeManagementWPF.Views
                         "SELECT doc_file FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
                         "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
                         "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
-                    cmd.Parameters.AddWithValue("@d", _selDept);   cmd.Parameters.AddWithValue("@s", _selStream);
-                    cmd.Parameters.AddWithValue("@l", _selLevel);  cmd.Parameters.AddWithValue("@m", _selMod);
-                    cmd.Parameters.AddWithValue("@y", _selYear);   cmd.Parameters.AddWithValue("@at", _selAdmType);
+                    cmd.Parameters.AddWithValue("@d",_selDept);  cmd.Parameters.AddWithValue("@s",_selStream);
+                    cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
+                    cmd.Parameters.AddWithValue("@y",_selYear);  cmd.Parameters.AddWithValue("@at",_selAdmType);
                     var bytes = cmd.ExecuteScalar() as byte[];
                     conn.Close(); return bytes;
                 });
-                if (data == null || data.Length == 0) { MessageBox.Show("No file found for this record."); return; }
+                if (data == null || data.Length == 0) { ModernDialog.Show(this, "No file found for this record.", "Info", ModernDialog.DialogType.Info); return; }
                 await File.WriteAllBytesAsync(dlg.FileName, data);
-                MessageBox.Show("Downloaded successfully!");
+                ModernDialog.Show(this, "Downloaded successfully!", "Success", ModernDialog.DialogType.Success);
             }
-            catch (Exception ex) { MessageBox.Show("Connection failed! " + ex.Message); }
+            catch (Exception ex) { ModernDialog.Show(this, "Connection failed! " + ex.Message, "Error", ModernDialog.DialogType.Error); }
         }
 
-        // ── SAVE (exact original algorithm) ───────────────────────────────────
+        // ── SAVE ─────────────────────────────────────────────────────────────
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            string dept = TxtDeptID.Text.Trim(), stream = TxtStreamID.Text.Trim(),
-                   level = TxtLevelID.Text.Trim(), mod = TxtModCode.Text.Trim(),
-                   year = TxtAcadYear.Text.Trim(), adm = CmbVal(CmbAdmType), path = TxtFilePath.Text;
+            string dept   = GetCmb(CmbDeptID),  stream = GetCmb(CmbStreamID),
+                   level  = GetCmb(CmbLevelID), mod    = GetCmb(CmbModCode),
+                   year   = TxtAcadYear.Text.Trim(), adm = CmbVal(CmbAdmType), path = TxtFilePath.Text;
 
             if (string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(stream) || string.IsNullOrEmpty(level) ||
-                string.IsNullOrEmpty(mod)  || string.IsNullOrEmpty(year)  || string.IsNullOrEmpty(path))
-            { MessageBox.Show("Error. Please fill in all fields!"); return; }
+                string.IsNullOrEmpty(mod)  || string.IsNullOrEmpty(year)   || string.IsNullOrEmpty(path))
+            { ModernDialog.Show(this, "Error. Please fill in all fields!", "Error", ModernDialog.DialogType.Error); return; }
 
             try
             {
-                // Duplicate check (original algorithm)
                 bool dup = await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
@@ -126,7 +262,7 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@y",year); cmd.Parameters.AddWithValue("@at",adm);
                     int n = Convert.ToInt32(cmd.ExecuteScalar()); conn.Close(); return n > 0;
                 });
-                if (dup) { MessageBox.Show("Error. This mark list is already attached!"); return; }
+                if (dup) { ModernDialog.Show(this, "Error. This mark list is already attached!", "Error", ModernDialog.DialogType.Error); return; }
 
                 byte[] fileBytes = await File.ReadAllBytesAsync(path);
                 await Task.Run(() =>
@@ -142,23 +278,22 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@f",fileBytes);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
-                MessageBox.Show("Saved successfully!");
+                ModernDialog.Show(this, "Saved successfully!", "Success", ModernDialog.DialogType.Success);
                 await LoadGrid(BASE);
             }
-            catch (Exception ex) { MessageBox.Show("Connection failed! " + ex.Message); }
+            catch (Exception ex) { ModernDialog.Show(this, "Connection failed! " + ex.Message, "Error", ModernDialog.DialogType.Error); }
         }
 
-        // ── UPDATE ────────────────────────────────────────────────────────────
+        // ── UPDATE ───────────────────────────────────────────────────────────
         private async void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_selDept)) { MessageBox.Show("Select a record first."); return; }
-            if (string.IsNullOrEmpty(TxtFilePath.Text)) { MessageBox.Show("Error. Wrong update attempt!"); return; }
+            if (string.IsNullOrEmpty(_selDept)) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
+            if (string.IsNullOrEmpty(TxtFilePath.Text)) { ModernDialog.Show(this, "Error. Wrong update attempt!", "Error", ModernDialog.DialogType.Error); return; }
 
-            // Must match selected record (original validation)
-            if (TxtDeptID.Text.Trim() != _selDept   || TxtStreamID.Text.Trim() != _selStream ||
-                TxtLevelID.Text.Trim() != _selLevel  || TxtModCode.Text.Trim()  != _selMod   ||
-                TxtAcadYear.Text.Trim() != _selYear  || CmbVal(CmbAdmType)      != _selAdmType)
-            { MessageBox.Show("Error. Update attempt failed!"); return; }
+            if (GetCmb(CmbDeptID) != _selDept || GetCmb(CmbStreamID) != _selStream ||
+                GetCmb(CmbLevelID) != _selLevel || GetCmb(CmbModCode) != _selMod   ||
+                TxtAcadYear.Text.Trim() != _selYear || CmbVal(CmbAdmType) != _selAdmType)
+            { ModernDialog.Show(this, "Error. Update attempt failed!", "Warning", ModernDialog.DialogType.Warning); return; }
 
             try
             {
@@ -176,16 +311,16 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@y",_selYear); cmd.Parameters.AddWithValue("@at",_selAdmType);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
-                MessageBox.Show("Update successful!");
+                ModernDialog.Show(this, "Update successful!", "Success", ModernDialog.DialogType.Success);
                 await LoadGrid(BASE);
             }
-            catch (Exception ex) { MessageBox.Show("Connection failed! " + ex.Message); }
+            catch (Exception ex) { ModernDialog.Show(this, "Connection failed! " + ex.Message, "Error", ModernDialog.DialogType.Error); }
         }
 
-        // ── DELETE ────────────────────────────────────────────────────────────
+        // ── DELETE ───────────────────────────────────────────────────────────
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_selDept)) { MessageBox.Show("Select a record first."); return; }
+            if (string.IsNullOrEmpty(_selDept)) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
             try
             {
                 await Task.Run(() =>
@@ -200,30 +335,29 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@y",_selYear); cmd.Parameters.AddWithValue("@at",_selAdmType);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
-                MessageBox.Show("Delete successful!");
+                ModernDialog.Show(this, "Delete successful!", "Success", ModernDialog.DialogType.Success);
                 _selDept = _selStream = _selLevel = _selMod = _selYear = _selAdmType = "";
                 await LoadGrid(BASE);
             }
-            catch (Exception ex) { MessageBox.Show("Connection failed! " + ex.Message); }
+            catch (Exception ex) { ModernDialog.Show(this, "Connection failed! " + ex.Message, "Error", ModernDialog.DialogType.Error); }
         }
 
-        // ── FILTER (original: all 6 fields required) ──────────────────────────
+        // ── FILTER ───────────────────────────────────────────────────────────
         private async void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
-            string d=TxtSDept.Text.Trim(), s=TxtSStream.Text.Trim(), l=TxtSLevel.Text.Trim(),
-                   m=TxtSModule.Text.Trim(), y=TxtSYear.Text.Trim(), at=CmbVal(CmbSAdmType);
+            string d = GetCmb(TxtSDept), s = GetCmb(TxtSStream), l = GetCmb(TxtSLevel),
+                   m = GetCmb(TxtSModule), y = TxtSYear.Text.Trim(), at = CmbVal(CmbSAdmType);
 
-            if (string.IsNullOrEmpty(d) || string.IsNullOrEmpty(s) || string.IsNullOrEmpty(l) ||
-                string.IsNullOrEmpty(m) || string.IsNullOrEmpty(y))
-            { MessageBox.Show("Error. Wrong filter parameters!"); return; }
+            var conditions = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(d))  conditions.Add($"doc_dept_id='{d.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(s))  conditions.Add($"doc_stream_id='{s.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(l))  conditions.Add($"doc_level_id='{l.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(m))  conditions.Add($"doc_module_code='{m.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(y))  conditions.Add($"doc_academic_year='{y.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(at)) conditions.Add($"doc_admission_type='{at.Replace("'","''")}'");
 
-            await LoadGrid(
-                "SELECT doc_dept_id,doc_stream_id,doc_level_id,doc_module_code,doc_academic_year,doc_admission_type " +
-                "FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
-                $"WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
-                $"AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at"
-                    .Replace("@d",$"'{d}'").Replace("@s",$"'{s}'").Replace("@l",$"'{l}'")
-                    .Replace("@m",$"'{m}'").Replace("@y",$"'{y}'").Replace("@at",$"'{at}'"));
+            string q = BASE + (conditions.Count > 0 ? " WHERE " + string.Join(" AND ", conditions) : "");
+            await LoadGrid(q);
         }
 
         private async void BtnFilterReset_Click(object sender, RoutedEventArgs e)
