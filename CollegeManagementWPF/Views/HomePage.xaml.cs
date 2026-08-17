@@ -26,7 +26,7 @@ namespace CollegeManagementWPF.Views
             {"BtnStudents", "PanStudents"}, {"BtnDepts", "PanDepts"},
             {"BtnEmp",      "PanEmp"},      {"BtnAlumni","PanAlumni"},
             {"BtnLib",      "PanLib"},      {"BtnReports","PanReports"},
-            {"BtnAdmins",   "PanAdmins"},
+            {"BtnAdmins",   "PanAdmins"}, {"BtnConfig",  "PanConfig"},
         };
 
         private readonly System.Collections.Generic.Dictionary<string, string> _btnToChev
@@ -35,7 +35,7 @@ namespace CollegeManagementWPF.Views
             {"BtnStudents","ChevStudents"},{"BtnDepts","ChevDepts"},
             {"BtnEmp","ChevEmp"},          {"BtnAlumni","ChevAlumni"},
             {"BtnLib","ChevLib"},          {"BtnReports","ChevReports"},
-            {"BtnAdmins","ChevAdmins"},
+            {"BtnAdmins","ChevAdmins"}, {"BtnConfig","ChevConfig"},
         };
 
         public HomePage()
@@ -104,7 +104,7 @@ namespace CollegeManagementWPF.Views
             var sectionHov = dark ? System.Windows.Media.Color.FromRgb(0x14,0x30,0x5A)
                                   : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
 
-            foreach (var name in new[]{"BtnStudents","BtnDepts","BtnEmp","BtnAlumni","BtnLib","BtnReports","BtnAdmins"})
+            foreach (var name in new[]{"BtnStudents","BtnDepts","BtnEmp","BtnAlumni","BtnLib","BtnReports","BtnAdmins","BtnConfig"})
                 if (FindName(name) is WpfButton bb)
                 {
                     bb.Background = new System.Windows.Media.SolidColorBrush(sectionBg);
@@ -121,7 +121,7 @@ namespace CollegeManagementWPF.Views
             // Sub-button text
             var subFgColor = dark ? System.Windows.Media.Color.FromRgb(0x6B,0x8C,0xAE)
                                   : System.Windows.Media.Color.FromRgb(0x33,0x41,0x55);
-            foreach (var panelName in new[]{"PanStudents","PanDepts","PanEmp","PanAlumni","PanLib","PanReports","PanAdmins"})
+            foreach (var panelName in new[]{"PanStudents","PanDepts","PanEmp","PanAlumni","PanLib","PanReports","PanAdmins","PanConfig"})
                 if (FindName(panelName) is StackPanel pan)
                     foreach (var child in pan.Children)
                         if (child is WpfButton subBtn)
@@ -221,6 +221,7 @@ namespace CollegeManagementWPF.Views
                     AlumniPage              => new AlumniPage(),
                     EmployeePage            => new EmployeePage(),
                     LibraryPage             => new LibraryPage(),
+                    AssignPathPage       => new AssignPathPage(),
                     MigrationPage           => new MigrationPage(),
                     _                       => ContentFrame.Content
                 });
@@ -327,6 +328,7 @@ namespace CollegeManagementWPF.Views
                 "Library"             => new LibraryPage(),
                 "ManageAccounts"      => new ManageAccountsPage(),
                 "RolesPermissions"    => new RolesPermissionsPage(),
+                "AssignPath"         => new AssignPathPage(),
                 "Migration"           => new MigrationPage(),
                 _                     => new PlaceholderPage(TxtPageTitle.Text)
             });

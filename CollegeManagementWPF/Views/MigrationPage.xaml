@@ -4,33 +4,79 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Page.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0D1B3E" Offset="0"/><GradientStop Color="#07101E" Offset="1"/>
+            <GradientStop x:Name="PageBg1" Color="#0D1B3E" Offset="0"/>
+            <GradientStop x:Name="PageBg2" Color="#07101E" Offset="1"/>
         </LinearGradientBrush>
     </Page.Background>
     <StackPanel Margin="40,30" MaxWidth="700">
-        <TextBlock Text="BLOB to File Path Migration" FontSize="20" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI" Margin="0,0,0,8"/>
-        <TextBlock Text="Copies all photo and attachment BLOBs from the database to local files and saves the file paths back to the database. BLOBs are NOT deleted." FontSize="12" Foreground="#5577AA" FontFamily="Segoe UI" TextWrapping="Wrap" Margin="0,0,0,20"/>
-        <TextBlock Text="Storage Folder" FontSize="11" FontWeight="SemiBold" Foreground="#5577AA" FontFamily="Segoe UI" Margin="0,0,0,5"/>
+        <!-- Title -->
+        <TextBlock Text="BLOB to File Path Migration" FontSize="20" FontWeight="Bold"
+                   Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+        <TextBlock Text="Copies all photo and attachment BLOBs from the database to local files and saves the file paths back to the database. BLOBs are NOT deleted."
+                   FontSize="12" Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+        <!-- Storage folder -->
+        <TextBlock Text="Storage Folder" FontSize="11" FontWeight="SemiBold"
+                   Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" Margin="0,0,0,5"/>
         <Grid Margin="0,0,0,20">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-            <TextBox x:Name="TxtFolder" Grid.Column="0" Background="#0F1E36" Foreground="White" BorderBrush="#1E3A6A" BorderThickness="1" FontSize="12" FontFamily="Segoe UI" Height="34" Padding="8,0" VerticalContentAlignment="Center"/>
-            <Button Grid.Column="2" Content="Browse Folder" Height="34" FontSize="12" FontFamily="Segoe UI" Foreground="White" Cursor="Hand" Padding="14,0" BorderThickness="0" Click="BrowseFolder_Click">
-                <Button.Background><SolidColorBrush Color="#1A3A6B"/></Button.Background>
+            <Border Grid.Column="0" CornerRadius="7" BorderThickness="1" BorderBrush="{DynamicResource RegInputBorder}">
+                <Border.Background><DynamicResource ResourceKey="RegInputBg"/></Border.Background>
+                <TextBox x:Name="TxtFolder" Background="Transparent" BorderThickness="0"
+                         Foreground="{DynamicResource RegInputFg}" FontSize="12" FontFamily="Segoe UI"
+                         Height="34" Padding="10,0" VerticalContentAlignment="Center"/>
+            </Border>
+            <Button Grid.Column="2" Content="Browse Folder" Height="34" FontSize="12" FontFamily="Segoe UI"
+                    Foreground="White" Cursor="Hand" Padding="14,0" BorderThickness="0" Click="BrowseFolder_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="7" Background="#1A3A6B" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
             </Button>
         </Grid>
-        <TextBlock x:Name="TxtStatus" Text="Ready to migrate." FontSize="12" Foreground="#5577AA" FontFamily="Segoe UI" Margin="0,0,0,8"/>
-        <ProgressBar x:Name="Progress" Height="8" Minimum="0" Maximum="100" Value="0" Margin="0,0,0,16" BorderThickness="0"/>
-        <Button x:Name="BtnRun" Content="Run Migration" Height="42" FontSize="14" FontWeight="Bold" FontFamily="Segoe UI" Foreground="White" Cursor="Hand" Padding="28,0" BorderThickness="0" HorizontalAlignment="Left" Margin="0,0,0,20" Click="BtnRun_Click">
-            <Button.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#2255DD" Offset="0"/><GradientStop Color="#1144BB" Offset="1"/>
-                </LinearGradientBrush>
-            </Button.Background>
+
+        <TextBlock x:Name="TxtStatus" Text="Ready to migrate." FontSize="12"
+                   Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+        <ProgressBar x:Name="Progress" Height="8" Minimum="0" Maximum="100" Value="0"
+                     Margin="0,0,0,16" BorderThickness="0"/>
+
+        <Button x:Name="BtnRun" Content="Run Migration" Height="42" FontSize="14" FontWeight="Bold"
+                FontFamily="Segoe UI" Foreground="White" Cursor="Hand" Padding="28,0"
+                BorderThickness="0" HorizontalAlignment="Left" Margin="0,0,0,20" Click="BtnRun_Click">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bd" CornerRadius="9" Padding="{TemplateBinding Padding}">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#2255DD" Offset="0"/>
+                                <GradientStop Color="#1144BB" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.85"/></Trigger>
+                        <Trigger Property="IsPressed"   Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.65"/></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
         </Button>
-        <Border CornerRadius="8" BorderThickness="1" BorderBrush="#1A3A6B" Padding="12" MaxHeight="360">
-            <Border.Background><SolidColorBrush Color="#060C18"/></Border.Background>
+
+        <!-- Log box -->
+        <Border CornerRadius="10" BorderThickness="1" Padding="12" MaxHeight="360">
+            <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+            <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <TextBox x:Name="TxtLog" Background="Transparent" BorderThickness="0" Foreground="#7799BB" FontFamily="Consolas" FontSize="11" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" Text="Migration log will appear here..."/>
+                <TextBox x:Name="TxtLog" Background="Transparent" BorderThickness="0"
+                         Foreground="{DynamicResource RegLabelFg}" FontFamily="Consolas" FontSize="11"
+                         IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+                         Text="Migration log will appear here..."/>
             </ScrollViewer>
         </Border>
     </StackPanel>

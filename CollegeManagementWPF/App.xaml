@@ -13,7 +13,9 @@
             <!-- Sub-button hover colors (updated at runtime by ThemeManager) -->
             <SolidColorBrush x:Key="SubBtnHoverBg" Color="#112240"/>
             <SolidColorBrush x:Key="SubBtnHoverFg" Color="White"/>
+            <SolidColorBrush x:Key="SubBtnDefaultFg" Color="#6B8CAE"/>
             <SolidColorBrush x:Key="SectionBtnHoverBg" Color="#14305A"/>
+            <SolidColorBrush x:Key="SubBtnFg" Color="#8AAAC8"/>
             <SolidColorBrush x:Key="RegLabelFg"          Color="#5577AA"/>
             <SolidColorBrush x:Key="RegInputBg"          Color="#0F1E36"/>
             <SolidColorBrush x:Key="RegInputFg"          Color="White"/>
