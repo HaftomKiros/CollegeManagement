@@ -1,6 +1,7 @@
 <Page x:Class="CollegeManagementWPF.Views.RolesPermissionsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:local="clr-namespace:CollegeManagementWPF.Views">
     <Page.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -8,134 +9,129 @@
             <GradientStop x:Name="PageBg2" Color="#07101E" Offset="1"/>
         </LinearGradientBrush>
     </Page.Background>
+    <Page.Resources>
+        <Style x:Key="FL" TargetType="TextBlock"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Margin" Value="0,0,0,3"/></Style>
+        <Style x:Key="WI" TargetType="TextBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Height" Value="32"/><Setter Property="Padding" Value="8,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+        <Style x:Key="AB" TargetType="Button"><Setter Property="Height" Value="34"/><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Padding" Value="16,0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="8" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.65"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+        <Style x:Key="CBStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Margin" Value="0,3,0,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Page.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
-        <StackPanel Margin="28,22,28,28">
+    <Grid Margin="16,10,16,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-            <!-- Page header banner -->
-            <Border CornerRadius="16" Padding="28,22" Margin="0,0,0,24" BorderThickness="1">
-                <Border.BorderBrush><SolidColorBrush Color="#7C3AED"/></Border.BorderBrush>
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#1A0A3A" Offset="0"/>
-                        <GradientStop Color="#0D0720" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Roles &amp; Permissions" FontSize="22" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
-                        <TextBlock Text="Define access levels by setting the Priority field when creating accounts." FontSize="11.5" Foreground="#9977BB" FontFamily="Segoe UI" Margin="0,6,0,0"/>
+        <!-- ══ LEFT: Role list ══ -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Add role card -->
+            <Border Grid.Row="0" CornerRadius="12" Padding="14,12" BorderThickness="1">
+                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#FBBF24" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Roles" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI"/>
                     </StackPanel>
-                    <Border Grid.Column="1" Width="54" Height="54" CornerRadius="14" Background="#3A0A7A" VerticalAlignment="Center">
-                        <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#E879F9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </Grid>
+                    <TextBlock Text="Role Name" Style="{StaticResource FL}"/>
+                    <TextBox x:Name="TxtRoleName" Style="{StaticResource WI}" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Add Role" Click="BtnAddRole_Click" Style="{StaticResource AB}" Padding="10,0" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                        <Button Content="Delete" Click="BtnDeleteRole_Click" Style="{StaticResource AB}" Padding="10,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
+                    </StackPanel>
+                </StackPanel>
             </Border>
 
-            <!-- Three role cards -->
-            <UniformGrid Rows="1" Columns="3" Margin="0,0,0,24">
+            <!-- Role list -->
+            <TextBlock Grid.Row="2" Text="Select Role" Style="{StaticResource FL}" Margin="2,0,0,0"/>
+            <Border Grid.Row="4" CornerRadius="10" BorderThickness="1" ClipToBounds="True">
+                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
+                <ListBox x:Name="LstRoles" Background="Transparent" BorderThickness="0"
+                         FontFamily="Segoe UI" FontSize="12" Foreground="{DynamicResource TableRowFg}"
+                         SelectionChanged="LstRoles_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="4,6,4,6">
+                                <TextBlock Text="&#xE7EF;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#A855F7" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding role_name}" Foreground="{DynamicResource TableRowFg}" FontFamily="Segoe UI" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Padding" Value="6,2"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#1A3A6B"/></Trigger>
+                                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource TableRowHoverBg}"/></Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Border>
+        </Grid>
 
-                <!-- Super Admin -->
-                <Border CornerRadius="14" Padding="20,18" Margin="0,0,12,0" BorderThickness="1">
-                    <Border.BorderBrush><SolidColorBrush Color="#7C3AED"/></Border.BorderBrush>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#1A0A3A" Offset="0"/><GradientStop Color="#0D051E" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <StackPanel>
-                        <Border Width="50" Height="50" CornerRadius="14" Background="#3A0A7A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="&#xE728;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#E879F9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="Super Admin" FontSize="16" FontWeight="Bold" Foreground="#E879F9" FontFamily="Segoe UI" Margin="0,0,0,4"/>
-                        <Border CornerRadius="10" Padding="8,3" Background="#3A0A7A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="Priority: 1" Foreground="#C084FC" FontSize="10.5" FontWeight="SemiBold" FontFamily="Segoe UI"/>
-                        </Border>
-                        <Border Height="1" Background="#3A1A6A" Margin="0,0,0,12"/>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#A855F7" Margin="0,0,8,0"/><TextBlock Text="Full system access" Foreground="#BB99DD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#A855F7" Margin="0,0,8,0"/><TextBlock Text="Manage all accounts" Foreground="#BB99DD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#A855F7" Margin="0,0,8,0"/><TextBlock Text="All student modules" Foreground="#BB99DD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#A855F7" Margin="0,0,8,0"/><TextBlock Text="Reports &amp; Analytics" Foreground="#BB99DD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal"><TextBlock Text="✓" Foreground="#A855F7" Margin="0,0,8,0"/><TextBlock Text="System configuration" Foreground="#BB99DD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+        <!-- ══ RIGHT: Permissions editor ══ -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                <!-- Admin -->
-                <Border CornerRadius="14" Padding="20,18" Margin="0,0,12,0" BorderThickness="1">
-                    <Border.BorderBrush><SolidColorBrush Color="#1D4ED8"/></Border.BorderBrush>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#0D1F4A" Offset="0"/><GradientStop Color="#060E28" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <StackPanel>
-                        <Border Width="50" Height="50" CornerRadius="14" Background="#1A3A7A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="&#xE7EF;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="Admin" FontSize="16" FontWeight="Bold" Foreground="#60A5FA" FontFamily="Segoe UI" Margin="0,0,0,4"/>
-                        <Border CornerRadius="10" Padding="8,3" Background="#1A3A7A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="Priority: 2" Foreground="#93C5FD" FontSize="10.5" FontWeight="SemiBold" FontFamily="Segoe UI"/>
-                        </Border>
-                        <Border Height="1" Background="#1A3A6A" Margin="0,0,0,12"/>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#3B82F6" Margin="0,0,8,0"/><TextBlock Text="Student management" Foreground="#8AADDD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#3B82F6" Margin="0,0,8,0"/><TextBlock Text="Department &amp; courses" Foreground="#8AADDD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#3B82F6" Margin="0,0,8,0"/><TextBlock Text="Reports generation" Foreground="#8AADDD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#3B82F6" Margin="0,0,8,0"/><TextBlock Text="Library management" Foreground="#8AADDD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal"><TextBlock Text="✗" Foreground="#EF4444" Margin="0,0,8,0"/><TextBlock Text="Cannot manage accounts" Foreground="#8AADDD" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Viewer -->
-                <Border CornerRadius="14" Padding="20,18" BorderThickness="1">
-                    <Border.BorderBrush><SolidColorBrush Color="#15803D"/></Border.BorderBrush>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#0D2A1A" Offset="0"/><GradientStop Color="#06150D" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <StackPanel>
-                        <Border Width="50" Height="50" CornerRadius="14" Background="#0D3A1A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="&#xE890;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#4ADE80" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="Viewer" FontSize="16" FontWeight="Bold" Foreground="#4ADE80" FontFamily="Segoe UI" Margin="0,0,0,4"/>
-                        <Border CornerRadius="10" Padding="8,3" Background="#0D3A1A" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <TextBlock Text="Priority: 3+" Foreground="#86EFAC" FontSize="10.5" FontWeight="SemiBold" FontFamily="Segoe UI"/>
-                        </Border>
-                        <Border Height="1" Background="#1A4A2A" Margin="0,0,0,12"/>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#22C55E" Margin="0,0,8,0"/><TextBlock Text="View all records" Foreground="#6AAA8A" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✓" Foreground="#22C55E" Margin="0,0,8,0"/><TextBlock Text="Generate reports" Foreground="#6AAA8A" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✗" Foreground="#EF4444" Margin="0,0,8,0"/><TextBlock Text="Cannot add/edit records" Foreground="#6AAA8A" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="✗" Foreground="#EF4444" Margin="0,0,8,0"/><TextBlock Text="Cannot delete records" Foreground="#6AAA8A" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                            <StackPanel Orientation="Horizontal"><TextBlock Text="✗" Foreground="#EF4444" Margin="0,0,8,0"/><TextBlock Text="Cannot manage accounts" Foreground="#6AAA8A" FontFamily="Segoe UI" FontSize="11.5"/></StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
-
-            <!-- How to set priority info card -->
-            <Border CornerRadius="14" Padding="24,18" BorderThickness="1">
+            <!-- Header + save -->
+            <Border Grid.Row="0" CornerRadius="12" Padding="16,12" BorderThickness="1">
                 <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
                 <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
                 <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="12" Background="#1A3A6A" VerticalAlignment="Center" Margin="0,0,18,0">
-                        <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="#4A9AEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="How to assign a role" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI" Margin="0,0,0,6"/>
-                        <TextBlock Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" FontSize="11.5" TextWrapping="Wrap">
-                            Go to <Bold>Manage Accounts</Bold>, create or select an account, and set the <Bold>Priority</Bold> field to 1 (Super Admin), 2 (Admin), or 3+ (Viewer). Lower number means higher access level. Passwords must match when saving or updating.
-                        </TextBlock>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtSelectedRole" Text="Select a role to edit permissions"
+                                   FontSize="14" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Toggle permissions for the selected role" FontSize="10.5"
+                                   Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" Margin="0,3,0,0"/>
                     </StackPanel>
+                    <Button Grid.Column="1" Click="BtnSavePermissions_Click" Style="{StaticResource AB}">
+                        <Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Save Permissions" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+            <!-- Permissions grid -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                <Border CornerRadius="12" Padding="20,16" BorderThickness="1">
+                    <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                    <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
+                    <StackPanel x:Name="PermissionsPanel">
+                        <!-- Generated in code-behind -->
+                        <TextBlock x:Name="TxtPermHint" Text="&#xE946;  Select a role from the left to view and edit its permissions."
+                                   FontFamily="Segoe UI" FontSize="12" Foreground="{DynamicResource RegLabelFg}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
+                                   Margin="0,60,0,0"/>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
 </Page>

@@ -12,14 +12,53 @@ namespace CollegeManagementWPF.Views
     {
         private string _selId = "";
         private DBConnect _db = new DBConnect();
-        private const string Q = "SELECT admin_id,user_name,password,priority FROM ecc_dof_wukrostmarycollege.admins";
+        private const string Q =
+            "SELECT a.admin_id, a.user_name, a.password, a.priority, " +
+            "COALESCE(r.role_name, CASE a.priority WHEN '1' THEN 'Super Admin' WHEN '2' THEN 'Admin' ELSE 'Viewer' END) AS role_name " +
+            "FROM ecc_dof_wukrostmarycollege.admins a " +
+            "LEFT JOIN ecc_dof_wukrostmarycollege.roles r ON r.role_id = a.priority";
 
         public ManageAccountsPage()
         {
             InitializeComponent();
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
-            Loaded += async (s, e) => await Load(Q);
+            Loaded += async (s, e) => {
+                await LoadRolesAsync();
+                await Load(Q);
+            };
+        }
+
+        private async Task LoadRolesAsync()
+        {
+            try
+            {
+                var roles = await Task.Run(() =>
+                {
+                    var list = new System.Collections.Generic.List<(int id, string name)>();
+                    var conn = _db.GetConnection(); conn.Open();
+                    using var cmd = new MySqlCommand(
+                        "SELECT role_id, role_name FROM ecc_dof_wukrostmarycollege.roles ORDER BY role_id", conn);
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read()) list.Add((Convert.ToInt32(r["role_id"]), r["role_name"]?.ToString() ?? ""));
+                    conn.Close();
+                    return list;
+                });
+
+                CmbRole.Items.Clear();
+                foreach (var (id, name) in roles)
+                    CmbRole.Items.Add(new ComboBoxItem { Content = name, Tag = id.ToString() });
+
+                // If no roles in DB yet, add defaults
+                if (CmbRole.Items.Count == 0)
+                {
+                    CmbRole.Items.Add(new ComboBoxItem { Content = "Super Admin", Tag = "1" });
+                    CmbRole.Items.Add(new ComboBoxItem { Content = "Admin",       Tag = "2" });
+                    CmbRole.Items.Add(new ComboBoxItem { Content = "Viewer",      Tag = "3" });
+                }
+                if (CmbRole.Items.Count > 0) CmbRole.SelectedIndex = 0;
+            }
+            catch { /* DB offline — keep empty */ }
         }
 
         private void ApplyTheme() {
@@ -28,18 +67,6 @@ namespace CollegeManagementWPF.Views
                 g1.Color = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E) : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9);
             if (FindName("PageBg2") is System.Windows.Media.GradientStop g2)
                 g2.Color = dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E) : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
-
-            // Priority card backgrounds adapt to theme
-            bool isDark = dark;
-            SetCardBg("PriorityCard1", isDark ? "#2A0A4A" : "#F5F0FF");
-            SetCardBg("PriorityCard2", isDark ? "#0A1E3A" : "#EFF6FF");
-            SetCardBg("PriorityCard3", isDark ? "#0A2A1A" : "#F0FDF4");
-        }
-
-        private void SetCardBg(string name, string hex) {
-            if (FindName(name) is System.Windows.Controls.Border b)
-                b.Background = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex));
         }
 
         private async Task Load(string q) {
@@ -58,12 +85,21 @@ namespace CollegeManagementWPF.Views
         }
 
         private string GetPriority() {
-            int idx = CmbRole.SelectedIndex;
-            return idx switch { 0 => "1", 1 => "2", _ => "3" };
+            // Use the selected index + 1 as priority, or tag if available
+            var item = CmbRole.SelectedItem as ComboBoxItem;
+            if (item?.Tag is string tag && !string.IsNullOrEmpty(tag)) return tag;
+            return (CmbRole.SelectedIndex + 1).ToString();
         }
 
         private void SetRole(string priority) {
-            CmbRole.SelectedIndex = priority switch { "1" => 0, "2" => 1, _ => 2 };
+            // Match by tag first, then by index
+            foreach (ComboBoxItem item in CmbRole.Items)
+                if (item.Tag?.ToString() == priority) { CmbRole.SelectedItem = item; return; }
+            // fallback to index
+            if (int.TryParse(priority, out int p) && p > 0 && p <= CmbRole.Items.Count)
+                CmbRole.SelectedIndex = p - 1;
+            else if (CmbRole.Items.Count > 0)
+                CmbRole.SelectedIndex = 0;
         }
 
         private void Grid1_SelectionChanged(object s, SelectionChangedEventArgs e) {

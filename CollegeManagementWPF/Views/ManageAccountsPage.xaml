@@ -1,4 +1,4 @@
-<Page x:Class="CollegeManagementWPF.Views.ManageAccountsPage"
+﻿<Page x:Class="CollegeManagementWPF.Views.ManageAccountsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -144,7 +144,7 @@
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Admin ID"  Binding="{Binding admin_id}"  Width="80"/>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="User Name" Binding="{Binding user_name}" Width="*"/>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Password"  Binding="{Binding password}"  Width="*"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Priority"  Binding="{Binding priority}"  Width="80"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Role" Binding="{Binding role_name}"  Width="80"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -160,63 +160,6 @@
 
         <!-- ══ RIGHT: Info panel ══ -->
         <StackPanel Grid.Column="2">
-
-            <!-- Priority guide card -->
-            <Border CornerRadius="14" Padding="20,18" Margin="0,0,0,14" BorderThickness="1">
-                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
-                <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                        <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#FBBF24" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="Priority Guide" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI"/>
-                    </StackPanel>
-
-                    <!-- Priority 1 -->
-                    <Border x:Name="PriorityCard1" CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
-                        <Border.Background><SolidColorBrush Color="#2A0A4A"/></Border.Background>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#7C3AED">
-                                <TextBlock Text="1" Foreground="White" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Super Admin" Foreground="#E879F9" FontWeight="Bold" FontSize="12" FontFamily="Segoe UI"/>
-                                <TextBlock Text="Full system access" Foreground="#9977BB" FontSize="10.5" FontFamily="Segoe UI" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- Priority 2 -->
-                    <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
-                        <Border.Background><SolidColorBrush Color="#0A1E3A"/></Border.Background>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#1D4ED8">
-                                <TextBlock Text="2" Foreground="White" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Admin" Foreground="#60A5FA" FontWeight="Bold" FontSize="12" FontFamily="Segoe UI"/>
-                                <TextBlock Text="Standard access" Foreground="#4A7AAA" FontSize="10.5" FontFamily="Segoe UI" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- Priority 3 -->
-                    <Border CornerRadius="8" Padding="12,10">
-                        <Border.Background><SolidColorBrush Color="#0A2A1A"/></Border.Background>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13" Background="#15803D">
-                                <TextBlock Text="3" Foreground="White" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Viewer" Foreground="#4ADE80" FontWeight="Bold" FontSize="12" FontFamily="Segoe UI"/>
-                                <TextBlock Text="Read-only access" Foreground="#2A6A4A" FontSize="10.5" FontFamily="Segoe UI" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
 
             <!-- Tips card -->
             <Border CornerRadius="14" Padding="20,18" BorderThickness="1">
