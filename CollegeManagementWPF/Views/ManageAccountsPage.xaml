@@ -19,11 +19,7 @@
     </Page.Resources>
 
     <Grid Margin="20,14,20,14">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="16"/>
-            <ColumnDefinition Width="300"/>
-        </Grid.ColumnDefinitions>
+        
 
         <!-- ══ LEFT: Form + Table ══ -->
         <Grid Grid.Column="0">
@@ -111,10 +107,10 @@
 
                     <!-- Buttons -->
                     <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
-                        <Button Content="&#xE74E; Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                        <Button Content="&#xE70F; Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
-                        <Button Content="&#xE74D; Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
-                        <Button Content="&#xE75A; Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#8899AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
+                        <Button Click="BtnSave_Click" Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/><TextBlock Text="Save" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/><TextBlock Text="Update" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,6,0"/><TextBlock Text="Delete" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button Click="BtnClear_Click" Style="{StaticResource AB}" Foreground="#8899AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE75A;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#8899AA" VerticalAlignment="Center" Margin="0,0,6,0"/><TextBlock Text="Clear" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Foreground="#8899AA"/></StackPanel></Button>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -144,7 +140,7 @@
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Admin ID"  Binding="{Binding admin_id}"  Width="80"/>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="User Name" Binding="{Binding user_name}" Width="*"/>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Password"  Binding="{Binding password}"  Width="*"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Role" Binding="{Binding role_name}"  Width="80"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Role" Binding="{Binding role_name}" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -158,26 +154,5 @@
             </Grid>
         </Grid>
 
-        <!-- ══ RIGHT: Info panel ══ -->
-        <StackPanel Grid.Column="2">
-
-            <!-- Tips card -->
-            <Border CornerRadius="14" Padding="20,18" BorderThickness="1">
-                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
-                <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A9AEE" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="Tips" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI"/>
-                    </StackPanel>
-                    <TextBlock Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" FontSize="11.5" TextWrapping="Wrap" LineHeight="18">
-                        <Run>• Click a row to load its data</Run><LineBreak/>
-                        <Run>• Passwords must match to save/update</Run><LineBreak/>
-                        <Run>• Lower priority number = higher access</Run><LineBreak/>
-                        <Run>• Use Clear to reset the form</Run>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-        </StackPanel>
-    </Grid>
+        </Grid>
 </Page>
