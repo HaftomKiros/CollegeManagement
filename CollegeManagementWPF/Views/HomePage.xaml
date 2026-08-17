@@ -235,12 +235,13 @@
                             <Button x:Name="BtnAdmins" Tag="Admins" Style="{StaticResource SectionBtn}" Click="Section_Click">
                                 <Grid Width="220"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="#2A0A2A" Margin="0,0,10,0"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="15" Foreground="#E879F9" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-                                    <TextBlock Grid.Column="1" Text="Admins" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Accounts" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="ChevAdmins" Grid.Column="2" Text="⌄" FontSize="14" Foreground="#2A4A7A" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 </Grid>
                             </Button>
                             <StackPanel x:Name="PanAdmins" Visibility="Collapsed" Margin="0,2,0,4">
-                                <Button Tag="ManageAdmins" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="13" Foreground="#E879F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Manage Admins" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="ManageAccounts" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ShieldPerson20" FontSize="13" Foreground="#E879F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Manage Accounts" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <Button Tag="RolesPermissions" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="KeyMultiple20" FontSize="13" Foreground="#FBBF24" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Roles &amp; Permissions" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                                 <Button Tag="Migration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowSync24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="BLOB Migration" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                             </StackPanel>
                         </StackPanel>

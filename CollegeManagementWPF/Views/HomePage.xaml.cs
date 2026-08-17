@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Wpf.Ui.Controls;
 using WpfButton = System.Windows.Controls.Button;
@@ -293,7 +293,7 @@ namespace CollegeManagementWPF.Views
                 "RegisterEmployee"    => "Register, Update, Delete Employees",
                 "RegisterAlumni"      => "Register, Update, Delete Alumni",
                 "Library"             => "Manage Library Records",
-                "ManageAdmins"        => "Add, Update, Delete Admin Accounts",
+                "ManageAccounts"  => "Manage Accounts", "RolesPermissions" => "Roles & Permissions",
                 "Dashboard"           => "",
                 _                     => ""
             };
@@ -325,6 +325,8 @@ namespace CollegeManagementWPF.Views
                 "RegisterEmployee"    => new EmployeePage(),
                 "RegisterAlumni"      => new AlumniPage(),
                 "Library"             => new LibraryPage(),
+                "ManageAccounts"      => new ManageAccountsPage(),
+                "RolesPermissions"    => new RolesPermissionsPage(),
                 "Migration"           => new MigrationPage(),
                 _                     => new PlaceholderPage(TxtPageTitle.Text)
             });
