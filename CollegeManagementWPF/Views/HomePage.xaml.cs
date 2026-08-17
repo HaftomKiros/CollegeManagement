@@ -308,6 +308,10 @@ namespace CollegeManagementWPF.Views
 
             ContentFrame.Navigate(tag switch
             {
+                "TVETTranscript"       => new TVETTranscriptPage(),
+                "MarkList"            => new MarkListPage(),
+                "AttendanceSheet"     => new AttendanceSheetPage(),
+                "COCList"             => new COCListPage(),
                 "Dashboard"           => (object)new DashboardPage(),
                 "StudentRegistration" => new StudentRegistrationPage(),
                 "StudentMarks"        => new StudentMarksPage(),

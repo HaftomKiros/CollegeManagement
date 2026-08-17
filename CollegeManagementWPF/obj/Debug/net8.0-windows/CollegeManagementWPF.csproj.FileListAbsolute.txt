@@ -74,3 +74,11 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AlumniPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\EmployeePage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\LibraryPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AttendanceSheetPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\COCListPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\MarkListPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\TVETTranscriptPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AttendanceSheetPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\COCListPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\MarkListPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\TVETTranscriptPage.baml
