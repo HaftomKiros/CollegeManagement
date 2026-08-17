@@ -393,7 +393,7 @@ namespace CollegeManagementWPF.Views
                 });
 
                 // Build FlowDocument on UI thread
-                string[] headers = { "Student ID","Level","Module Code","Employee ID",
+                string[] headers = { "Student ID","Level","Module Code","Instructor ID",
                                      "Acad Year","Know Score","Prac Score","Competence" };
                 var doc = new System.Windows.Documents.FlowDocument
                 {
@@ -460,7 +460,7 @@ namespace CollegeManagementWPF.Views
                 string[] fields  = { "student_id","level","module_code","employee_id",
                                      "academic_year","score_of_knowledge_test",
                                      "score_of_practical_test","competence" };
-                string[] headers = { "Student ID","Level","Module Code","Employee ID",
+                string[] headers = { "Student ID","Level","Module Code","Instructor ID",
                                      "Academic Year","Know Score","Prac Score","Competence" };
 
                 await Task.Run(() =>

@@ -207,6 +207,23 @@
                         Foreground="White" Cursor="Hand" BorderThickness="0" Padding="16,0">
                     <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="7" Background="#CC2222" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
                 </Button>
+                <Button Content="Reset" Click="BtnReset_Click" Height="32" FontSize="12" FontWeight="SemiBold"
+                        Foreground="#5577AA" Cursor="Hand" BorderThickness="0" Padding="16,0" Margin="12,0,0,0" Background="Transparent">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                <TextBlock x:Name="txt" Text="Reset" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#5577AA" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="txt" Property="Foreground" Value="#4A9AEE"/>
+                                    <Setter TargetName="txt" Property="TextDecorations" Value="Underline"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </StackPanel>
         </StackPanel>
 
@@ -218,8 +235,8 @@
                 <TextBlock Text="Search By:" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI"
                            Foreground="{DynamicResource RegInputFg}" Margin="0,0,0,10"/>
                 <TextBlock Text="Dept ID"        Style="{StaticResource LB}"/><ComboBox x:Name="TxtSDept"   Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSDept_SelectionChanged"/>
-                <TextBlock Text="Stream ID"      Style="{StaticResource LB}"/><ComboBox x:Name="TxtSStream" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
-                <TextBlock Text="Level ID"       Style="{StaticResource LB}"/><ComboBox x:Name="TxtSLevel"  Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
+                <TextBlock Text="Stream ID"      Style="{StaticResource LB}"/><ComboBox x:Name="TxtSStream" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSStream_SelectionChanged"/>
+                <TextBlock Text="Level ID"       Style="{StaticResource LB}"/><ComboBox x:Name="TxtSLevel"  Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSLevel_SelectionChanged"/>
                 <TextBlock Text="Module Code"    Style="{StaticResource LB}"/><ComboBox x:Name="TxtSModule" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
                 <TextBlock Text="Admission Type" Style="{StaticResource LB}"/>
                 <ComboBox x:Name="CmbSAdmType" Style="{StaticResource CB}" Margin="0,0,0,6">

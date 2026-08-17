@@ -221,7 +221,7 @@
                             <ComboBox x:Name="CmbModCode" Style="{StaticResource SearchDD}"/>
                         </StackPanel>
                         <StackPanel>
-                            <TextBlock Text="Employee ID" Style="{StaticResource FL}"/>
+                            <TextBlock Text="Instructor ID" Style="{StaticResource FL}"/>
                             <TextBox x:Name="TxtEmpID" Style="{StaticResource WI}"/>
                         </StackPanel>
                     </UniformGrid>

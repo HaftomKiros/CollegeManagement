@@ -106,6 +106,41 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Mark List base path -->
+                <TextBlock FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource RegLabelFg}"
+                           FontFamily="Segoe UI" Margin="0,0,0,4">Mark List Documents Path</TextBlock>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" CornerRadius="8" Padding="12,0" Height="38" BorderThickness="1">
+                        <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                        <Border.Background><DynamicResource ResourceKey="RegInputBg"/></Border.Background>
+                        <TextBlock x:Name="TxtMlBasePath" VerticalAlignment="Center" FontFamily="Segoe UI" FontSize="12"
+                                   Foreground="{DynamicResource RegInputFg}" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <Button Grid.Column="2" Click="BtnBrowseMl_Click" Height="38" Padding="16,0" Cursor="Hand"
+                            FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="White" BorderThickness="0">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" CornerRadius="8" Background="#0D6B6B" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xED25;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                   Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Browse" FontFamily="Segoe UI" FontWeight="Bold"
+                                                   FontSize="12" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
                 <!-- Save button -->
                 <Button Click="BtnSave_Click" HorizontalAlignment="Left" Height="38" Padding="20,0"
                         FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="White" BorderThickness="0">

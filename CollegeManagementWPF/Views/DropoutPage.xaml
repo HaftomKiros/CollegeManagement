@@ -52,7 +52,11 @@
                                     <ToggleButton BorderThickness="0" Background="Transparent" IsChecked="{Binding IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" ClickMode="Press" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                         <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent" BorderThickness="0"/></ControlTemplate></ToggleButton.Template>
                                     </ToggleButton>
-                                    <ContentPresenter IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" Margin="8,0,24,0" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="PART_EditableTextBox" Background="Transparent" BorderThickness="0"
+                                             Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
+                                             FontSize="{Binding FontSize, RelativeSource={RelativeSource TemplatedParent}}"
+                                             Margin="6,0,24,0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" Margin="8,0,24,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="#4A7ACC" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" IsHitTestVisible="False"/>
                                 </Grid>
                             </Border>
@@ -62,6 +66,12 @@
                                 </Border>
                             </Popup>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEditable" Value="True">
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -228,11 +238,12 @@
                         </DataGrid.CellStyle>
                         <DataGrid.Columns>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="#"             Binding="{Binding _RowNo}"          Width="38"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Student ID"    Binding="{Binding student_id}"       Width="*"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Dropout Date"  Binding="{Binding drop_out_date}"    Width="*"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Student ID"    Binding="{Binding student_id}"       Width="120"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Full Name"     Binding="{Binding full_name}"        Width="*"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Dropout Date"  Binding="{Binding drop_out_date}"    Width="80"/>
                             <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Level"         Binding="{Binding level_number}"     Width="50"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Reason"        Binding="{Binding drop_out_reason}"  Width="*"/>
-                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Remark"        Binding="{Binding remark}"           Width="*"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Reason"        Binding="{Binding drop_out_reason}"  Width="120"/>
+                            <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Remark"        Binding="{Binding remark}"           Width="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -260,10 +271,7 @@
                 <Border Height="1" Margin="0,0,0,12"><Border.Background><DynamicResource ResourceKey="RegInputBorder"/></Border.Background></Border>
 
                 <TextBlock Text="Dept ID" Style="{StaticResource FL}"/>
-                <TextBox x:Name="TxtFDept" Style="{StaticResource WI}" Margin="0,0,0,8"/>
-
-                <TextBlock Text="Stream ID" Style="{StaticResource FL}"/>
-                <TextBox x:Name="TxtFStream" Style="{StaticResource WI}" Margin="0,0,0,8"/>
+                <ComboBox x:Name="CmbFDept" Style="{StaticResource DD}" IsEditable="True" Margin="0,0,0,8"/>
 
                 <TextBlock Text="Dropout Year" Style="{StaticResource FL}"/>
                 <TextBox x:Name="TxtFYear" Style="{StaticResource WI}" Margin="0,0,0,8"/>
@@ -279,12 +287,19 @@
                 <Border Height="1" Margin="0,0,0,12"><Border.Background><DynamicResource ResourceKey="RegInputBorder"/></Border.Background></Border>
 
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="Filter" Click="BtnFilter_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                    <Button Click="BtnPrint_Click" Style="{StaticResource AB}" Height="32" Padding="14,0">
+                    <Button Content="Filter" Click="BtnFilter_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                    <Button Click="BtnPrint_Click" Style="{StaticResource AB}" Height="32" Padding="10,0" Margin="0,0,6,0">
                         <Button.Background><SolidColorBrush Color="#335577"/></Button.Background>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBlock Text="Print" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="PDF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="BtnExport_Click" Style="{StaticResource AB}" Height="32" Padding="10,0">
+                        <Button.Background><SolidColorBrush Color="#1A5A2A"/></Button.Background>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="Excel" FontFamily="Segoe UI" FontWeight="Bold" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

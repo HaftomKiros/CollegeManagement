@@ -15,7 +15,8 @@ namespace CollegeManagementWPF.Views
     {
         private readonly DBConnect _db = new DBConnect();
         private string _selDept="", _selStream="", _selLevel="", _selMod="", _selYear="", _selAdmType="";
-        private bool _loading = false; // suppress cascade events during programmatic fill
+        private string _existingFilePath = ""; // stored doc_file_path from DB
+        private bool _loading = false;
 
         private const string BASE =
             "SELECT doc_dept_id,doc_stream_id,doc_level_id,doc_module_code,doc_academic_year,doc_admission_type " +
@@ -113,7 +114,7 @@ namespace CollegeManagementWPF.Views
             await LoadModules(dept, stream, level, CmbModCode);
         }
 
-        // ── Cascade event handler (search panel) ─────────────────────────────
+        // ── Cascade event handlers (search panel) ────────────────────────────
         private async void CmbSDept_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_loading) return;
@@ -121,6 +122,24 @@ namespace CollegeManagementWPF.Views
             if (string.IsNullOrEmpty(dept)) return;
             TxtSStream.Items.Clear(); TxtSLevel.Items.Clear(); TxtSModule.Items.Clear();
             await LoadStreams(dept, TxtSStream);
+        }
+
+        private async void CmbSStream_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string stream = GetCmb(TxtSStream);
+            if (string.IsNullOrEmpty(stream)) return;
+            TxtSLevel.Items.Clear(); TxtSModule.Items.Clear();
+            await LoadLevels(stream, TxtSLevel);
+        }
+
+        private async void CmbSLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            string dept = GetCmb(TxtSDept), stream = GetCmb(TxtSStream), level = GetCmb(TxtSLevel);
+            if (string.IsNullOrEmpty(level)) return;
+            TxtSModule.Items.Clear();
+            await LoadModules(dept, stream, level, TxtSModule);
         }
 
         // ── Helper: get combo text (typed or selected) ────────────────────────
@@ -171,29 +190,67 @@ namespace CollegeManagementWPF.Views
             SetCombo(CmbAdmType, _selAdmType);
             _loading = false;
 
-            // Check if a file is stored and show indicator
-            TxtFilePath.Text = "[Checking file...]";
+            // Check stored file and display just the filename
+            _existingFilePath = "";
+            TxtFilePath.Text = "[Checking...]";
             try
             {
-                bool hasFile = await Task.Run(() =>
+                string result = await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
-                    using var cmd = new MySqlCommand(
-                        "SELECT LENGTH(doc_file) FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
-                        "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
-                        "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
-                    cmd.Parameters.AddWithValue("@d",_selDept);  cmd.Parameters.AddWithValue("@s",_selStream);
-                    cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
-                    cmd.Parameters.AddWithValue("@y",_selYear);  cmd.Parameters.AddWithValue("@at",_selAdmType);
-                    var result = cmd.ExecuteScalar();
+
+                    // Try doc_file_path first
+                    try
+                    {
+                        using var cmd = new MySqlCommand(
+                            "SELECT doc_file_path FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
+                            "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
+                            "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
+                        cmd.Parameters.AddWithValue("@d",_selDept); cmd.Parameters.AddWithValue("@s",_selStream);
+                        cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
+                        cmd.Parameters.AddWithValue("@y",_selYear); cmd.Parameters.AddWithValue("@at",_selAdmType);
+                        string? fp = cmd.ExecuteScalar()?.ToString()?.Trim();
+                        conn.Close();
+                        if (!string.IsNullOrEmpty(fp)) return fp;
+                    }
+                    catch { }
+
+                    // Fall back to BLOB column check
+                    try
+                    {
+                        using var cmd2 = new MySqlCommand(
+                            "SELECT LENGTH(doc_file) FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
+                            "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
+                            "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
+                        cmd2.Parameters.AddWithValue("@d",_selDept); cmd2.Parameters.AddWithValue("@s",_selStream);
+                        cmd2.Parameters.AddWithValue("@l",_selLevel); cmd2.Parameters.AddWithValue("@m",_selMod);
+                        cmd2.Parameters.AddWithValue("@y",_selYear); cmd2.Parameters.AddWithValue("@at",_selAdmType);
+                        var res = cmd2.ExecuteScalar();
+                        conn.Close();
+                        if (res != null && res != DBNull.Value && Convert.ToInt64(res) > 0)
+                            return "__BLOB__";
+                    }
+                    catch { }
+
                     conn.Close();
-                    return result != null && result != DBNull.Value && Convert.ToInt64(result) > 0;
+                    return "";
                 });
-                TxtFilePath.Text = hasFile
-                    ? $"[File attached — {_selMod}_{_selYear}.pdf — click Browse to replace]"
-                    : "[No file stored]";
+
+                if (result == "__BLOB__")
+                {
+                    TxtFilePath.Text = "[BLOB file — run Migration to convert to file path]";
+                }
+                else if (!string.IsNullOrEmpty(result))
+                {
+                    _existingFilePath = result;
+                    TxtFilePath.Text = Path.GetFileName(result); // show just filename
+                }
+                else
+                {
+                    TxtFilePath.Text = "[No file stored]";
+                }
             }
-            catch { TxtFilePath.Text = "[Unable to check file]"; }
+            catch { TxtFilePath.Text = "[No file stored]"; }
         }
 
         private void SetCombo(ComboBox c, string v)
@@ -205,7 +262,8 @@ namespace CollegeManagementWPF.Views
         {
             var dlg = new OpenFileDialog
             { Filter = "PDF Files(*.pdf)|*.pdf|Word Files(*.docx)|*.docx|All Files(*.*)|*.*" };
-            if (dlg.ShowDialog() == true) TxtFilePath.Text = dlg.FileName;
+            if (dlg.ShowDialog() == true)
+                TxtFilePath.Text = dlg.FileName; // real path — used directly by Save/Update
         }
 
         // ── DOWNLOAD ─────────────────────────────────────────────────────────
@@ -220,6 +278,25 @@ namespace CollegeManagementWPF.Views
                 byte[]? data = await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
+
+                    // Try file path first (after migration)
+                    try
+                    {
+                        using var pathCmd = new MySqlCommand(
+                            "SELECT doc_file_path FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
+                            "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
+                            "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
+                        pathCmd.Parameters.AddWithValue("@d",_selDept); pathCmd.Parameters.AddWithValue("@s",_selStream);
+                        pathCmd.Parameters.AddWithValue("@l",_selLevel); pathCmd.Parameters.AddWithValue("@m",_selMod);
+                        pathCmd.Parameters.AddWithValue("@y",_selYear); pathCmd.Parameters.AddWithValue("@at",_selAdmType);
+                        string? fp = pathCmd.ExecuteScalar()?.ToString()?.Trim();
+                        conn.Close();
+                        if (!string.IsNullOrEmpty(fp) && File.Exists(fp))
+                            return File.ReadAllBytes(fp);
+                    }
+                    catch { }
+
+                    // Fall back to BLOB
                     using var cmd = new MySqlCommand(
                         "SELECT doc_file FROM ecc_dof_wukrostmarycollege.mark_list_docs " +
                         "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
@@ -265,17 +342,30 @@ namespace CollegeManagementWPF.Views
                 if (dup) { ModernDialog.Show(this, "Error. This mark list is already attached!", "Error", ModernDialog.DialogType.Error); return; }
 
                 byte[] fileBytes = await File.ReadAllBytesAsync(path);
+                // Save to configured mark list path and store file path in DB
+                string mlDir = AppSettings.Current.MarkListsPath;
+                Directory.CreateDirectory(mlDir);
+                string safeId(string s) => s.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                            .Replace("*","_").Replace("?","_").Replace(" ","_");
+                string fname = $"{safeId(dept)}_{safeId(stream)}_{safeId(level)}_{safeId(mod)}_{safeId(year)}_{safeId(adm)}{System.IO.Path.GetExtension(path)}";
+                string destPath = System.IO.Path.Combine(mlDir, fname);
+                await File.WriteAllBytesAsync(destPath, fileBytes);
+
                 await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
+
+                    // Ensure doc_file_path column exists
+                    try { new MySqlCommand("ALTER TABLE ecc_dof_wukrostmarycollege.mark_list_docs ADD COLUMN doc_file_path VARCHAR(500) NULL", conn).ExecuteNonQuery(); } catch { }
+
                     using var cmd = new MySqlCommand(
                         "INSERT INTO ecc_dof_wukrostmarycollege.mark_list_docs " +
-                        "(doc_dept_id,doc_stream_id,doc_level_id,doc_module_code,doc_academic_year,doc_admission_type,doc_file) " +
-                        "VALUES(@d,@s,@l,@m,@y,@at,@f)", conn);
+                        "(doc_dept_id,doc_stream_id,doc_level_id,doc_module_code,doc_academic_year,doc_admission_type,doc_file_path) " +
+                        "VALUES(@d,@s,@l,@m,@y,@at,@fp)", conn);
                     cmd.Parameters.AddWithValue("@d",dept); cmd.Parameters.AddWithValue("@s",stream);
                     cmd.Parameters.AddWithValue("@l",level); cmd.Parameters.AddWithValue("@m",mod);
                     cmd.Parameters.AddWithValue("@y",year); cmd.Parameters.AddWithValue("@at",adm);
-                    cmd.Parameters.AddWithValue("@f",fileBytes);
+                    cmd.Parameters.AddWithValue("@fp",destPath);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
                 ModernDialog.Show(this, "Saved successfully!", "Success", ModernDialog.DialogType.Success);
@@ -288,29 +378,55 @@ namespace CollegeManagementWPF.Views
         private async void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_selDept)) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
-            if (string.IsNullOrEmpty(TxtFilePath.Text)) { ModernDialog.Show(this, "Error. Wrong update attempt!", "Error", ModernDialog.DialogType.Error); return; }
 
             if (GetCmb(CmbDeptID) != _selDept || GetCmb(CmbStreamID) != _selStream ||
                 GetCmb(CmbLevelID) != _selLevel || GetCmb(CmbModCode) != _selMod   ||
                 TxtAcadYear.Text.Trim() != _selYear || CmbVal(CmbAdmType) != _selAdmType)
             { ModernDialog.Show(this, "Error. Update attempt failed!", "Warning", ModernDialog.DialogType.Warning); return; }
 
+            // Use newly browsed file if available, otherwise keep existing
+            string path = TxtFilePath.Text.Trim();
+            bool isNewFile = !string.IsNullOrEmpty(path) && File.Exists(path);
+            bool hasExisting = !string.IsNullOrEmpty(_existingFilePath) && File.Exists(_existingFilePath);
+
+            if (!isNewFile && !hasExisting)
+            { ModernDialog.Show(this, "No file available. Please Browse and select a file.", "Info", ModernDialog.DialogType.Info); return; }
+
+            // Determine actual file to use
+            string sourceFile = isNewFile ? path : _existingFilePath;
+
             try
             {
-                byte[] fileBytes = await File.ReadAllBytesAsync(TxtFilePath.Text);
+                // Copy to configured mark list folder
+                string mlDir = AppSettings.Current.MarkListsPath;
+                Directory.CreateDirectory(mlDir);
+                string safeId(string s) => s.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                            .Replace("*","_").Replace("?","_").Replace(" ","_");
+                string fname = $"{safeId(_selDept)}_{safeId(_selStream)}_{safeId(_selLevel)}_{safeId(_selMod)}_{safeId(_selYear)}_{safeId(_selAdmType)}{Path.GetExtension(sourceFile)}";
+                string destPath = isNewFile ? Path.Combine(mlDir, fname) : sourceFile; // keep same path if not replacing
+                if (isNewFile)
+                {
+                    byte[] fileBytes = await File.ReadAllBytesAsync(sourceFile);
+                    await File.WriteAllBytesAsync(destPath, fileBytes);
+                }
+
                 await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
+                    // Update doc_file_path
                     using var cmd = new MySqlCommand(
-                        "UPDATE ecc_dof_wukrostmarycollege.mark_list_docs SET doc_file=@f " +
+                        "UPDATE ecc_dof_wukrostmarycollege.mark_list_docs SET doc_file_path=@fp " +
                         "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
                         "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
-                    cmd.Parameters.AddWithValue("@f",fileBytes);
+                    cmd.Parameters.AddWithValue("@fp",destPath);
                     cmd.Parameters.AddWithValue("@d",_selDept); cmd.Parameters.AddWithValue("@s",_selStream);
                     cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
                     cmd.Parameters.AddWithValue("@y",_selYear); cmd.Parameters.AddWithValue("@at",_selAdmType);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
+
+                _existingFilePath = destPath;
+                TxtFilePath.Text = Path.GetFileName(destPath);
                 ModernDialog.Show(this, "Update successful!", "Success", ModernDialog.DialogType.Success);
                 await LoadGrid(BASE);
             }
@@ -358,6 +474,20 @@ namespace CollegeManagementWPF.Views
 
             string q = BASE + (conditions.Count > 0 ? " WHERE " + string.Join(" AND ", conditions) : "");
             await LoadGrid(q);
+        }
+
+        private void BtnReset_Click(object sender, RoutedEventArgs e)
+        {
+            _selDept = _selStream = _selLevel = _selMod = _selYear = _selAdmType = "";
+            _existingFilePath = "";
+            _loading = true;
+            CmbDeptID.Text  = ""; CmbStreamID.Items.Clear(); CmbStreamID.Text = "";
+            CmbLevelID.Items.Clear(); CmbLevelID.Text = "";
+            CmbModCode.Items.Clear(); CmbModCode.Text = "";
+            TxtAcadYear.Text = ""; TxtFilePath.Text = "";
+            CmbAdmType.SelectedIndex = 0;
+            _loading = false;
+            GridDocs.SelectedItem = null;
         }
 
         private async void BtnFilterReset_Click(object sender, RoutedEventArgs e)

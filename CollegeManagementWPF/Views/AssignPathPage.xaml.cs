@@ -7,7 +7,8 @@ namespace CollegeManagementWPF.Views
 {
     public partial class AssignPathPage : Page
     {
-        private string _selectedPath = "";
+        private string _selectedPath   = "";
+        private string _selectedMlPath = "";
 
         public AssignPathPage()
         {
@@ -30,8 +31,9 @@ namespace CollegeManagementWPF.Views
 
         private void LoadCurrentSettings()
         {
-            var settings = AppSettings.Current;
-            _selectedPath = settings.StorageBasePath;
+            var s = AppSettings.Current;
+            _selectedPath   = s.StorageBasePath;
+            _selectedMlPath = s.MarkListBasePath;
             UpdateDisplay();
         }
 
@@ -40,40 +42,49 @@ namespace CollegeManagementWPF.Views
             TxtBasePath.Text   = _selectedPath;
             TxtPhotosPath.Text = Path.Combine(_selectedPath, "photos");
             TxtAttachPath.Text = Path.Combine(_selectedPath, "attachments");
+            TxtMlBasePath.Text = _selectedMlPath;
         }
 
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            // Use OpenFolderDialog (WPF .NET 6+)
             var dlg = new OpenFolderDialog
             {
-                Title        = "Select base storage folder for student files",
+                Title = "Select base storage folder for student files",
                 InitialDirectory = _selectedPath
             };
-            if (dlg.ShowDialog() == true)
+            if (dlg.ShowDialog() == true) { _selectedPath = dlg.FolderName; UpdateDisplay(); }
+        }
+
+        private void BtnBrowseMl_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFolderDialog
             {
-                _selectedPath = dlg.FolderName;
-                UpdateDisplay();
-            }
+                Title = "Select storage folder for mark list documents",
+                InitialDirectory = _selectedMlPath
+            };
+            if (dlg.ShowDialog() == true) { _selectedMlPath = dlg.FolderName; UpdateDisplay(); }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_selectedPath))
             {
-                ModernDialog.Show(Window.GetWindow(this), "Please select a folder first.", "Error", ModernDialog.DialogType.Error);
+                ModernDialog.Show(Window.GetWindow(this), "Please select a student files folder.", "Error", ModernDialog.DialogType.Error);
                 return;
             }
 
-            var settings = AppSettings.Current;
-            settings.StorageBasePath = _selectedPath;
-            settings.Save();
+            var s = AppSettings.Current;
+            s.StorageBasePath   = _selectedPath;
+            s.MarkListBasePath  = _selectedMlPath;
+            s.Save();
 
-            Directory.CreateDirectory(settings.PhotosPath);
-            Directory.CreateDirectory(settings.AttachmentsPath);
+            Directory.CreateDirectory(s.PhotosPath);
+            Directory.CreateDirectory(s.AttachmentsPath);
+            if (!string.IsNullOrWhiteSpace(_selectedMlPath))
+                Directory.CreateDirectory(s.MarkListsPath);
 
             ModernDialog.Show(Window.GetWindow(this),
-                $"Storage path saved!\n\nPhotos: {settings.PhotosPath}\nAttachments: {settings.AttachmentsPath}",
+                $"Configuration saved!\n\nPhotos: {s.PhotosPath}\nAttachments: {s.AttachmentsPath}\nMark Lists: {s.MarkListsPath}",
                 "Saved", ModernDialog.DialogType.Success);
         }
     }

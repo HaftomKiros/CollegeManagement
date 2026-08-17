@@ -13,15 +13,45 @@ namespace CollegeManagementWPF.Views
         private string _selSid = "", _selLvl = "", _selAy = "", _selMo = "";
         private DBConnect _db = new DBConnect();
         private const string Q =
-            "SELECT student_id,level,academic_year,month,amount,cash_receipt_voucher,remark " +
-            "FROM ecc_dof_wukrostmarycollege.student_fee";
+            "SELECT sf.student_id, " +
+            "CONCAT(TRIM(sp.first_name),' ',TRIM(sp.father_name),' ',TRIM(sp.grand_father_name)) AS full_name, " +
+            "sf.level,sf.academic_year,sf.month,sf.amount,sf.cash_receipt_voucher,sf.remark " +
+            "FROM ecc_dof_wukrostmarycollege.student_fee sf " +
+            "LEFT JOIN (SELECT TRIM(student_id) AS student_id, dept_id, first_name, father_name, grand_father_name " +
+            "FROM ecc_dof_wukrostmarycollege.student_profile GROUP BY TRIM(student_id)) sp " +
+            "ON TRIM(sf.student_id)=sp.student_id";
 
         public StudentFeesPage()
         {
             InitializeComponent();
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
-            Loaded += async (s, e) => await Load(Q);
+            Loaded += async (s, e) =>
+            {
+                await LoadDepartments();
+                await Load(Q);
+            };
+        }
+
+        private async Task LoadDepartments()
+        {
+            try
+            {
+                var depts = await Task.Run(() =>
+                {
+                    var list = new System.Collections.Generic.List<string>();
+                    var conn = _db.GetConnection(); conn.Open();
+                    using var cmd = new MySqlCommand(
+                        "SELECT dept_id FROM ecc_dof_wukrostmarycollege.departments ORDER BY dept_id", conn);
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read()) list.Add(r[0]?.ToString() ?? "");
+                    conn.Close(); return list;
+                });
+                CmbFDeptID.Items.Clear();
+                foreach (var d in depts)
+                    CmbFDeptID.Items.Add(new ComboBoxItem { Content = d });
+            }
+            catch { }
         }
 
         private void ApplyTheme()
@@ -174,7 +204,7 @@ namespace CollegeManagementWPF.Views
         private async void TxtFilter_Changed(object s, TextChangedEventArgs e)
         {
             string t = TxtFilter.Text.Trim();
-            await Load(string.IsNullOrEmpty(t) ? Q : Q + $" WHERE student_id LIKE '%{t}%'");
+            await Load(string.IsNullOrEmpty(t) ? Q : Q + $" WHERE TRIM(sf.student_id) LIKE '%{t.Replace("'","''")}%' OR CONCAT(TRIM(sp.first_name),' ',TRIM(sp.father_name),' ',TRIM(sp.grand_father_name)) LIKE '%{t.Replace("'","''")}%'");
         }
 
         private async void BtnReset_Click(object s, RoutedEventArgs e) { TxtFilter.Text = ""; await Load(Q); }
@@ -190,32 +220,181 @@ namespace CollegeManagementWPF.Views
 
         private async void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
-            string sid = TxtFStudID.Text.Trim();
-            string lvl = (CmbFLevel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
-            string mo  = (CmbFMonth.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
-            string ay  = TxtFYear.Text.Trim();
+            string sid   = TxtFStudID.Text.Trim();
+            string dept  = (CmbFDeptID.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? CmbFDeptID.Text?.Trim() ?? "";
+            string lvl   = (CmbFLevel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            string mo    = (CmbFMonth.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            string ay    = TxtFYear.Text.Trim();
 
             if (!string.IsNullOrEmpty(sid))
-                await Load(Q + $" WHERE student_id='{sid}'");
-            else if (!string.IsNullOrEmpty(lvl) && !string.IsNullOrEmpty(ay))
-                await Load(Q + $" WHERE level='{lvl}' AND academic_year='{ay}'" +
-                    (string.IsNullOrEmpty(mo) ? "" : $" AND month='{mo}'"));
+            {
+                await Load(Q + $" WHERE TRIM(sf.student_id)='{sid.Replace("'","''")}'");
+            }
             else
-                Msg("Enter Student ID, or Level + Year to filter.", false);
+            {
+                var conditions = new System.Collections.Generic.List<string>();
+                if (!string.IsNullOrEmpty(dept)) conditions.Add($"sp.dept_id='{dept.Replace("'","''")}'");
+                if (!string.IsNullOrEmpty(ay))   conditions.Add($"sf.academic_year='{ay.Replace("'","''")}'");
+                if (!string.IsNullOrEmpty(lvl))  conditions.Add($"sf.level='{lvl.Replace("'","''")}'");
+                if (!string.IsNullOrEmpty(mo))   conditions.Add($"sf.month='{mo.Replace("'","''")}'");
+
+                if (conditions.Count == 0)
+                    await Load(Q);
+                else
+                    await Load(Q + " WHERE " + string.Join(" AND ", conditions));
+            }
         }
 
         private async void BtnFilterReset_Click(object sender, RoutedEventArgs e)
         {
             TxtFStudID.Text = TxtFYear.Text = "";
+            CmbFDeptID.SelectedIndex = -1; CmbFDeptID.Text = "";
             CmbFLevel.SelectedIndex = 0;
             CmbFMonth.SelectedIndex = 0;
             await Load(Q);
         }
 
-        private void BtnPrint_Click(object sender, RoutedEventArgs e)
+        private async void BtnPrint_Click(object sender, RoutedEventArgs e)
         {
-            var owner = Window.GetWindow(this);
-            ModernDialog.Show(owner, "Print not implemented.", "Info", ModernDialog.DialogType.Info);
+            if (Grid1.ItemsSource is not System.Data.DataView view || view.Count == 0)
+            { Msg("No data to export.", false); return; }
+
+            var saveDlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = $"StudentFees_{DateTime.Now:yyyyMMdd_HHmm}",
+                DefaultExt = ".pdf", Filter = "PDF File|*.pdf"
+            };
+            if (saveDlg.ShowDialog() != true) return;
+
+            if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
+            await Task.Delay(50);
+            try
+            {
+                string path = saveDlg.FileName;
+                string[] fields  = { "student_id","full_name","level","academic_year","month","amount","cash_receipt_voucher","remark" };
+                string[] headers = { "Student ID","Full Name","Level","Acad Year","Month","Amount","CRV","Remark" };
+
+                await Task.Run(() =>
+                {
+                    // Snapshot data
+                    var rows = new System.Collections.Generic.List<string[]>();
+                    foreach (System.Data.DataRowView drv in view)
+                        rows.Add(System.Array.ConvertAll(fields, f => { try { return drv[f]?.ToString() ?? ""; } catch { return ""; } }));
+
+                    // Build MigraDoc document
+                    var doc = new MigraDoc.DocumentObjectModel.Document();
+                    doc.Info.Title = "Student Fees List";
+
+                    var section = doc.AddSection();
+                    section.PageSetup.Orientation = MigraDoc.DocumentObjectModel.Orientation.Landscape;
+                    section.PageSetup.PageFormat   = MigraDoc.DocumentObjectModel.PageFormat.A4;
+                    section.PageSetup.TopMargin    = "1.5cm";
+                    section.PageSetup.BottomMargin = "1.5cm";
+                    section.PageSetup.LeftMargin   = "1.5cm";
+                    section.PageSetup.RightMargin  = "1.5cm";
+
+                    // Title
+                    var title = section.AddParagraph("Wukro St. Mary College");
+                    title.Format.Font.Size = 16; title.Format.Font.Bold = true;
+                    title.Format.Alignment = MigraDoc.DocumentObjectModel.ParagraphAlignment.Center;
+                    var sub = section.AddParagraph("Student Fees List");
+                    sub.Format.Font.Size = 12;
+                    sub.Format.Alignment = MigraDoc.DocumentObjectModel.ParagraphAlignment.Center;
+                    var date = section.AddParagraph($"Generated: {DateTime.Now:dd MMM yyyy  HH:mm}");
+                    date.Format.Font.Size = 8; date.Format.Font.Color = MigraDoc.DocumentObjectModel.Colors.Gray;
+                    date.Format.Alignment = MigraDoc.DocumentObjectModel.ParagraphAlignment.Center;
+                    date.Format.SpaceAfter = "6pt";
+
+                    // Table
+                    var table = section.AddTable();
+                    table.Borders.Width = 0.25;
+                    table.Borders.Color = MigraDoc.DocumentObjectModel.Colors.LightGray;
+
+                    double[] widths = { 3.0, 4.5, 1.0, 2.0, 2.0, 2.0, 2.5, 3.0 };
+                    foreach (var w in widths) { var col = table.AddColumn($"{w}cm"); col.Format.Alignment = MigraDoc.DocumentObjectModel.ParagraphAlignment.Left; }
+
+                    // Header row
+                    var hRow = table.AddRow();
+                    hRow.Shading.Color = new MigraDoc.DocumentObjectModel.Color(18, 52, 116);
+                    for (int c = 0; c < headers.Length; c++)
+                    {
+                        hRow.Cells[c].AddParagraph(headers[c]).Format.Font.Bold = true;
+                        hRow.Cells[c].Format.Font.Color = MigraDoc.DocumentObjectModel.Colors.White;
+                        hRow.Cells[c].Format.Font.Size = 8;
+                        hRow.Cells[c].VerticalAlignment = MigraDoc.DocumentObjectModel.Tables.VerticalAlignment.Center;
+                    }
+
+                    // Data rows
+                    bool alt = false;
+                    foreach (var cols in rows)
+                    {
+                        var row = table.AddRow();
+                        if (alt) row.Shading.Color = new MigraDoc.DocumentObjectModel.Color(245, 247, 250);
+                        alt = !alt;
+                        for (int c = 0; c < cols.Length; c++)
+                        {
+                            row.Cells[c].AddParagraph(cols[c]).Format.Font.Size = 8;
+                            row.Cells[c].VerticalAlignment = MigraDoc.DocumentObjectModel.Tables.VerticalAlignment.Center;
+                        }
+                    }
+
+                    // Render to PDF
+                    var renderer = new MigraDoc.Rendering.PdfDocumentRenderer { Document = doc };
+                    renderer.RenderDocument();
+                    renderer.PdfDocument.Save(path);
+                });
+
+                Msg($"PDF saved to:\n{path}", true);
+            }
+            catch (Exception ex) { Msg("PDF export failed: " + ex.Message, false); }
+            finally { if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed; }
+        }
+
+        private async void BtnExport_Click(object sender, RoutedEventArgs e)
+        {
+            if (Grid1.ItemsSource is not System.Data.DataView view || view.Count == 0)
+            { Msg("No data to export.", false); return; }
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = $"StudentFees_{DateTime.Now:yyyyMMdd_HHmm}",
+                DefaultExt = ".xlsx", Filter = "Excel Workbook|*.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
+            try
+            {
+                string path = dlg.FileName;
+                string[] fields  = { "student_id","full_name","level","academic_year","month","amount","cash_receipt_voucher","remark" };
+                string[] headers = { "Student ID","Full Name","Level","Academic Year","Month","Amount","CRV","Remark" };
+                await Task.Run(() =>
+                {
+                    using var wb = new ClosedXML.Excel.XLWorkbook();
+                    var ws = wb.Worksheets.Add("Fees");
+                    for (int c = 0; c < headers.Length; c++)
+                    {
+                        var cell = ws.Cell(1, c + 1);
+                        cell.Value = headers[c];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#1A3A6B");
+                        cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                    }
+                    int row = 2;
+                    foreach (System.Data.DataRowView drv in view)
+                    {
+                        for (int c = 0; c < fields.Length; c++)
+                        { try { ws.Cell(row, c + 1).Value = drv[fields[c]]?.ToString() ?? ""; } catch { } }
+                        row++;
+                    }
+                    ws.Columns().AdjustToContents();
+                    ws.SheetView.FreezeRows(1);
+                    wb.SaveAs(path);
+                });
+                Msg($"Exported {view.Count} records to:\n{path}", true);
+            }
+            catch (Exception ex) { Msg("Export failed: " + ex.Message, false); }
+            finally { if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed; }
         }
 
         private void Msg(string m, bool ok)

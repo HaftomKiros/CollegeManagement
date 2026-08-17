@@ -14,6 +14,10 @@ namespace CollegeManagementWPF
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "StMaryCollege", "students");
 
+        public string MarkListBasePath { get; set; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "StMaryCollege", "marklists");
+
         private static AppSettings? _instance;
         public static AppSettings Current => _instance ??= Load();
 
@@ -42,7 +46,8 @@ namespace CollegeManagementWPF
             catch { }
         }
 
-        public string PhotosPath    => Path.Combine(StorageBasePath, "photos");
+        public string PhotosPath      => Path.Combine(StorageBasePath, "photos");
         public string AttachmentsPath => Path.Combine(StorageBasePath, "attachments");
+        public string MarkListsPath   => MarkListBasePath;
     }
 }
