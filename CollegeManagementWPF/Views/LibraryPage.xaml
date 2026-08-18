@@ -74,7 +74,9 @@
                 <TextBlock Text="Stream ID" Style="{StaticResource FL}"/><TextBox x:Name="TxtFStream" Style="{StaticResource WI}" Margin="0,0,0,16"/>
                 <Border Height="1" Margin="0,0,0,12"><Border.Background><DynamicResource ResourceKey="RegInputBorder"/></Border.Background></Border>
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="Filter" Click="BtnFilter_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,8,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                    <Button Content="Filter" Click="BtnFilter_Click" Style="{StaticResource AB}" Height="32" Padding="14,0" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                    <Button Click="BtnExportPdf_Click" Style="{StaticResource AB}" Height="32" Padding="9,0" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#335577"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="White" VerticalAlignment="Center" Margin="0,0,3,0"/><TextBlock Text="PDF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="10" Foreground="White" VerticalAlignment="Center"/></StackPanel></Button>
+                    <Button Click="BtnExportExcel_Click" Style="{StaticResource AB}" Height="32" Padding="9,0" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#1A5A2A"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="White" VerticalAlignment="Center" Margin="0,0,3,0"/><TextBlock Text="Excel" FontFamily="Segoe UI" FontWeight="Bold" FontSize="10" Foreground="White" VerticalAlignment="Center"/></StackPanel></Button>
                     <Button Content="Reset" Click="BtnFilterReset_Click" Style="{StaticResource AB}" Height="32" Padding="12,0" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
                 </StackPanel>
             </StackPanel>

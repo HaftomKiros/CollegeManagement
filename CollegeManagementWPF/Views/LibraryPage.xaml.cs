@@ -142,21 +142,79 @@ namespace CollegeManagementWPF.Views
             } catch(Exception ex){Msg("Connection failed! "+ex.Message,false);}
         }
 
-        // Filter: by book_id alone OR title alone OR dept+stream (original algorithm)
+        // Filter: flexible - any combination
         private async void BtnFilter_Click(object sender, RoutedEventArgs e) {
-            string bid=TxtFBookID.Text.Trim(), ti=TxtFTitle.Text.Trim(), di=TxtFDept.Text.Trim(), si=TxtFStream.Text.Trim();
-            if(!string.IsNullOrEmpty(bid)&&string.IsNullOrEmpty(ti)&&string.IsNullOrEmpty(di))
-                await Load(Q+$" WHERE book_id='{bid}'");
-            else if(string.IsNullOrEmpty(bid)&&!string.IsNullOrEmpty(ti)&&string.IsNullOrEmpty(di))
-                await Load(Q+$" WHERE book_title='{ti}'");
-            else if(string.IsNullOrEmpty(bid)&&string.IsNullOrEmpty(ti)&&!string.IsNullOrEmpty(di)&&!string.IsNullOrEmpty(si))
-                await Load(Q+$" WHERE book_dept_id='{di}' AND book_stream_id='{si}'");
-            else Msg("Invalid search parameters!",false);
+            string bid=TxtFBookID.Text.Trim(), ti=TxtFTitle.Text.Trim(),
+                   di=TxtFDept.Text.Trim(), si=TxtFStream.Text.Trim();
+            var conditions = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(bid)) conditions.Add($"book_id='{bid.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(ti))  conditions.Add($"book_title LIKE '%{ti.Replace("'","''")}%'");
+            if (!string.IsNullOrEmpty(di))  conditions.Add($"book_dept_id='{di.Replace("'","''")}'");
+            if (!string.IsNullOrEmpty(si))  conditions.Add($"book_stream_id='{si.Replace("'","''")}'");
+            await Load(conditions.Count > 0 ? Q + " WHERE " + string.Join(" AND ", conditions) : Q);
         }
 
         private async void BtnFilterReset_Click(object sender, RoutedEventArgs e) { TxtFBookID.Text=TxtFTitle.Text=TxtFDept.Text=TxtFStream.Text=""; await Load(Q); }
         private void BtnClear_Click(object s, RoutedEventArgs e)=>Clear();
         private void Clear(){TxtBookID.Text=TxtTitle.Text=TxtDeptID.Text=TxtStreamID.Text=TxtLevelID.Text=TxtModCode.Text=TxtFilePath.Text="";_selKey="";}
         private void Msg(string m,bool ok){var o=Window.GetWindow(this);if(ok)ModernDialog.Show(o,m,"Success",ModernDialog.DialogType.Success);else ModernDialog.Show(o,m,"Error",ModernDialog.DialogType.Error);}
+
+        private async void BtnExportPdf_Click(object s, RoutedEventArgs e) => await ExportPdf();
+        private async void BtnExportExcel_Click(object s, RoutedEventArgs e) => await ExportExcel();
+
+        private async Task ExportPdf()
+        {
+            if(Grid1.ItemsSource is not System.Data.DataView view||view.Count==0){Msg("No data.",false);return;}
+            var dlg=new SaveFileDialog{FileName=$"Library_{DateTime.Now:yyyyMMdd}",DefaultExt=".pdf",Filter="PDF|*.pdf"};
+            if(dlg.ShowDialog()!=true)return;
+            if(LoadingOverlay!=null)LoadingOverlay.Visibility=Visibility.Visible;
+            await Task.Delay(50);
+            try{
+                string path=dlg.FileName;
+                string[] fields={"book_id","book_type","book_title","book_dept_id","book_stream_id","book_level_id","book_module_code"};
+                string[] headers={"Book ID","Type","Title","Dept","Stream","Level","Module"};
+                var rows=new System.Collections.Generic.List<string[]>();
+                foreach(System.Data.DataRowView drv in view)rows.Add(System.Array.ConvertAll(fields,f=>{try{return drv[f]?.ToString()??""; }catch{return "";}}));
+                await Task.Run(()=>{
+                    var doc=new MigraDoc.DocumentObjectModel.Document();var sec=doc.AddSection();
+                    sec.PageSetup.Orientation=MigraDoc.DocumentObjectModel.Orientation.Landscape;sec.PageSetup.PageFormat=MigraDoc.DocumentObjectModel.PageFormat.A4;
+                    sec.PageSetup.TopMargin=sec.PageSetup.BottomMargin=sec.PageSetup.LeftMargin=sec.PageSetup.RightMargin="1.5cm";
+                    var tp=sec.AddParagraph("Wukro St. Mary College");tp.Format.Font.Bold=true;tp.Format.Font.Size=14;tp.Format.Alignment=MigraDoc.DocumentObjectModel.ParagraphAlignment.Center;
+                    sec.AddParagraph("Library List").Format.Font.Size=11;
+                    var tbl=sec.AddTable();tbl.Borders.Width=0.25;tbl.Borders.Color=MigraDoc.DocumentObjectModel.Colors.LightGray;
+                    double[] ws2={2.5,3.0,7.0,2.0,2.5,2.0,3.0};foreach(var w in ws2)tbl.AddColumn($"{w}cm");
+                    var hRow=tbl.AddRow();hRow.Shading.Color=new MigraDoc.DocumentObjectModel.Color(18,52,116);
+                    for(int c=0;c<headers.Length;c++){hRow.Cells[c].AddParagraph(headers[c]).Format.Font.Bold=true;hRow.Cells[c].Format.Font.Color=MigraDoc.DocumentObjectModel.Colors.White;hRow.Cells[c].Format.Font.Size=8;}
+                    bool alt=false;
+                    foreach(var cols in rows){var row=tbl.AddRow();if(alt)row.Shading.Color=new MigraDoc.DocumentObjectModel.Color(245,247,250);alt=!alt;for(int c=0;c<cols.Length;c++)row.Cells[c].AddParagraph(cols[c]).Format.Font.Size=8;}
+                    var r=new MigraDoc.Rendering.PdfDocumentRenderer{Document=doc};r.RenderDocument();r.PdfDocument.Save(path);
+                });
+                Msg("PDF saved!",true);
+            }catch(Exception ex){Msg("PDF failed: "+ex.Message,false);}
+            finally{if(LoadingOverlay!=null)LoadingOverlay.Visibility=Visibility.Collapsed;}
+        }
+
+        private async Task ExportExcel()
+        {
+            if(Grid1.ItemsSource is not System.Data.DataView view||view.Count==0){Msg("No data.",false);return;}
+            var dlg=new SaveFileDialog{FileName=$"Library_{DateTime.Now:yyyyMMdd}",DefaultExt=".xlsx",Filter="Excel|*.xlsx"};
+            if(dlg.ShowDialog()!=true)return;
+            if(LoadingOverlay!=null)LoadingOverlay.Visibility=Visibility.Visible;
+            try{
+                string path=dlg.FileName;
+                string[] fields={"book_id","book_type","book_title","book_dept_id","book_stream_id","book_level_id","book_module_code"};
+                string[] headers={"Book ID","Type","Title","Dept","Stream","Level","Module"};
+                var snap=new System.Collections.Generic.List<string[]>();
+                foreach(System.Data.DataRowView drv in view)snap.Add(System.Array.ConvertAll(fields,f2=>{try{return drv[f2]?.ToString()??"";}catch{return "";}}));
+                await Task.Run(()=>{
+                    using var wb=new ClosedXML.Excel.XLWorkbook();var ws=wb.Worksheets.Add("Library");
+                    for(int c=0;c<headers.Length;c++){var cell=ws.Cell(1,c+1);cell.Value=headers[c];cell.Style.Font.Bold=true;cell.Style.Fill.BackgroundColor=ClosedXML.Excel.XLColor.FromHtml("#1A3A6B");cell.Style.Font.FontColor=ClosedXML.Excel.XLColor.White;}
+                    int row=2;foreach(var srow in snap){for(int c=0;c<srow.Length;c++)ws.Cell(row,c+1).Value=srow[c];row++;}
+                    ws.Columns().AdjustToContents();ws.SheetView.FreezeRows(1);wb.SaveAs(path);
+                });
+                Msg($"Exported {view.Count} records!",true);
+            }catch(Exception ex){Msg("Export failed: "+ex.Message,false);}
+            finally{if(LoadingOverlay!=null)LoadingOverlay.Visibility=Visibility.Collapsed;}
+        }
     }
 }

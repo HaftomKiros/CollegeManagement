@@ -66,7 +66,8 @@ namespace CollegeManagementWPF.Views
                 string.IsNullOrWhiteSpace(TxtLevel.Text)||string.IsNullOrWhiteSpace(TxtQualification.Text))
             { Msg("There is empty field(s). Please fill all fields!",false); return; }
             try {
-                bool dup = await Task.Run(() => { var c=_db.GetConnection(); c.Open(); var cmd=new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile WHERE employee_id=@k",c); cmd.Parameters.AddWithValue("@k",TxtEmpID.Text.Trim()); int n=Convert.ToInt32(cmd.ExecuteScalar()); c.Close(); return n>0; });
+                string eid2=TxtEmpID.Text.Trim();
+                bool dup = await Task.Run(() => { var c=_db.GetConnection(); c.Open(); var cmd=new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile WHERE employee_id=@k",c); cmd.Parameters.AddWithValue("@k",eid2); int n=Convert.ToInt32(cmd.ExecuteScalar()); c.Close(); return n>0; });
                 if(dup){Msg("There is already an employee with the same ID!",false);return;}
 
                 // Store file path (WPF uses file paths, not BLOB)
