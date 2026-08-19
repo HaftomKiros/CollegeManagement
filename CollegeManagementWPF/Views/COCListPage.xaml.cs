@@ -11,7 +11,14 @@ namespace CollegeManagementWPF.Views
     public partial class COCListPage : Page
     {
         private DBConnect _db = new DBConnect();
-        public COCListPage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); Loaded += async (s,e) => await LoadDepts(); }
+        public COCListPage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); ApplyPermissions(); Loaded += async (s,e) => await LoadDepts(); }
+
+        private void ApplyPermissions() {
+            if (SessionUser.IsSuperAdmin) return;
+            bool can = SessionUser.Has("report_coc_list");
+            BtnGenerate.Visibility = can ? Visibility.Visible : Visibility.Collapsed;
+            BtnPrint.Visibility    = can ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         private async Task LoadDepts()
         {

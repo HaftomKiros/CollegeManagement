@@ -24,6 +24,7 @@ namespace CollegeManagementWPF.Views
             InitializeComponent();
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
+            ApplyPermissions();
             Loaded += async (s, e) => await LoadDeptsAsync();
         }
 
@@ -34,6 +35,15 @@ namespace CollegeManagementWPF.Views
                 g1.Color = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E) : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9);
             if (FindName("PageBg2") is System.Windows.Media.GradientStop g2)
                 g2.Color = dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E) : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+        }
+
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+            bool can = SessionUser.Has("report_assessment_ml");
+            BtnGenerate.Visibility    = can ? Visibility.Visible : Visibility.Collapsed;
+            BtnPrint.Visibility       = can ? Visibility.Visible : Visibility.Collapsed;
+            BtnExportExcel.Visibility = can ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async Task LoadDeptsAsync()
@@ -363,17 +373,6 @@ namespace CollegeManagementWPF.Views
                         ws.Cell(row,1).Style.Font.Bold=bold;ws.Cell(row,1).Style.Font.FontSize=fs;
                         ws.Cell(row,1).Style.Alignment.Horizontal=ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
                         if(ul)ws.Cell(row,1).Style.Font.Underline=ClosedXML.Excel.XLFontUnderlineValues.Single;
-                    }
-                    // Helper: info row with bottom border (left half cols 1-4, right half cols 5-9)
-                    void InfoRow(int row,string leftText,bool leftBold,bool leftUl,string rightText,bool rightBold,bool rightUl,int rightFs=10){
-                        ws.Range(row,1,row,4).Merge();ws.Cell(row,1).Value=leftText;
-                        ws.Cell(row,1).Style.Font.Bold=leftBold;ws.Cell(row,1).Style.Font.FontSize=10;
-                        if(leftUl)ws.Cell(row,1).Style.Font.Underline=ClosedXML.Excel.XLFontUnderlineValues.Single;
-                        ws.Cell(row,1).Style.Border.BottomBorder=ClosedXML.Excel.XLBorderStyleValues.Thin;
-                        ws.Range(row,5,row,cols).Merge();ws.Cell(row,5).Value=rightText;
-                        ws.Cell(row,5).Style.Font.Bold=rightBold;ws.Cell(row,5).Style.Font.FontSize=rightFs;
-                        if(rightUl)ws.Cell(row,5).Style.Font.Underline=ClosedXML.Excel.XLFontUnderlineValues.Single;
-                        ws.Cell(row,5).Style.Border.BottomBorder=ClosedXML.Excel.XLBorderStyleValues.Thin;
                     }
                     // Title rows
                     MgAll(rn,"ECC-DoA  WUKRO ST.MARY COLLEGE",true,13);rn++;

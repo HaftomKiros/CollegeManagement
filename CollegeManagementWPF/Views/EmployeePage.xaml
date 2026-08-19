@@ -40,10 +40,10 @@
                 </UniformGrid>
             </Border>
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                <Button Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                <Button Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
-                <Button Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
-                <Button Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
+                <Button x:Name="BtnSave"   Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                <Button x:Name="BtnUpdate" Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
+                <Button x:Name="BtnDelete" Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
+                <Button x:Name="BtnClear"  Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
             </StackPanel>
             <Grid Grid.Row="4"><Border CornerRadius="10" BorderThickness="1" ClipToBounds="True"><Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush><Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
                 <DataGrid x:Name="Grid1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Background="Transparent" RowBackground="{DynamicResource TableRowBg}" AlternatingRowBackground="{DynamicResource TableRowBg}" BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource RegInputBorder}" ColumnHeaderHeight="34" RowHeight="30" FontSize="11.5" FontFamily="Segoe UI" Foreground="{DynamicResource TableRowFg}" SelectionChanged="Grid1_SelectionChanged">

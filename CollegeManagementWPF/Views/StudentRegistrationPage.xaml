@@ -255,11 +255,11 @@
 
                     <!-- Action buttons (Register/Update/Delete/Enroll/Clear) -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                        <Button Content="Register" Click="BtnRegister_Click" Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                        <Button Content="Update"   Click="BtnUpdate_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
-                        <Button Content="Delete"   Click="BtnDelete_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
-                        <Button Content="Enroll"   Click="BtnEnroll_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#8822CC"/></Button.Background></Button>
-                        <Button Content="Clear"    Click="BtnClear_Click"    Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
+                        <Button x:Name="BtnRegister" Content="Register" Click="BtnRegister_Click" Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                        <Button x:Name="BtnUpdate"   Content="Update"   Click="BtnUpdate_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
+                        <Button x:Name="BtnDelete"   Content="Delete"   Click="BtnDelete_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
+                        <Button x:Name="BtnEnroll"   Content="Enroll"   Click="BtnEnroll_Click"   Style="{StaticResource AB}" Margin="0,0,5,0"><Button.Background><SolidColorBrush Color="#8822CC"/></Button.Background></Button>
+                        <Button x:Name="BtnClear"    Content="Clear"    Click="BtnClear_Click"    Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
                     </StackPanel>
                     <Border x:Name="MsgBorder" CornerRadius="6" Padding="10,5" Visibility="Collapsed" Margin="0,4,0,0">
                         <TextBlock x:Name="TxtMsg" FontSize="11.5" FontFamily="Segoe UI" HorizontalAlignment="Center"/>

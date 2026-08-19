@@ -24,6 +24,7 @@ namespace CollegeManagementWPF.Views
             TxtPrac.PreviewTextInput += NumOnly;
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
+            ApplyPermissions();
             CmbModCode.GotFocus  += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
             CmbFDept.GotFocus    += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
             CmbFModule.GotFocus  += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
@@ -33,6 +34,26 @@ namespace CollegeManagementWPF.Views
                 await LoadModulesAsync();
                 await Load(BASE);
             };
+        }
+
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+
+            bool canView   = SessionUser.Has("marks_view");
+            bool canAdd    = SessionUser.Has("marks_add");
+            bool canUpdate = SessionUser.Has("marks_update");
+            bool canDelete = SessionUser.Has("marks_delete");
+            bool hasAny    = canView || canAdd || canUpdate || canDelete;
+
+            Grid1.Visibility             = canView   ? Visibility.Visible : Visibility.Collapsed;
+            BtnSave.Visibility           = canAdd    ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdate.Visibility         = canUpdate ? Visibility.Visible : Visibility.Collapsed;
+            BtnDelete.Visibility         = canDelete ? Visibility.Visible : Visibility.Collapsed;
+            // Attach Mark List: visible if the role has ANY marks permission
+            BtnAttachMarkList.Visibility = hasAny    ? Visibility.Visible : Visibility.Collapsed;
+            // Clear: useful only when save/update is possible
+            BtnClear.Visibility          = (canAdd || canUpdate) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         // Adds id column to student_mark if it doesn't already exist

@@ -43,11 +43,42 @@ namespace CollegeManagementWPF.Views
             TxtGpa12.PreviewTextInput += GpaField_PreviewTextInput;
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
+            ApplyPermissions();
             Loaded += async (s, e) =>
             {
                 await LoadDepartmentsAsync();
                 await LoadGridAsync(BASE_QUERY);
             };
+        }
+
+        /// <summary>
+        /// Show/hide buttons and table based on session permissions.
+        /// student_view  → show table (GridStudents)
+        /// student_register → show Register button
+        /// student_update   → show Update button
+        /// student_delete   → show Delete button
+        /// student_enroll   → show Enroll button
+        /// </summary>
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+
+            bool canView     = SessionUser.Has("student_view");
+            bool canRegister = SessionUser.Has("student_register");
+            bool canUpdate   = SessionUser.Has("student_update");
+            bool canDelete   = SessionUser.Has("student_delete");
+            bool canEnroll   = SessionUser.Has("student_enroll");
+
+            // Table only visible if user can view
+            GridStudents.Visibility = canView ? Visibility.Visible : Visibility.Collapsed;
+
+            // Individual action buttons
+            BtnRegister.Visibility = canRegister ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdate.Visibility   = canUpdate   ? Visibility.Visible : Visibility.Collapsed;
+            BtnDelete.Visibility   = canDelete   ? Visibility.Visible : Visibility.Collapsed;
+            BtnEnroll.Visibility   = canEnroll   ? Visibility.Visible : Visibility.Collapsed;
+            // Clear is only useful when action buttons are shown
+            BtnClear.Visibility    = (canRegister || canUpdate) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void ApplyTheme()

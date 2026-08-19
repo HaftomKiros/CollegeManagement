@@ -38,10 +38,10 @@
             </UniformGrid>
         </Border>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-            <Button Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-            <Button Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
-            <Button Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
-            <Button Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
+            <Button x:Name="BtnSave"   Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+            <Button x:Name="BtnUpdate" Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
+            <Button x:Name="BtnDelete" Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
+            <Button x:Name="BtnClear"  Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
         </StackPanel>
         <Border Grid.Row="2" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" BorderThickness="1">
             <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>

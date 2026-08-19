@@ -13,13 +13,6 @@
         <Style x:Key="FL" TargetType="TextBlock"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Margin" Value="0,0,0,3"/></Style>
         <Style x:Key="WI" TargetType="TextBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Height" Value="32"/><Setter Property="Padding" Value="8,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
         <Style x:Key="AB" TargetType="Button"><Setter Property="Height" Value="34"/><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Padding" Value="16,0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="8" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.65"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
-        <Style x:Key="CBStyle" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="11.5"/>
-            <Setter Property="Margin" Value="0,3,0,3"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
     </Page.Resources>
 
     <Grid Margin="16,10,16,10">
@@ -118,17 +111,16 @@
                 </Grid>
             </Border>
 
-            <!-- Permissions grid -->
+            <!-- Permissions panel (single, no tabs) -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <Border CornerRadius="12" Padding="20,16" BorderThickness="1">
                     <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
                     <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
                     <StackPanel x:Name="PermissionsPanel">
-                        <!-- Generated in code-behind -->
-                        <TextBlock x:Name="TxtPermHint" Text="&#xE946;  Select a role from the left to view and edit its permissions."
+                        <TextBlock x:Name="TxtPermHint"
+                                   Text="&#xE946;  Select a role from the left to view and edit its permissions."
                                    FontFamily="Segoe UI" FontSize="12" Foreground="{DynamicResource RegLabelFg}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
-                                   Margin="0,60,0,0"/>
+                                   HorizontalAlignment="Center" TextAlignment="Center" Margin="0,60,0,0"/>
                     </StackPanel>
                 </Border>
             </ScrollViewer>

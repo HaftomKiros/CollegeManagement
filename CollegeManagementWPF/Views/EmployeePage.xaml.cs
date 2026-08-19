@@ -19,12 +19,21 @@ namespace CollegeManagementWPF.Views
             "birth_date,employee_date,level,qualification_title,mobile_number " +
             "FROM ecc_dof_wukrostmarycollege.employee_profile";
 
-        public EmployeePage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); Loaded += async (s,e) => await Load(Q); }
+        public EmployeePage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); ApplyPermissions(); Loaded += async (s,e) => await Load(Q); }
 
         private void ApplyTheme() {
             bool dark = ThemeManager.IsDark;
             if (FindName("PageBg1") is System.Windows.Media.GradientStop g1) g1.Color = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E) : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9);
             if (FindName("PageBg2") is System.Windows.Media.GradientStop g2) g2.Color = dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E) : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+        }
+
+        private void ApplyPermissions() {
+            if (SessionUser.IsSuperAdmin) return;
+            Grid1.Visibility     = SessionUser.Has("emp_view")   ? Visibility.Visible : Visibility.Collapsed;
+            BtnSave.Visibility   = SessionUser.Has("emp_add")    ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdate.Visibility = SessionUser.Has("emp_update") ? Visibility.Visible : Visibility.Collapsed;
+            BtnDelete.Visibility = SessionUser.Has("emp_delete") ? Visibility.Visible : Visibility.Collapsed;
+            BtnClear.Visibility  = (SessionUser.Has("emp_add") || SessionUser.Has("emp_update")) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async Task Load(string q) {

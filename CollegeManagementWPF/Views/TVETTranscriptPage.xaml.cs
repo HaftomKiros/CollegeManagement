@@ -22,7 +22,16 @@ namespace CollegeManagementWPF.Views
         public TVETTranscriptPage()
         {
             InitializeComponent();
+            ApplyPermissions();
             Loaded += async (s, e) => await LoadStudentIdsAsync();
+        }
+
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+            bool canGenerate = SessionUser.Has("report_tvet_transcript");
+            BtnGenerate.Visibility = canGenerate ? Visibility.Visible : Visibility.Collapsed;
+            BtnPrint.Visibility    = canGenerate ? Visibility.Visible : Visibility.Collapsed;
         }
 
         // ── Load all student IDs into the searchable dropdown ────────────────

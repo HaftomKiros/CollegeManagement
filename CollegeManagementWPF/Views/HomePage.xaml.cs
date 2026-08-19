@@ -45,6 +45,119 @@ namespace CollegeManagementWPF.Views
             TxtPageSubTitle.Visibility = Visibility.Collapsed;
             ThemeManager.ThemeChanged += ApplyThemeToShell;
             ApplyThemeToShell();
+            ApplyPermissions();
+            ShowCurrentUser();
+        }
+
+        /// <summary>
+        /// Shows the logged-in user name and role badge in the sidebar header.
+        /// </summary>
+        private void ShowCurrentUser()
+        {
+            // Sidebar sub-header: "username  ·  RoleName"
+            if (FindName("TxtCollegeSub") is WpfTextBlock sub)
+                sub.Text = $"{SessionUser.Username}  ·  {SessionUser.RoleName}";
+
+            // Top-bar badge: show logged-in username
+            if (FindName("TxtAdminLabel") is WpfTextBlock badge)
+                badge.Text = string.IsNullOrEmpty(SessionUser.Username)
+                    ? "Administrator"
+                    : SessionUser.Username;
+        }
+
+        /// <summary>
+        /// Maps each nav button Tag to the SET of permission keys that control its visibility.
+        /// The nav item is visible if the user has ANY ONE of those keys.
+        /// Groups mirror the AllPerms groups in RolesPermissionsPage.
+        /// </summary>
+        private static readonly System.Collections.Generic.Dictionary<string, string[]> _tagToPermKeys =
+            new()
+        {
+            // Students section — shown if ANY student permission is granted
+            { "StudentRegistration", new[]{ "student_view","student_register","student_update","student_delete","student_enroll" } },
+            { "StudentMarks",        new[]{ "marks_view","marks_add","marks_update","marks_delete" } },
+            { "AssessmentRecords",   new[]{ "assess_view","assess_add","assess_update","assess_delete" } },
+            { "StudentFees",         new[]{ "fees_view","fees_add","fees_update","fees_delete" } },
+            { "DropoutStudents",     new[]{ "dropout_view","dropout_add","dropout_update","dropout_delete" } },
+            { "COCRecord",           new[]{ "coc_view","coc_add","coc_update","coc_delete" } },
+            // Departments section
+            { "Departments",         new[]{ "dept_view","dept_add","dept_update","dept_delete" } },
+            { "Streams",             new[]{ "stream_view","stream_add","stream_update","stream_delete" } },
+            { "Levels",              new[]{ "level_view","level_add","level_update","level_delete" } },
+            { "Courses",             new[]{ "course_view","course_add","course_update","course_delete" } },
+            // Employees
+            { "RegisterEmployee",    new[]{ "emp_view","emp_add","emp_update","emp_delete" } },
+            // Alumni
+            { "RegisterAlumni",      new[]{ "alumni_view","alumni_add","alumni_update","alumni_delete" } },
+            // Library
+            { "Library",             new[]{ "lib_view","lib_add","lib_update","lib_delete" } },
+            // Reports — shown if ANY report permission is granted
+            { "TVETTranscript",           new[]{ "report_tvet_transcript" } },
+            { "TVETAssessmentTranscript", new[]{ "report_tvet_assessment" } },
+            { "MarkList",                 new[]{ "report_marklist" } },
+            { "AssessmentMarkList",       new[]{ "report_assessment_ml" } },
+            { "AttendanceSheet",          new[]{ "report_attendance" } },
+            { "COCList",                  new[]{ "report_coc_list" } },
+            // Accounts
+            { "ManageAccounts",      new[]{ "account_manage" } },
+            { "RolesPermissions",    new[]{ "account_roles" } },
+        };
+
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+
+            // Maps section button name → the separator Rectangle that precedes it
+            var sectionToSep = new System.Collections.Generic.Dictionary<string,string>
+            {
+                {"BtnStudents","SepStudents"},{"BtnDepts","SepDepts"},{"BtnEmp","SepEmp"},
+                {"BtnAlumni","SepAlumni"},{"BtnLib","SepLib"},{"BtnReports","SepReports"},
+                {"BtnAdmins","SepAdmins"},{"BtnConfig","SepAdmins"},
+            };
+
+            var panelNames = new[] { "PanStudents","PanDepts","PanEmp","PanAlumni","PanLib","PanReports","PanAdmins","PanConfig" };
+            var sectionBtnForPanel = new System.Collections.Generic.Dictionary<string,string>
+            {
+                {"PanStudents","BtnStudents"},{"PanDepts","BtnDepts"},{"PanEmp","BtnEmp"},
+                {"PanAlumni","BtnAlumni"},{"PanLib","BtnLib"},{"PanReports","BtnReports"},
+                {"PanAdmins","BtnAdmins"},{"PanConfig","BtnConfig"},
+            };
+
+            foreach (var panelName in panelNames)
+            {
+                if (FindName(panelName) is not StackPanel pan) continue;
+                int visible = 0;
+                foreach (var child in pan.Children)
+                {
+                    if (child is not WpfButton btn) continue;
+                    string tag2 = btn.Tag?.ToString() ?? "";
+                    if (_tagToPermKeys.TryGetValue(tag2, out string[]? keys))
+                    {
+                        bool allowed = false;
+                        foreach (var k in keys) if (SessionUser.Has(k)) { allowed = true; break; }
+                        btn.Visibility = allowed ? Visibility.Visible : Visibility.Collapsed;
+                        if (allowed) visible++;
+                    }
+                    else
+                    {
+                        visible++;
+                    }
+                }
+
+                bool sectionVisible = visible > 0;
+
+                // Hide/show the section header button
+                if (sectionBtnForPanel.TryGetValue(panelName, out string? secBtnName))
+                {
+                    if (FindName(secBtnName) is WpfButton sb2)
+                        sb2.Visibility = sectionVisible ? Visibility.Visible : Visibility.Collapsed;
+
+                    // Hide the separator line before this section too
+                    if (!sectionVisible && sectionToSep.TryGetValue(secBtnName, out string? sepName))
+                        if (FindName(sepName) is System.Windows.Shapes.Rectangle sep)
+                            sep.Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private void ApplyThemeToShell()
@@ -360,6 +473,7 @@ namespace CollegeManagementWPF.Views
 
         private void BtnSignOut_Click(object sender, RoutedEventArgs e)
         {
+            SessionUser.Clear();
             new LoginWindow().Show();
             this.Close();
         }

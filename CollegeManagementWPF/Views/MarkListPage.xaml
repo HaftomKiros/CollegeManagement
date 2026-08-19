@@ -159,8 +159,8 @@
                         </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                        <Button Click="BtnGenerate_Click" Style="{StaticResource AB}" Margin="0,0,10,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Generate" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
-                        <Button Click="BtnPrint_Click" Style="{StaticResource AB}"><Button.Background><SolidColorBrush Color="#335577"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Print" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="BtnGenerate" Click="BtnGenerate_Click" Style="{StaticResource AB}" Margin="0,0,10,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Generate" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button x:Name="BtnPrint" Click="BtnPrint_Click" Style="{StaticResource AB}"><Button.Background><SolidColorBrush Color="#335577"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Print" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
                     </StackPanel>
                 </StackPanel>
             </Border>

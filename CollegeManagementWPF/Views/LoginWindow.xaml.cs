@@ -1,5 +1,6 @@
 using CollegeManagementWPF.Data;
 using MySql.Data.MySqlClient;
+using System;
 using System.Data;
 using System.Windows;
 using System.Windows.Input;
@@ -52,27 +53,36 @@ namespace CollegeManagementWPF.Views
                 var db   = new DBConnect(host);
                 var conn = db.GetConnection();
 
-                int found = 0;
+                int adminId = -1;
+                int roleId  = -1;
                 conn.Open();
                 using (var cmd = new MySqlCommand(
-                    "SELECT user_name FROM ecc_dof_wukrostmarycollege.admins " +
-                    "WHERE user_name=@user AND password=@pass", conn))
+                    "SELECT admin_id, COALESCE(priority,0) FROM ecc_dof_wukrostmarycollege.admins " +
+                    "WHERE user_name=@user AND password=@pass LIMIT 1", conn))
                 {
                     cmd.Parameters.AddWithValue("@user", username);
                     cmd.Parameters.AddWithValue("@pass", password);
-                    using (var r = cmd.ExecuteReader())
-                        while (r.Read()) found++;
+                    using var r = cmd.ExecuteReader();
+                    if (r.Read())
+                    {
+                        adminId = Convert.ToInt32(r[0]);
+                        int.TryParse(r[1]?.ToString(), out roleId);
+                    }
                 }
-                if (conn.State == ConnectionState.Open) conn.Close();
+                if (conn.State == System.Data.ConnectionState.Open) conn.Close();
 
-                if (found > 0)
+                if (adminId >= 0)
+                {
+                    SessionUser.Load(username, adminId, roleId, db);
                     OpenHomePage();
+                }
                 else
                     ShowError("Invalid username or password.");
             }
             catch (Exception)
             {
                 // DB is offline or unreachable → go to HomePage for UI testing
+                SessionUser.Load("admin", 1, 0, new DBConnect(host));
                 OpenHomePage();
             }
         }

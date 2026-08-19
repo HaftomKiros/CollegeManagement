@@ -26,6 +26,7 @@ namespace CollegeManagementWPF.Views
             InitializeComponent();
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
+            ApplyPermissions();
             Loaded += async (s, e) =>
             {
                 await LoadDepartments();
@@ -65,6 +66,16 @@ namespace CollegeManagementWPF.Views
                 g2.Color = dark
                     ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E)
                     : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+        }
+
+        private void ApplyPermissions()
+        {
+            if (SessionUser.IsSuperAdmin) return;
+            Grid1.Visibility     = SessionUser.Has("fees_view")   ? Visibility.Visible : Visibility.Collapsed;
+            BtnSave.Visibility   = SessionUser.Has("fees_add")    ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdate.Visibility = SessionUser.Has("fees_update") ? Visibility.Visible : Visibility.Collapsed;
+            BtnDelete.Visibility = SessionUser.Has("fees_delete") ? Visibility.Visible : Visibility.Collapsed;
+            BtnClear.Visibility  = (SessionUser.Has("fees_add") || SessionUser.Has("fees_update")) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async Task Load(string q)

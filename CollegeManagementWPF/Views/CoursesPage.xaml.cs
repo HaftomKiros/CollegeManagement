@@ -14,7 +14,7 @@ namespace CollegeManagementWPF.Views
         private DBConnect _db = new DBConnect();
         private const string Q = "SELECT level_id,module_code,unit_of_competence_title,total_hours FROM ecc_dof_wukrostmarycollege.courses";
 
-        public CoursesPage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); Loaded += async (s,e) => { await LoadLevelIds(); await Load(Q); }; }
+        public CoursesPage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); ApplyPermissions(); Loaded += async (s,e) => { await LoadLevelIds(); await Load(Q); }; }
 
         private async Task LoadLevelIds()
         {
@@ -29,6 +29,15 @@ namespace CollegeManagementWPF.Views
             bool dark = ThemeManager.IsDark;
             if (FindName("PageBg1") is System.Windows.Media.GradientStop g1) g1.Color = dark ? System.Windows.Media.Color.FromRgb(0x0D,0x1B,0x3E) : System.Windows.Media.Color.FromRgb(0xF1,0xF5,0xF9);
             if (FindName("PageBg2") is System.Windows.Media.GradientStop g2) g2.Color = dark ? System.Windows.Media.Color.FromRgb(0x07,0x10,0x1E) : System.Windows.Media.Color.FromRgb(0xE2,0xE8,0xF0);
+        }
+
+        private void ApplyPermissions() {
+            if (SessionUser.IsSuperAdmin) return;
+            Grid1.Visibility     = SessionUser.Has("course_view")   ? Visibility.Visible : Visibility.Collapsed;
+            BtnSave.Visibility   = SessionUser.Has("course_add")    ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdate.Visibility = SessionUser.Has("course_update") ? Visibility.Visible : Visibility.Collapsed;
+            BtnDelete.Visibility = SessionUser.Has("course_delete") ? Visibility.Visible : Visibility.Collapsed;
+            BtnClear.Visibility  = (SessionUser.Has("course_add") || SessionUser.Has("course_update")) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async Task Load(string q) {

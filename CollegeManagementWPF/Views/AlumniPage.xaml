@@ -34,10 +34,10 @@
                 </UniformGrid>
             </Border>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                <Button Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
-                <Button Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
-                <Button Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
-                <Button Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
+                <Button x:Name="BtnSave"   Content="Save"   Click="BtnSave_Click"   Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background></Button>
+                <Button x:Name="BtnUpdate" Content="Update" Click="BtnUpdate_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#1A9944"/></Button.Background></Button>
+                <Button x:Name="BtnDelete" Content="Delete" Click="BtnDelete_Click" Style="{StaticResource AB}" Margin="0,0,6,0"><Button.Background><SolidColorBrush Color="#CC2222"/></Button.Background></Button>
+                <Button x:Name="BtnClear"  Content="Clear"  Click="BtnClear_Click"  Style="{StaticResource AB}" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button>
             </StackPanel>
             <Border Grid.Row="3" CornerRadius="8" Padding="12,8" Margin="0,0,0,8" BorderThickness="1"><Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush><Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
                 <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#4A9AEE" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Filter:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource RegLabelFg}" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBox x:Name="TxtFilter" Style="{StaticResource WI}" Width="200" Height="30" TextChanged="TxtFilter_Changed"/><Button Content="Reset" Click="BtnReset_Click" Style="{StaticResource AB}" Height="30" Padding="12,0" Margin="6,0,0,0" Foreground="#5577AA"><Button.Background><SolidColorBrush Color="Transparent"/></Button.Background></Button></StackPanel>
