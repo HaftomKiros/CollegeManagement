@@ -612,8 +612,7 @@ namespace CollegeManagementWPF.Views
 
                     // ── Build PDF ─────────────────────────────────────────────
                     var doc = new MigraDoc.DocumentObjectModel.Document();
-                    doc.Styles["Normal"].Font.Name = "Times New Roman";
-                    doc.Styles["Normal"].Font.Size = 10;
+                    if (doc.Styles["Normal"] is { } ns4) { ns4.Font.Name = "Times New Roman"; ns4.Font.Size = 10; }
 
                     var sec = doc.AddSection();
                     sec.PageSetup.PageFormat   = MigraDoc.DocumentObjectModel.PageFormat.A4;

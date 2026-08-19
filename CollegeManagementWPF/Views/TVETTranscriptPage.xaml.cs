@@ -366,8 +366,8 @@ namespace CollegeManagementWPF.Views
                 {
                     var doc = new MigraDoc.DocumentObjectModel.Document();
                     // Set Times New Roman as the document-wide default font
-                    doc.Styles["Normal"].Font.Name = "Times New Roman";
-                    doc.Styles["Heading1"].Font.Name = "Times New Roman";
+                    if (doc.Styles["Normal"]   is { } ns2) ns2.Font.Name = "Times New Roman";
+                    if (doc.Styles["Heading1"] is { } ns3) ns3.Font.Name = "Times New Roman";
                     var sec = doc.AddSection();
                     sec.PageSetup.PageFormat  = MigraDoc.DocumentObjectModel.PageFormat.A4;
                     sec.PageSetup.Orientation = MigraDoc.DocumentObjectModel.Orientation.Portrait;

@@ -23,11 +23,24 @@ namespace CollegeManagementWPF.Views
 
         private async void CmbDeptID_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string dept = TxtDeptID.Text?.Trim() ?? (TxtDeptID.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+            // Always use SelectedItem in SelectionChanged — Text may lag behind
+            string dept = (TxtDeptID.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim()
+                       ?? TxtDeptID.Text?.Trim() ?? "";
             if (string.IsNullOrEmpty(dept)) return;
             try {
-                var list = await Task.Run(() => { var r=new System.Collections.Generic.List<string>(); var c=_db.GetConnection(); c.Open(); using var cmd=new MySqlCommand("SELECT stream_id FROM ecc_dof_wukrostmarycollege.streams WHERE dept_id=@d ORDER BY stream_id",c); cmd.Parameters.AddWithValue("@d",dept); using var rd=cmd.ExecuteReader(); while(rd.Read()) r.Add(rd[0]?.ToString()??""); c.Close(); return r; });
-                TxtStreamID.Items.Clear(); foreach(var s in list) TxtStreamID.Items.Add(new ComboBoxItem{Content=s});
+                var list = await Task.Run(() => {
+                    var r = new System.Collections.Generic.List<string>();
+                    var c = _db.GetConnection(); c.Open();
+                    using var cmd = new MySqlCommand(
+                        "SELECT stream_id FROM ecc_dof_wukrostmarycollege.streams WHERE dept_id=@d ORDER BY stream_id", c);
+                    cmd.Parameters.AddWithValue("@d", dept);
+                    using var rd = cmd.ExecuteReader();
+                    while (rd.Read()) r.Add(rd[0]?.ToString() ?? "");
+                    c.Close(); return r;
+                });
+                TxtStreamID.Items.Clear();
+                foreach (var s in list) TxtStreamID.Items.Add(new ComboBoxItem { Content = s });
+                if (TxtStreamID.Items.Count > 0) TxtStreamID.SelectedIndex = 0;
             } catch {}
         }
 
@@ -57,32 +70,31 @@ namespace CollegeManagementWPF.Views
             try
             {
                 var dt = new DataTable();
-                // Filter coc by level + assessment_date; join student_profile for name/gender/mobile
-                // dept/stream filter goes through student_profile (admission_type also there)
+                // 1. Start from COC table, filter by level + assessment_date
+                // 2. Join student_profile to filter by dept, stream, admission_type, academic year
                 string sql =
-                    "SELECT c.student_id, " +
-                    "IFNULL(CONCAT(TRIM(sp.first_name),' ',TRIM(sp.father_name),' ',TRIM(sp.grand_father_name)),'') AS full_name, " +
-                    "IFNULL(sp.gender,'') AS gender, IFNULL(sp.mobile_number1,'') AS mobile_number1, " +
+                    "SELECT DISTINCT c.student_id, " +
+                    "CONCAT(TRIM(sp.first_name),' ',TRIM(sp.father_name),' ',TRIM(sp.grand_father_name)) AS full_name, " +
+                    "sp.gender, sp.mobile_number1, " +
                     "c.level, c.assessment_date, c.assessor_name, c.supervisor_name, c.competence, c.coc_level_id " +
                     "FROM ecc_dof_wukrostmarycollege.coc c " +
-                    "LEFT JOIN ecc_dof_wukrostmarycollege.student_profile sp " +
+                    "INNER JOIN ecc_dof_wukrostmarycollege.student_profile sp " +
                     "ON TRIM(c.student_id)=TRIM(sp.student_id) AND c.level=sp.level " +
                     "WHERE c.level=@l";
 
-                // dept/stream filters are optional — only apply if student_profile join finds them
-                if (!string.IsNullOrEmpty(di)) sql += " AND (sp.dept_id=@d OR sp.dept_id IS NULL)";
-                if (!string.IsNullOrEmpty(si)) sql += " AND (sp.stream_id=@s OR sp.stream_id IS NULL)";
-                if (!string.IsNullOrEmpty(at) && at != "(All)") sql += " AND (sp.admission_type=@at OR sp.admission_type IS NULL)";
                 if (!string.IsNullOrEmpty(ad)) sql += " AND c.assessment_date LIKE @ad";
-                if (!string.IsNullOrEmpty(ay)) sql += " AND (sp.admission_date LIKE @ay OR sp.admission_date IS NULL)";
-                sql += " ORDER BY full_name";
+                if (!string.IsNullOrEmpty(di)) sql += " AND sp.dept_id=@d";
+                if (!string.IsNullOrEmpty(si)) sql += " AND sp.stream_id=@s";
+                if (!string.IsNullOrEmpty(at)) sql += " AND sp.admission_type=@at";
+                if (!string.IsNullOrEmpty(ay)) sql += " AND sp.admission_date LIKE @ay";
+                sql += " ORDER BY sp.first_name, sp.father_name";
 
                 var cmd = new MySqlCommand(sql, _db.GetConnection());
                 cmd.Parameters.AddWithValue("@l", lv);
+                if (!string.IsNullOrEmpty(ad)) cmd.Parameters.AddWithValue("@ad", $"%{ad}%");
                 if (!string.IsNullOrEmpty(di)) cmd.Parameters.AddWithValue("@d",  di);
                 if (!string.IsNullOrEmpty(si)) cmd.Parameters.AddWithValue("@s",  si);
-                if (!string.IsNullOrEmpty(at) && at != "(All)") cmd.Parameters.AddWithValue("@at", at);
-                if (!string.IsNullOrEmpty(ad)) cmd.Parameters.AddWithValue("@ad", $"%{ad}%");
+                if (!string.IsNullOrEmpty(at)) cmd.Parameters.AddWithValue("@at", at);
                 if (!string.IsNullOrEmpty(ay)) cmd.Parameters.AddWithValue("@ay", $"%{ay}%");
 
                 await Task.Run(() => new MySqlDataAdapter(cmd).Fill(dt));
@@ -117,7 +129,7 @@ namespace CollegeManagementWPF.Views
             string level    = (CmbLevel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
             string assessDate = TxtAssessDate.Text.Trim();
 
-            var rows = new System.Collections.Generic.List<(string Name, string Sex, string Mobile)>();
+            var rows = new System.Collections.Generic.List<(string Name, string Sex, string Mobile, string CerId)>();
             foreach (System.Data.DataRowView drv in view)
             {
                 string name = "";
@@ -125,7 +137,8 @@ namespace CollegeManagementWPF.Views
                 if (string.IsNullOrEmpty(name)) try { name = drv["student_id"]?.ToString() ?? ""; } catch { }
                 string sex    = ""; try { sex    = drv["gender"]?.ToString()?.Trim() ?? ""; } catch { }
                 string mobile = ""; try { mobile = drv["mobile_number1"]?.ToString()?.Trim() ?? ""; } catch { }
-                rows.Add((name, sex, mobile));
+                string cerId  = ""; try { cerId  = drv["coc_level_id"]?.ToString()?.Trim() ?? ""; } catch { }
+                rows.Add((name, sex, mobile, cerId));
             }
 
             try
@@ -143,8 +156,8 @@ namespace CollegeManagementWPF.Views
                     conn.Close();
 
                     var doc = new MigraDoc.DocumentObjectModel.Document();
-                    doc.Styles["Normal"].Font.Name = "Times New Roman";
-                    doc.Styles["Normal"].Font.Size = 10;
+                    if (doc.Styles["Normal"] is { } normalStyle)
+                    { normalStyle.Font.Name = "Times New Roman"; normalStyle.Font.Size = 10; }
 
                     var sec = doc.AddSection();
                     sec.PageSetup.PageFormat   = MigraDoc.DocumentObjectModel.PageFormat.A4;
@@ -211,7 +224,7 @@ namespace CollegeManagementWPF.Views
                     hdr.HeadingFormat = true;
                     hdr.Format.Font.Bold = true;
                     hdr.VerticalAlignment = MigraDoc.DocumentObjectModel.Tables.VerticalAlignment.Center;
-                    string[] hdrs = { "No", "Full Name", "Sex", "COC FEE", "Mobile Number", "Signature" };
+                    string[] hdrs = { "No", "Full Name", "Sex", "CER ID", "Mobile Number", "Signature" };
                     for (int c = 0; c < hdrs.Length; c++)
                     {
                         hdr.Cells[c].AddParagraph(hdrs[c]);
@@ -220,7 +233,7 @@ namespace CollegeManagementWPF.Views
 
                     for (int i = 0; i < rows.Count; i++)
                     {
-                        var (name, sex, mobile) = rows[i];
+                        var (name, sex, mobile, cerId) = rows[i];
                         var row = tbl.AddRow();
                         row.VerticalAlignment = MigraDoc.DocumentObjectModel.Tables.VerticalAlignment.Center;
                         row.Cells[0].AddParagraph((i + 1).ToString());
@@ -228,7 +241,7 @@ namespace CollegeManagementWPF.Views
                         row.Cells[1].AddParagraph(name);
                         row.Cells[2].AddParagraph(sex.Length > 0 ? sex[0].ToString().ToUpper() : "");
                         row.Cells[2].Format.Alignment = MigraDoc.DocumentObjectModel.ParagraphAlignment.Center;
-                        row.Cells[3].AddParagraph("");  // COC FEE — blank for manual fill
+                        row.Cells[3].AddParagraph(cerId);
                         row.Cells[4].AddParagraph(mobile);
                         row.Cells[5].AddParagraph("");  // Signature — blank
                     }

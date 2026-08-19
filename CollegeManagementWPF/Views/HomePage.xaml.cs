@@ -273,7 +273,7 @@ namespace CollegeManagementWPF.Views
             {
                 "StudentRegistration" => "Student Registration",
                 "StudentMarks"        => "Student Marks",
-                "StudentFees"         => "Student Fees",
+                "GradeConfig"         => "Grade Configuration",
                 "DropoutStudents"     => "Dropout Students",
                 "COCRecord"           => "COC Record",
                 _                     => tag
@@ -284,6 +284,8 @@ namespace CollegeManagementWPF.Views
             {
                 "StudentRegistration" => "Register, Update, Enroll, Delete Student",
                 "StudentMarks"        => "Add, Update, Delete Student Marks",
+                "AssessmentRecords"   => "Add, Update Student Assessment Records (New Curriculum)",
+                "GradeConfig"         => "Configure grade scale: Raw Mark ranges, Letter Grades and Grade Points",
                 "StudentFees"         => "Record, Update, Delete Student Fees",
                 "DropoutStudents"     => "Manage Dropout Student Records",
                 "COCRecord"           => "Manage COC Records",
@@ -316,6 +318,7 @@ namespace CollegeManagementWPF.Views
                 "Dashboard"           => (object)new DashboardPage(),
                 "StudentRegistration" => new StudentRegistrationPage(),
                 "StudentMarks"        => new StudentMarksPage(),
+                "AssessmentRecords"   => new AssessmentRecordsPage(),
                 "StudentFees"         => new StudentFeesPage(),
                 "DropoutStudents"     => new DropoutPage(),
                 "COCRecord"           => new COCRecordPage(),
@@ -329,6 +332,7 @@ namespace CollegeManagementWPF.Views
                 "ManageAccounts"      => new ManageAccountsPage(),
                 "RolesPermissions"    => new RolesPermissionsPage(),
                 "AssignPath"         => new AssignPathPage(),
+                "GradeConfig"        => new GradeConfigPage(),
                 "Migration"           => new MigrationPage(),
                 _                     => new PlaceholderPage(TxtPageTitle.Text)
             });

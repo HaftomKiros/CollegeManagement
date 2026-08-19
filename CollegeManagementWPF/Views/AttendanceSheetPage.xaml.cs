@@ -265,8 +265,7 @@ namespace CollegeManagementWPF.Views
                     conn.Close();
 
                     var doc = new MigraDoc.DocumentObjectModel.Document();
-                    doc.Styles["Normal"].Font.Name = "Times New Roman";
-                    doc.Styles["Normal"].Font.Size = 9;
+                    if (doc.Styles["Normal"] is { } ns1) { ns1.Font.Name = "Times New Roman"; ns1.Font.Size = 9; }
 
                     var sec = doc.AddSection();
                     sec.PageSetup.PageFormat   = MigraDoc.DocumentObjectModel.PageFormat.A4;

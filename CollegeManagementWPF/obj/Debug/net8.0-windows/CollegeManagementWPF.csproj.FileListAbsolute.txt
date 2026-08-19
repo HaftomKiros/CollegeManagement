@@ -55,7 +55,6 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\DropoutPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\StudentFeesPage.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\StudentMarksPage.baml
-C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\CollegeManagementWPF.sourcelink.json
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AttachMarkListWindow.baml
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AttachMarkListWindow.g.cs
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\COCRecordPage.g.cs
@@ -114,3 +113,7 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\de\MigraDoc.RtfRendering.resources.dll
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\de\PdfSharp.Charting.resources.dll
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\de\PdfSharp.resources.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AssessmentRecordsPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\AssessmentRecordsPage.g.cs
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\GradeConfigPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\GradeConfigPage.g.cs

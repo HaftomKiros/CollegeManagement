@@ -231,15 +231,15 @@
                             <TextBox x:Name="TxtAcadYear" Style="{StaticResource WI}"/>
                         </StackPanel>
                         <StackPanel Margin="0,0,8,0">
-                            <TextBlock Text="Knowledge Score" Style="{StaticResource FL}"/>
+                            <TextBlock Text="Institutional Assessment (70%)" Style="{StaticResource FL}"/>
                             <TextBox x:Name="TxtKnow" Style="{StaticResource WI}" TextChanged="ScoreChanged"/>
                         </StackPanel>
                         <StackPanel Margin="0,0,8,0">
-                            <TextBlock Text="Practical Score" Style="{StaticResource FL}"/>
+                            <TextBlock Text="Industry Assessment (30%)" Style="{StaticResource FL}"/>
                             <TextBox x:Name="TxtPrac" Style="{StaticResource WI}" TextChanged="ScoreChanged"/>
                         </StackPanel>
                         <StackPanel>
-                            <TextBlock Text="Competence" Style="{StaticResource FL}"/>
+                            <TextBlock Text="Grade" Style="{StaticResource FL}"/>
                             <TextBox x:Name="TxtCompetence" Style="{StaticResource WI}" IsReadOnly="True"/>
                         </StackPanel>
                     </UniformGrid>
