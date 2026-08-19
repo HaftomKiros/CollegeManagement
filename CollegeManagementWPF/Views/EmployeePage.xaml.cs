@@ -124,16 +124,37 @@ namespace CollegeManagementWPF.Views
             } catch(Exception ex){Msg("Connection failed! "+ex.Message,false);}
         }
 
-        private async void BtnFilter_Click(object sender, RoutedEventArgs e) {
-            string eid=TxtFEmpID.Text.Trim(), dept=TxtFDept.Text.Trim(), lvl=TxtFLevel.Text.Trim();
-            if(!string.IsNullOrEmpty(eid)&&string.IsNullOrEmpty(dept))
-                await Load(Q+$" WHERE employee_id='{eid}'");
-            else if(string.IsNullOrEmpty(eid)&&!string.IsNullOrEmpty(dept))
-                await Load(Q+$" WHERE department_id='{dept}' AND level='{lvl}'");
-            else Msg("Invalid filter parameters!",false);
+        private async void BtnFilter_Click(object sender, RoutedEventArgs e)
+        {
+            string eid   = TxtFEmpID.Text.Trim();
+            string fn    = TxtFFName.Text.Trim();
+            string mn    = TxtFMName.Text.Trim();
+            string ln    = TxtFLName.Text.Trim();
+            string dept  = TxtFDept.Text.Trim();
+            string lvl   = TxtFLevel.Text.Trim();
+
+            // Employee ID takes priority alone
+            if (!string.IsNullOrEmpty(eid))
+            { await Load(Q + $" WHERE employee_id='{eid.Replace("'","''")}' "); return; }
+
+            // Build OR-style conditions from name / dept / level
+            var conds = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(fn))   conds.Add($"first_name LIKE '%{fn.Replace("'","''")}%'");
+            if (!string.IsNullOrEmpty(mn))   conds.Add($"middle_name LIKE '%{mn.Replace("'","''")}%'");
+            if (!string.IsNullOrEmpty(ln))   conds.Add($"last_name LIKE '%{ln.Replace("'","''")}%'");
+            if (!string.IsNullOrEmpty(dept)) conds.Add($"department_id='{dept.Replace("'","''")}' ");
+            if (!string.IsNullOrEmpty(lvl))  conds.Add($"level='{lvl.Replace("'","''")}' ");
+
+            if (conds.Count == 0) { await Load(Q); return; }
+            await Load(Q + " WHERE " + string.Join(" AND ", conds));
         }
 
-        private async void BtnFilterReset_Click(object sender, RoutedEventArgs e) { TxtFEmpID.Text=TxtFDept.Text=TxtFLevel.Text=""; await Load(Q); }
+        private async void BtnFilterReset_Click(object sender, RoutedEventArgs e)
+        {
+            TxtFEmpID.Text = TxtFFName.Text = TxtFMName.Text = TxtFLName.Text =
+            TxtFDept.Text  = TxtFLevel.Text = "";
+            await Load(Q);
+        }
         private void BtnClear_Click(object s, RoutedEventArgs e)=>Clear();
         private void Clear(){TxtEmpID.Text=TxtDeptID.Text=TxtFName.Text=TxtMName.Text=TxtLName.Text=TxtSex.Text=TxtBirthDate.Text=TxtEmpDate.Text=TxtLevel.Text=TxtQualification.Text=TxtMobile.Text=TxtPhoto.Text="";_selKey="";}
         private void Msg(string m,bool ok){var o=Window.GetWindow(this);if(ok)ModernDialog.Show(o,m,"Success",ModernDialog.DialogType.Success);else ModernDialog.Show(o,m,"Error",ModernDialog.DialogType.Error);}

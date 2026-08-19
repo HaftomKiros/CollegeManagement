@@ -284,7 +284,8 @@ namespace CollegeManagementWPF.Views
             {
                 "StudentRegistration" => "Register, Update, Enroll, Delete Student",
                 "StudentMarks"        => "Add, Update, Delete Student Marks",
-                "AssessmentRecords"   => "Add, Update Student Assessment Records (New Curriculum)",
+                "AssessmentRecords"        => "Add, Update Student Assessment Records (New Curriculum)",
+                "TVETAssessmentTranscript" => "Generate Assessment Transcript from New Curriculum Records",
                 "GradeConfig"         => "Configure grade scale: Raw Mark ranges, Letter Grades and Grade Points",
                 "StudentFees"         => "Record, Update, Delete Student Fees",
                 "DropoutStudents"     => "Manage Dropout Student Records",
@@ -311,8 +312,10 @@ namespace CollegeManagementWPF.Views
 
             ContentFrame.Navigate(tag switch
             {
-                "TVETTranscript"       => new TVETTranscriptPage(),
+                "TVETTranscript"           => new TVETTranscriptPage(),
+                "TVETAssessmentTranscript" => new TVETAssessmentTranscriptPage(),
                 "MarkList"            => new MarkListPage(),
+                "AssessmentMarkList"  => new AssessmentMarkListPage(),
                 "AttendanceSheet"     => new AttendanceSheetPage(),
                 "COCList"             => new COCListPage(),
                 "Dashboard"           => (object)new DashboardPage(),

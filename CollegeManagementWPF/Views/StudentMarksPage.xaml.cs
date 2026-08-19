@@ -24,15 +24,42 @@ namespace CollegeManagementWPF.Views
             TxtPrac.PreviewTextInput += NumOnly;
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
-            // Open dropdown on click for module/dept combos
             CmbModCode.GotFocus  += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
             CmbFDept.GotFocus    += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
             CmbFModule.GotFocus  += (s,e) => ((ComboBox)s).IsDropDownOpen = true;
             Loaded += async (s, e) =>
             {
+                await MigrateAddIdAsync();
                 await LoadModulesAsync();
                 await Load(BASE);
             };
+        }
+
+        // Adds id column to student_mark if it doesn't already exist
+        private async Task MigrateAddIdAsync()
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var conn = _db.GetConnection(); conn.Open();
+                    // Check if id column exists
+                    using var check = new MySqlCommand(
+                        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' " +
+                        "AND TABLE_NAME='student_mark' AND COLUMN_NAME='id'", conn);
+                    int exists = Convert.ToInt32(check.ExecuteScalar());
+                    if (exists == 0)
+                    {
+                        new MySqlCommand(
+                            "ALTER TABLE ecc_dof_wukrostmarycollege.student_mark " +
+                            "ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST", conn)
+                            .ExecuteNonQuery();
+                    }
+                    conn.Close();
+                });
+            }
+            catch { /* skip if fails — table may already have a PK */ }
         }
 
         private void ApplyTheme()

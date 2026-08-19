@@ -1,0 +1,121 @@
+<Page x:Class="CollegeManagementWPF.Views.AssessmentMarkListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <Page.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop x:Name="PageBg1" Color="#0D1B3E" Offset="0"/><GradientStop x:Name="PageBg2" Color="#07101E" Offset="1"/></LinearGradientBrush></Page.Background>
+    <Page.Resources>
+        <Style x:Key="FL" TargetType="TextBlock"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Margin" Value="0,0,0,3"/></Style>
+        <Style x:Key="WI" TargetType="TextBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Height" Value="32"/><Setter Property="Padding" Value="8,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+        <Style x:Key="SDD" TargetType="ComboBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="FontSize" Value="12"/><Setter Property="Height" Value="32"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="IsEditable" Value="True"/><Setter Property="IsTextSearchEnabled" Value="True"/><Setter Property="StaysOpenOnEdit" Value="True"/><Setter Property="OverridesDefaultStyle" Value="True"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox"><Grid><Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><Grid><TextBox x:Name="PART_EditableTextBox" Background="Transparent" BorderThickness="0" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" Margin="8,0,28,0" VerticalAlignment="Center" IsReadOnly="{TemplateBinding IsReadOnly}"/><ToggleButton BorderThickness="0" Background="Transparent" IsChecked="{Binding IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" ClickMode="Press" HorizontalAlignment="Right" Width="28" VerticalAlignment="Stretch"><ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent" BorderThickness="0"><TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="#4A7ACC" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></ToggleButton.Template></ToggleButton></Grid></Border><Popup IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" Placement="Bottom" PopupAnimation="Slide"><Border Background="{DynamicResource RegInputBg}" BorderBrush="{DynamicResource RegInputBorder}" BorderThickness="1" CornerRadius="0,0,6,6" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="240"><ScrollViewer><StackPanel IsItemsHost="True"/></ScrollViewer></Border></Popup></Grid><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="BorderBrush" Value="#4A7ACC"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter><Style.Resources><Style TargetType="ComboBoxItem"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="Padding" Value="8,6"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger></Style.Triggers></Style></Style.Resources></Style>
+        <Style x:Key="DD" TargetType="ComboBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="FontSize" Value="12"/><Setter Property="Height" Value="32"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="OverridesDefaultStyle" Value="True"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox"><Grid><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><Grid><ToggleButton BorderThickness="0" Background="Transparent" IsChecked="{Binding IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" ClickMode="Press" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"><ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent" BorderThickness="0"/></ControlTemplate></ToggleButton.Template></ToggleButton><ContentPresenter IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" Margin="8,0,24,0" VerticalAlignment="Center"/><TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="#4A7ACC" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" IsHitTestVisible="False"/></Grid></Border><Popup IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" Placement="Bottom" PopupAnimation="Slide"><Border Background="{DynamicResource RegInputBg}" BorderBrush="{DynamicResource RegInputBorder}" BorderThickness="1" CornerRadius="0,0,6,6" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200"><ScrollViewer><StackPanel IsItemsHost="True"/></ScrollViewer></Border></Popup></Grid></ControlTemplate></Setter.Value></Setter><Style.Resources><Style TargetType="ComboBoxItem"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="Padding" Value="8,6"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger></Style.Triggers></Style></Style.Resources></Style>
+        <Style x:Key="TC" TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+        <Style x:Key="AB" TargetType="Button"><Setter Property="Height" Value="36"/><Setter Property="FontSize" Value="12.5"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Padding" Value="20,0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="8" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.65"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+        <StackPanel Margin="32,24,32,32">
+            <!-- Banner -->
+            <Border CornerRadius="14" Padding="24,18" Margin="0,0,0,24" BorderThickness="1">
+                <Border.BorderBrush><SolidColorBrush Color="#F59E0B"/></Border.BorderBrush>
+                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2A1A00" Offset="0"/><GradientStop Color="#1A1000" Offset="1"/></LinearGradientBrush></Border.Background>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="28" Foreground="#F59E0B" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Assessment Mark List" FontSize="20" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Assessment Results Summary Report to the Registrar" FontSize="11" Foreground="#D97706" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Parameters -->
+            <Border CornerRadius="12" Padding="24,20" Margin="0,0,0,20" BorderThickness="1">
+                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                <Border.Background><DynamicResource ResourceKey="RegCardInnerBg"/></Border.Background>
+                <StackPanel>
+                    <TextBlock Text="Report Parameters" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI" Margin="0,0,0,16"/>
+                    <UniformGrid Rows="3" Columns="2">
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="Department" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbDept" Style="{StaticResource SDD}"
+                                      TextBoxBase.TextChanged="CmbDept_TextChanged"
+                                      SelectionChanged="CmbDept_SelectionChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Stream" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbStream" Style="{StaticResource SDD}"
+                                      TextBoxBase.TextChanged="CmbStream_TextChanged"
+                                      SelectionChanged="CmbStream_SelectionChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="Level" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbLevel" Style="{StaticResource SDD}"
+                                      TextBoxBase.TextChanged="CmbLevel_TextChanged"
+                                      SelectionChanged="CmbLevel_SelectionChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Module Code" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbModCode" Style="{StaticResource SDD}"
+                                      TextBoxBase.TextChanged="CmbModCode_TextChanged"
+                                      SelectionChanged="CmbModCode_SelectionChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="Instructor" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbInstructor" Style="{StaticResource SDD}"
+                                      TextBoxBase.TextChanged="CmbInstructor_TextChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Academic Year" Style="{StaticResource FL}"/>
+                            <ComboBox x:Name="CmbAcadYear" Style="{StaticResource DD}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                    <StackPanel Width="300" HorizontalAlignment="Left" Margin="0,10,0,0">
+                        <TextBlock Text="Admission Type" Style="{StaticResource FL}"/>
+                        <ComboBox x:Name="CmbAdmType" Style="{StaticResource DD}">
+                            <ComboBoxItem Content="Regular" IsSelected="True"/>
+                            <ComboBoxItem Content="Extension"/>
+                            <ComboBoxItem Content="Distance"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                        <Button Click="BtnGenerate_Click" Style="{StaticResource AB}" Margin="0,0,10,0"><Button.Background><SolidColorBrush Color="#1A55DD"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9D5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Generate" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button Click="BtnPrint_Click" Style="{StaticResource AB}" Margin="0,0,10,0"><Button.Background><SolidColorBrush Color="#335577"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE749;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Print" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                        <Button Click="BtnExportExcel_Click" Style="{StaticResource AB}"><Button.Background><SolidColorBrush Color="#1A5A2A"/></Button.Background><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock Text="Export Excel" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/></StackPanel></Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Preview -->
+            <Border x:Name="PreviewCard" CornerRadius="12" BorderThickness="1" Visibility="Collapsed">
+                <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="16,12,16,8">
+                        <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="#4A9AEE" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtPreviewInfo" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <DataGrid x:Name="Grid1" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="450"
+                              Background="Transparent" RowBackground="{DynamicResource TableRowBg}"
+                              BorderThickness="0" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{DynamicResource RegInputBorder}"
+                              ColumnHeaderHeight="34" RowHeight="28" FontSize="11" FontFamily="Segoe UI"
+                              Foreground="{DynamicResource TableRowFg}">
+                        <DataGrid.ColumnHeaderStyle><Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="{DynamicResource TableHeaderBg}"/><Setter Property="Foreground" Value="{DynamicResource TableHeaderFg}"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Padding" Value="8,0"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/></Style></DataGrid.ColumnHeaderStyle>
+                        <DataGrid.RowStyle><Style TargetType="DataGridRow"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="Background" Value="{DynamicResource TableRowBg}"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource TableRowHoverBg}"/></Trigger></Style.Triggers></Style></DataGrid.RowStyle>
+                        <DataGrid.CellStyle><Style TargetType="DataGridCell"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="BorderThickness" Value="0"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell"><Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="0"><ContentPresenter VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter><Style.Triggers><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="White"/></Trigger></Style.Triggers></Style></DataGrid.CellStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Student ID"          Binding="{Binding student_id}"           Width="*"/>
+                            <DataGridTextColumn Header="Full Name"           Binding="{Binding full_name}"            Width="*"/>
+                            <DataGridTextColumn Header="Sex"                 Binding="{Binding gender}"               Width="50"/>
+                            <DataGridTextColumn Header="ID.NO"               Binding="{Binding student_id}"           Width="*"/>
+                            <DataGridTextColumn Header="Institutional(70%)"  Binding="{Binding institutional_score}"  Width="*"/>
+                            <DataGridTextColumn Header="Industry(30%)"       Binding="{Binding industry_score}"       Width="*"/>
+                            <DataGridTextColumn Header="Total(100%)"         Binding="{Binding total_score}"          Width="*"/>
+                            <DataGridTextColumn Header="Grade Letter"        Binding="{Binding letter_grade}"         Width="*"/>
+                            <DataGridTextColumn Header="Grade Point"         Binding="{Binding grade_points}"         Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

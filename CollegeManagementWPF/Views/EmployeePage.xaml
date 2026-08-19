@@ -72,6 +72,9 @@
                 <Border Height="1" Margin="0,0,0,10"><Border.Background><DynamicResource ResourceKey="RegInputBorder"/></Border.Background></Border>
                 <TextBlock Text="Employee ID" Style="{StaticResource FL}"/><TextBox x:Name="TxtFEmpID" Style="{StaticResource WI}" Margin="0,0,0,8"/>
                 <TextBlock Text="OR..." FontSize="12" FontWeight="Bold" Foreground="#22AA66" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+                <TextBlock Text="First Name" Style="{StaticResource FL}"/><TextBox x:Name="TxtFFName" Style="{StaticResource WI}" Margin="0,0,0,8"/>
+                <TextBlock Text="Father Name" Style="{StaticResource FL}"/><TextBox x:Name="TxtFMName" Style="{StaticResource WI}" Margin="0,0,0,8"/>
+                <TextBlock Text="G/Father Name" Style="{StaticResource FL}"/><TextBox x:Name="TxtFLName" Style="{StaticResource WI}" Margin="0,0,0,8"/>
                 <TextBlock Text="Dept ID" Style="{StaticResource FL}"/><TextBox x:Name="TxtFDept" Style="{StaticResource WI}" Margin="0,0,0,8"/>
                 <TextBlock Text="Level" Style="{StaticResource FL}"/><TextBox x:Name="TxtFLevel" Style="{StaticResource WI}" Margin="0,0,0,16"/>
                 <Border Height="1" Margin="0,0,0,12"><Border.Background><DynamicResource ResourceKey="RegInputBorder"/></Border.Background></Border>

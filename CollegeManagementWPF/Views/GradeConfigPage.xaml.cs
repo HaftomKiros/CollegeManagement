@@ -171,19 +171,18 @@ namespace CollegeManagementWPF.Views
             { Owner = Window.GetWindow(this) };
             if (dlg.ShowDialog() != true) return;
 
-            // Ranges: min <= score < max, except top grade: 95 <= score <= 100
-            // Store max as 100.01 internally so the condition score < max covers 100
+            // All ranges inclusive: min <= score <= max
             var defaults = new[]
             {
-                (95.0, 100.01, "A+",  4.00),
-                (92.0,  95.0,  "A",   4.00),
-                (89.0,  92.0,  "A-",  3.75),
-                (86.0,  89.0,  "B+",  3.50),
-                (83.0,  86.0,  "B",   3.00),
-                (80.0,  83.0,  "B-",  2.75),
-                (77.0,  80.0,  "C+",  2.50),
-                (74.0,  77.0,  "C",   2.00),
-                ( 0.0,  74.0,  "NYC", 0.00),
+                (95.0, 100.0, "A+",  4.00),
+                (92.0,  94.0, "A",   4.00),
+                (89.0,  91.0, "A-",  3.75),
+                (86.0,  88.0, "B+",  3.50),
+                (83.0,  85.0, "B",   3.00),
+                (80.0,  82.0, "B-",  2.75),
+                (77.0,  79.0, "C+",  2.50),
+                (74.0,  76.0, "C",   2.00),
+                ( 0.0,  73.0, "NYC", 0.00),
             };
 
             try
@@ -229,9 +228,9 @@ namespace CollegeManagementWPF.Views
 
         private static string BuildLabel(double min, double max)
         {
-            if (min <= 0 && max <= 74)   return "< 74";
-            if (max > 100)               return $"{min}–100";       // top grade: 95–100
-            return $"{min}–<{max}";                                  // e.g. 92–<95
+            if (min <= 0 && max < 74) return "Below 74";
+            if (min == max)           return $"{(int)min}";
+            return $"{(int)min}–{(int)max}";
         }
 
         private void Clear()
