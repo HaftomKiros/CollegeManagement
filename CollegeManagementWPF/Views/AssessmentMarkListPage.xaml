@@ -105,8 +105,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Student ID"          Binding="{Binding student_id}"           Width="*"/>
                             <DataGridTextColumn Header="Full Name"           Binding="{Binding full_name}"            Width="*"/>
-                            <DataGridTextColumn Header="Sex"                 Binding="{Binding gender}"               Width="50"/>
-                            <DataGridTextColumn Header="ID.NO"               Binding="{Binding student_id}"           Width="*"/>
+                            <DataGridTextColumn Header="Sex"                 Binding="{Binding gender}"               Width="60"/>
                             <DataGridTextColumn Header="Institutional(70%)"  Binding="{Binding institutional_score}"  Width="*"/>
                             <DataGridTextColumn Header="Industry(30%)"       Binding="{Binding industry_score}"       Width="*"/>
                             <DataGridTextColumn Header="Total(100%)"         Binding="{Binding total_score}"          Width="*"/>
