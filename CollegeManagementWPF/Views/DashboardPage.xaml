@@ -48,7 +48,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Welcome back, Administrator"
+                        <TextBlock x:Name="TxtWelcome" Text="Welcome back, Administrator"
                                    FontSize="21" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
                         <TextBlock Text="Here is what is happening at Wukro St. Mary College today."
                                    FontSize="11.5" FontFamily="Segoe UI" Margin="0,6,0,0">

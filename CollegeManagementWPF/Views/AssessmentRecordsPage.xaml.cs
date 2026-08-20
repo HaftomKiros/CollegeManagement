@@ -1,5 +1,6 @@
 ﻿using CollegeManagementWPF.Data;
 using MySql.Data.MySqlClient;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -49,7 +50,7 @@ namespace CollegeManagementWPF.Views
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
             ApplyPermissions();
-            Loaded += async (s, e) => { await EnsureTableAsync(); await LoadGradesAsync(); await Load(BASE); };
+            Loaded += async (s, e) => { await EnsureTableAsync(); await LoadGradesAsync(); await LoadAllInstructorsAsync(); await Load(BASE); };
         }
 
         private void ApplyTheme()
@@ -68,7 +69,36 @@ namespace CollegeManagementWPF.Views
             BtnSave.Visibility   = SessionUser.Has("assess_add")    ? Visibility.Visible : Visibility.Collapsed;
             BtnUpdate.Visibility = SessionUser.Has("assess_update") ? Visibility.Visible : Visibility.Collapsed;
             BtnDelete.Visibility = SessionUser.Has("assess_delete") ? Visibility.Visible : Visibility.Collapsed;
+            BtnImport.Visibility   = SessionUser.Has("assess_import")   ? Visibility.Visible : Visibility.Collapsed;
+            BtnTemplate.Visibility = SessionUser.Has("assess_template") ? Visibility.Visible : Visibility.Collapsed;
+            BtnRemoveDup.Visibility= SessionUser.Has("assess_remove_dup") ? Visibility.Visible : Visibility.Collapsed;
             BtnClear.Visibility  = (SessionUser.Has("assess_add") || SessionUser.Has("assess_update")) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // Load all instructors from employee_profile into the dropdown on startup
+        private async Task LoadAllInstructorsAsync()
+        {
+            try
+            {
+                _moduleInstructors = await Task.Run(() =>
+                {
+                    var list = new List<(string, string)>();
+                    var conn = _db.GetConnection(); conn.Open();
+                    using var cmd = new MySqlCommand(
+                        "SELECT employee_id, " +
+                        "TRIM(CONCAT_WS(' ', NULLIF(TRIM(first_name),''), NULLIF(TRIM(middle_name),''), NULLIF(TRIM(last_name),''))) AS full_name " +
+                        "FROM ecc_dof_wukrostmarycollege.employee_profile ORDER BY employee_id", conn);
+                    using var r = cmd.ExecuteReader();
+                    while (r.Read()) list.Add((r[0]?.ToString() ?? "", r[1]?.ToString()?.Trim() ?? ""));
+                    conn.Close(); return list;
+                });
+                _suppress = true;
+                CmbEmpID.Items.Clear();
+                foreach (var (id, name) in _moduleInstructors)
+                    CmbEmpID.Items.Add(new ComboBoxItem { Content = string.IsNullOrEmpty(name) ? id : $"{id} — {name}", Tag = id });
+                _suppress = false;
+            }
+            catch { }
         }
 
         private async Task EnsureTableAsync()
@@ -240,7 +270,7 @@ namespace CollegeManagementWPF.Views
             int d = t.IndexOf(" — "); return d >= 0 ? t[..d].Trim() : t;
         }
 
-        // ── Instructor — filtered by module ───────────────────────────────────
+        // ── Instructor — load ALL employees from employee_profile ─────────────
         private async Task LoadModuleInstructorsAsync(string moduleCode)
         {
             try
@@ -250,12 +280,10 @@ namespace CollegeManagementWPF.Views
                     var list = new List<(string,string)>();
                     var conn = _db.GetConnection(); conn.Open();
                     using var cmd = new MySqlCommand(
-                        "SELECT DISTINCT sm.employee_id, " +
-                        "IFNULL(CONCAT(TRIM(ep.first_name),' ',TRIM(ep.middle_name),' ',TRIM(ep.last_name)),sm.employee_id) AS full_name " +
-                        "FROM ecc_dof_wukrostmarycollege.student_mark sm " +
-                        "LEFT JOIN ecc_dof_wukrostmarycollege.employee_profile ep ON sm.employee_id=ep.employee_id " +
-                        "WHERE sm.module_code=@m AND sm.employee_id IS NOT NULL ORDER BY sm.employee_id", conn);
-                    cmd.Parameters.AddWithValue("@m", moduleCode);
+                        "SELECT employee_id, " +
+                        "TRIM(CONCAT_WS(' ', NULLIF(TRIM(first_name),''), NULLIF(TRIM(middle_name),''), NULLIF(TRIM(last_name),''))) AS full_name " +
+                        "FROM ecc_dof_wukrostmarycollege.employee_profile " +
+                        "ORDER BY employee_id", conn);
                     using var r = cmd.ExecuteReader();
                     while (r.Read()) list.Add((r[0]?.ToString()??"", r[1]?.ToString()?.Trim()??""));
                     conn.Close(); return list;
@@ -263,7 +291,7 @@ namespace CollegeManagementWPF.Views
                 _suppress = true;
                 CmbEmpID.Items.Clear();
                 foreach (var (id, name) in _moduleInstructors)
-                    CmbEmpID.Items.Add(new ComboBoxItem { Content = $"{id} — {name}", Tag = id });
+                    CmbEmpID.Items.Add(new ComboBoxItem { Content = string.IsNullOrEmpty(name) ? id : $"{id} — {name}", Tag = id });
                 _suppress = false;
             }
             catch { }
@@ -341,9 +369,24 @@ namespace CollegeManagementWPF.Views
             var(letter,pts)=GetGrade(total);
             try
             {
-                await Task.Run(()=>{var conn=_db.GetConnection();conn.Open();var cmd=new MySqlCommand("INSERT INTO ecc_dof_wukrostmarycollege.student_assessment (student_id,level,module_code,employee_id,academic_year,institutional_score,industry_score,total_score,letter_grade,grade_points) VALUES(@s,@l,@m,@e,@y,@i,@n,@t,@g,@p)",conn);cmd.Parameters.AddWithValue("@s",sid);cmd.Parameters.AddWithValue("@l",lvl);cmd.Parameters.AddWithValue("@m",mod);cmd.Parameters.AddWithValue("@e",emp);cmd.Parameters.AddWithValue("@y",ay);cmd.Parameters.AddWithValue("@i",inst);cmd.Parameters.AddWithValue("@n",ind);cmd.Parameters.AddWithValue("@t",total);cmd.Parameters.AddWithValue("@g",letter);cmd.Parameters.AddWithValue("@p",pts);cmd.ExecuteNonQuery();conn.Close();});
+                await Task.Run(()=>{
+                    var conn=_db.GetConnection();conn.Open();
+                    // ── Duplicate check: same student+level+module+instructor (not year)
+                    using(var chk=new MySqlCommand(
+                        "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_assessment " +
+                        "WHERE TRIM(student_id)=@s AND level=@l AND module_code=@m AND IFNULL(employee_id,'')=@e",conn))
+                    {
+                        chk.Parameters.AddWithValue("@s",sid);chk.Parameters.AddWithValue("@l",lvl);
+                        chk.Parameters.AddWithValue("@m",mod);chk.Parameters.AddWithValue("@e",emp);
+                        int dup=Convert.ToInt32(chk.ExecuteScalar());
+                        if(dup>0) throw new InvalidOperationException($"Duplicate: A record for Student '{sid}', Level {lvl}, Module '{mod}', Instructor '{emp}' already exists.");
+                    }
+                    var cmd=new MySqlCommand("INSERT INTO ecc_dof_wukrostmarycollege.student_assessment (student_id,level,module_code,employee_id,academic_year,institutional_score,industry_score,total_score,letter_grade,grade_points) VALUES(@s,@l,@m,@e,@y,@i,@n,@t,@g,@p)",conn);
+                    cmd.Parameters.AddWithValue("@s",sid);cmd.Parameters.AddWithValue("@l",lvl);cmd.Parameters.AddWithValue("@m",mod);cmd.Parameters.AddWithValue("@e",emp);cmd.Parameters.AddWithValue("@y",ay);cmd.Parameters.AddWithValue("@i",inst);cmd.Parameters.AddWithValue("@n",ind);cmd.Parameters.AddWithValue("@t",total);cmd.Parameters.AddWithValue("@g",letter);cmd.Parameters.AddWithValue("@p",pts);cmd.ExecuteNonQuery();conn.Close();
+                });
                 Msg("Saved successfully!",true); await Load(BASE); Clear();
             }
+            catch(InvalidOperationException ex){Msg(ex.Message,false);}
             catch(Exception ex){Msg("Error: "+ex.Message,false);}
         }
 
@@ -405,6 +448,247 @@ namespace CollegeManagementWPF.Views
             TxtScoreError.Visibility=Visibility.Collapsed;
             _selSid=_selLvl=_selMod=""; _selId=-1;
             if(BtnSave!=null)BtnSave.IsEnabled=true; if(BtnUpdate!=null)BtnUpdate.IsEnabled=true;
+        }
+
+        // ── Remove Duplicate Records ──────────────────────────────────────────
+        // Keeps the row with the LOWEST id for each (student_id+level+module_code+employee_id)
+        // and deletes all others.
+        private async void BtnRemoveDup_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new ModernDialog(
+                "This will delete duplicate records, keeping only the earliest entry for each Student+Level+Module+Instructor combination. Continue?",
+                "Remove Duplicates", ModernDialog.DialogType.Warning) { Owner = Window.GetWindow(this) };
+            if (dlg.ShowDialog() != true) return;
+
+            int deleted = 0;
+            try
+            {
+                deleted = await Task.Run(() =>
+                {
+                    var conn = _db.GetConnection(); conn.Open();
+                    // Delete rows where id is NOT the minimum id for that group
+                    using var cmd = new MySqlCommand(
+                        "DELETE sa FROM ecc_dof_wukrostmarycollege.student_assessment sa " +
+                        "INNER JOIN (" +
+                        "  SELECT MIN(id) AS keep_id, student_id, level, module_code, IFNULL(employee_id,'') AS employee_id " +
+                        "  FROM ecc_dof_wukrostmarycollege.student_assessment " +
+                        "  GROUP BY TRIM(student_id), level, module_code, IFNULL(employee_id,'') " +
+                        "  HAVING COUNT(*) > 1" +
+                        ") dup ON TRIM(sa.student_id)=dup.student_id AND sa.level=dup.level " +
+                        "   AND sa.module_code=dup.module_code AND IFNULL(sa.employee_id,'')=dup.employee_id " +
+                        "   AND sa.id != dup.keep_id", conn);
+                    int n = cmd.ExecuteNonQuery();
+                    conn.Close();
+                    return n;
+                });
+                Msg($"Removed {deleted} duplicate record(s). One record kept per group.", deleted >= 0);
+                await Load(BASE);
+            }
+            catch (Exception ex) { Msg("Error: " + ex.Message, false); }
+        }
+
+        // ── Download Excel Template ───────────────────────────────────────────
+        private void BtnTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Save Import Template",
+                FileName = "AssessmentRecords_Template",
+                DefaultExt = ".xlsx",
+                Filter = "Excel Workbook|*.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                using var wb = new ClosedXML.Excel.XLWorkbook();
+                var ws = wb.Worksheets.Add("Assessment Records");
+
+                // Headers
+                string[] headers = { "student_id", "level", "module_code", "employee_id", "academic_year", "institutional_score", "industry_score" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = ws.Cell(1, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#1A55DD");
+                    cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                    cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                }
+
+                // Sample row
+                ws.Cell(2, 1).Value = "ICT/R/17/051";
+                ws.Cell(2, 2).Value = "1";
+                ws.Cell(2, 3).Value = "EIS HNS1 M01";
+                ws.Cell(2, 4).Value = "Inst029";
+                ws.Cell(2, 5).Value = "2017";
+                ws.Cell(2, 6).Value = 55;
+                ws.Cell(2, 7).Value = 24;
+
+                // Note row
+                ws.Cell(4, 1).Value = "Note: student_id, level, module_code are required. institutional_score (max 70) + industry_score (max 30) = total (max 100).";
+                ws.Cell(4, 1).Style.Font.Italic = true;
+                ws.Cell(4, 1).Style.Font.FontColor = ClosedXML.Excel.XLColor.Gray;
+                ws.Range(4, 1, 4, headers.Length).Merge();
+
+                ws.Columns().AdjustToContents();
+                wb.SaveAs(dlg.FileName);
+                Msg("Template saved!", true);
+            }
+            catch (Exception ex) { Msg("Failed to save template: " + ex.Message, false); }
+        }
+
+        // ── Import from Excel (with cascade validation) ───────────────────────
+        // Validates: student_id exists, level is valid for student's stream,
+        //            module_code belongs to that level, academic_year is numeric.
+        private async void BtnImport_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Title = "Select Excel file to import",
+                Filter = "Excel Workbook|*.xlsx;*.xls",
+                DefaultExt = ".xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            int inserted = 0, skipped = 0;
+            var errors = new System.Text.StringBuilder();
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    using var wb = new ClosedXML.Excel.XLWorkbook(dlg.FileName);
+                    var ws = wb.Worksheets.Worksheet(1);
+
+                    // Map headers (case-insensitive)
+                    var colMap = new System.Collections.Generic.Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var cell in ws.Row(1).CellsUsed())
+                        colMap[cell.Value.ToString().Trim()] = cell.Address.ColumnNumber;
+
+                    string[] required = { "student_id", "level", "module_code" };
+                    foreach (var req in required)
+                        if (!colMap.ContainsKey(req))
+                            throw new Exception($"Missing required column: '{req}'");
+
+                    int Get(string col) => colMap.TryGetValue(col, out int c) ? c : 0;
+                    string Val(ClosedXML.Excel.IXLRow row, string col)
+                    { int c = Get(col); return c > 0 ? row.Cell(c).Value.ToString().Trim() : ""; }
+
+                    var conn = _db.GetConnection(); conn.Open();
+
+                    // Pre-load validation sets
+                    var validStudents = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    using (var cmd = new MySqlCommand("SELECT DISTINCT TRIM(student_id) FROM ecc_dof_wukrostmarycollege.student_profile", conn))
+                    using (var r = cmd.ExecuteReader()) while (r.Read()) validStudents.Add(r[0]?.ToString() ?? "");
+
+                    // student → stream_id mapping
+                    var studentStream = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    using (var cmd = new MySqlCommand("SELECT DISTINCT TRIM(student_id), stream_id FROM ecc_dof_wukrostmarycollege.student_profile GROUP BY TRIM(student_id)", conn))
+                    using (var r = cmd.ExecuteReader()) while (r.Read()) studentStream[r[0]?.ToString() ?? ""] = r[1]?.ToString() ?? "";
+
+                    // stream+level → set of valid module_codes
+                    var streamLevelModules = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+                    using (var cmd = new MySqlCommand(
+                        "SELECT lv.stream_id, lv.level, c.module_code " +
+                        "FROM ecc_dof_wukrostmarycollege.courses c " +
+                        "JOIN ecc_dof_wukrostmarycollege.levels lv ON c.level_id=lv.level_id", conn))
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read())
+                        {
+                            string key = $"{r[0]}|{r[1]}";
+                            if (!streamLevelModules.ContainsKey(key))
+                                streamLevelModules[key] = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            streamLevelModules[key].Add(r[2]?.ToString() ?? "");
+                        }
+
+                    int lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
+                    for (int rn = 2; rn <= lastRow; rn++)
+                    {
+                        var row = ws.Row(rn);
+                        if (row.IsEmpty()) continue;
+
+                        string sid  = Val(row, "student_id");
+                        string lvl  = Val(row, "level");
+                        string mod  = Val(row, "module_code");
+                        string emp  = Val(row, "employee_id");
+                        string ay   = Val(row, "academic_year");
+                        string inst = Val(row, "institutional_score");
+                        string ind  = Val(row, "industry_score");
+
+                        // ── Required fields
+                        if (string.IsNullOrEmpty(sid) || string.IsNullOrEmpty(lvl) || string.IsNullOrEmpty(mod))
+                        { errors.AppendLine($"Row {rn}: student_id, level or module_code is empty — skipped."); skipped++; continue; }
+
+                        // ── 1. Validate student exists
+                        if (!validStudents.Contains(sid))
+                        { errors.AppendLine($"Row {rn}: Student '{sid}' not found."); skipped++; continue; }
+
+                        // ── 2. Validate level is numeric 1–4
+                        if (!int.TryParse(lvl, out int lvlInt) || lvlInt < 1 || lvlInt > 4)
+                        { errors.AppendLine($"Row {rn}: Level '{lvl}' is invalid (must be 1–4)."); skipped++; continue; }
+
+                        // ── 3. Cascade — module must belong to student's stream + level
+                        if (studentStream.TryGetValue(sid, out string? streamId))
+                        {
+                            string key = $"{streamId}|{lvl}";
+                            if (streamLevelModules.TryGetValue(key, out var mods) && !mods.Contains(mod))
+                            { errors.AppendLine($"Row {rn}: Module '{mod}' does not belong to level {lvl} of student '{sid}' stream."); skipped++; continue; }
+                        }
+
+                        // ── 4. Academic year — must be a 4-digit year if provided
+                        if (!string.IsNullOrEmpty(ay) && (!int.TryParse(ay, out int ayInt) || ayInt < 1900 || ayInt > 2100))
+                        { errors.AppendLine($"Row {rn}: Academic year '{ay}' is invalid."); skipped++; continue; }
+
+                        // ── 5. Score validation
+                        if (!double.TryParse(inst, out double instVal)) instVal = 0;
+                        if (!double.TryParse(ind,  out double indVal))  indVal  = 0;
+                        double total = Math.Round(instVal + indVal, 2);
+                        if (total > 100) { errors.AppendLine($"Row {rn}: Total score {total} exceeds 100."); skipped++; continue; }
+
+                        var (letter, pts) = GetGrade(total);
+
+                        try
+                        {
+                            // ── Duplicate check before insert
+                            using (var chk = new MySqlCommand(
+                                "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_assessment " +
+                                "WHERE TRIM(student_id)=@s AND level=@l AND module_code=@m AND IFNULL(employee_id,'')=@e", conn))
+                            {
+                                chk.Parameters.AddWithValue("@s", sid); chk.Parameters.AddWithValue("@l", lvl);
+                                chk.Parameters.AddWithValue("@m", mod); chk.Parameters.AddWithValue("@e", emp);
+                                int dup = Convert.ToInt32(chk.ExecuteScalar());
+                                if (dup > 0)
+                                { errors.AppendLine($"Row {rn}: Duplicate — Student '{sid}', Level {lvl}, Module '{mod}', Instructor '{emp}' already exists."); skipped++; continue; }
+                            }
+                            var cmd = new MySqlCommand(
+                                "INSERT INTO ecc_dof_wukrostmarycollege.student_assessment " +
+                                "(student_id,level,module_code,employee_id,academic_year," +
+                                "institutional_score,industry_score,total_score,letter_grade,grade_points) " +
+                                "VALUES(@s,@l,@m,@e,@y,@i,@n,@t,@g,@p)", conn);
+                            cmd.Parameters.AddWithValue("@s", sid);
+                            cmd.Parameters.AddWithValue("@l", lvl);
+                            cmd.Parameters.AddWithValue("@m", mod);
+                            cmd.Parameters.AddWithValue("@e", emp);
+                            cmd.Parameters.AddWithValue("@y", ay);
+                            cmd.Parameters.AddWithValue("@i", instVal);
+                            cmd.Parameters.AddWithValue("@n", indVal);
+                            cmd.Parameters.AddWithValue("@t", total);
+                            cmd.Parameters.AddWithValue("@g", letter);
+                            cmd.Parameters.AddWithValue("@p", pts);
+                            cmd.ExecuteNonQuery();
+                            inserted++;
+                        }
+                        catch (Exception ex2) { errors.AppendLine($"Row {rn}: {ex2.Message}"); skipped++; }
+                    }
+                    conn.Close();
+                });
+
+                string summary = $"Import complete.\nInserted: {inserted}  |  Skipped: {skipped}";
+                if (errors.Length > 0) summary += $"\n\nValidation Errors:\n{errors}";
+                Msg(summary, inserted > 0);
+                await Load(BASE);
+            }
+            catch (Exception ex) { Msg("Import failed: " + ex.Message, false); }
         }
 
         private void Msg(string m, bool ok)

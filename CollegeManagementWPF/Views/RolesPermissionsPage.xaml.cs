@@ -32,13 +32,17 @@ namespace CollegeManagementWPF.Views
                 ("marks_view",   "View Marks"),
                 ("marks_add",    "Add Marks"),
                 ("marks_update", "Update Marks"),
-                ("marks_delete", "Delete Marks")}),
+                ("marks_delete", "Delete Marks"),
+                ("marks_attach", "Attach Mark List")}),
 
             ("Assessment Records", "\uE8A1", "#F472B6", new List<(string,string)>{
-                ("assess_view",   "View Records"),
-                ("assess_add",    "Add Records"),
-                ("assess_update", "Update Records"),
-                ("assess_delete", "Delete Records")}),
+                ("assess_view",       "View Records"),
+                ("assess_add",        "Add Records"),
+                ("assess_update",     "Update Records"),
+                ("assess_delete",     "Delete Records"),
+                ("assess_import",     "Import from Excel"),
+                ("assess_template",   "Download Template"),
+                ("assess_remove_dup", "Remove Duplicates")}),
 
             ("Student Fees",       "\uE7C4", "#F87171", new List<(string,string)>{
                 ("fees_view",   "View Fees"),
@@ -107,6 +111,12 @@ namespace CollegeManagementWPF.Views
                 ("report_assessment_ml",    "Assessment Mark List"),
                 ("report_attendance",       "Attendance Sheet"),
                 ("report_coc_list",         "COC List")}),
+
+            ("Dashboard",          "\uE80F", "#818CF8", new List<(string,string)>{
+                ("dashboard_students",    "View Total Students"),
+                ("dashboard_departments", "View Total Departments"),
+                ("dashboard_streams",     "View Total Streams"),
+                ("dashboard_employees",   "View Total Employees")}),
 
             ("Accounts",           "\uE728", "#E879F9", new List<(string,string)>{
                 ("account_manage",       "Manage Accounts"),

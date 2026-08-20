@@ -44,15 +44,13 @@ namespace CollegeManagementWPF.Views
             bool canAdd    = SessionUser.Has("marks_add");
             bool canUpdate = SessionUser.Has("marks_update");
             bool canDelete = SessionUser.Has("marks_delete");
-            bool hasAny    = canView || canAdd || canUpdate || canDelete;
+            bool canAttach = SessionUser.Has("marks_attach");
 
             Grid1.Visibility             = canView   ? Visibility.Visible : Visibility.Collapsed;
             BtnSave.Visibility           = canAdd    ? Visibility.Visible : Visibility.Collapsed;
             BtnUpdate.Visibility         = canUpdate ? Visibility.Visible : Visibility.Collapsed;
             BtnDelete.Visibility         = canDelete ? Visibility.Visible : Visibility.Collapsed;
-            // Attach Mark List: visible if the role has ANY marks permission
-            BtnAttachMarkList.Visibility = hasAny    ? Visibility.Visible : Visibility.Collapsed;
-            // Clear: useful only when save/update is possible
+            BtnAttachMarkList.Visibility = canAttach ? Visibility.Visible : Visibility.Collapsed;
             BtnClear.Visibility          = (canAdd || canUpdate) ? Visibility.Visible : Visibility.Collapsed;
         }
 

@@ -17,7 +17,45 @@ namespace CollegeManagementWPF.Views
             InitializeComponent();
             ThemeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
+            ApplyPermissions();
             Loaded += async (s, e) => await LoadStatsAsync();
+        }
+
+        /// <summary>
+        /// 1. Update welcome banner with logged-in user name.
+        /// 2. Hide Quick Access buttons the user has no permission for.
+        /// </summary>
+        private void ApplyPermissions()
+        {
+            // Welcome banner — show real username
+            if (FindName("TxtWelcome") is System.Windows.Controls.TextBlock wb)
+                wb.Text = $"Welcome back, {(string.IsNullOrEmpty(SessionUser.Username) ? "Administrator" : SessionUser.Username)}";
+
+            if (SessionUser.IsSuperAdmin) return;
+
+            // Quick Access: hide buttons whose tag maps to a permission the user lacks
+            var permKeys = new System.Collections.Generic.Dictionary<string, string[]>
+            {
+                { "StudentRegistration", new[]{ "student_view","student_register","student_update","student_delete","student_enroll" } },
+                { "StudentMarks",        new[]{ "marks_view","marks_add","marks_update","marks_delete","marks_attach" } },
+                { "AttendanceSheet",     new[]{ "report_attendance" } },
+                { "StudentFees",         new[]{ "fees_view","fees_add","fees_update","fees_delete" } },
+                { "Courses",             new[]{ "course_view","course_add","course_update","course_delete" } },
+                { "COCRecord",           new[]{ "coc_view","coc_add","coc_update","coc_delete" } },
+            };
+
+            if (QAGrid == null) return;
+            foreach (UIElement child in QAGrid.Children)
+            {
+                if (child is not System.Windows.Controls.Button btn) continue;
+                string tag = btn.Tag?.ToString() ?? "";
+                if (permKeys.TryGetValue(tag, out string[]? keys))
+                {
+                    bool allowed = false;
+                    foreach (var k in keys) if (SessionUser.Has(k)) { allowed = true; break; }
+                    btn.Visibility = allowed ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
         }
 
         // ── Theme ──────────────────────────────────────────────────────────────
@@ -139,9 +177,20 @@ namespace CollegeManagementWPF.Views
 
         private async Task LoadStatsAsync()
         {
+            // Each stat card has its own dashboard permission
+            bool canSeeStudents  = SessionUser.IsSuperAdmin || SessionUser.Has("dashboard_students");
+            bool canSeeDepts     = SessionUser.IsSuperAdmin || SessionUser.Has("dashboard_departments");
+            bool canSeeStreams    = SessionUser.IsSuperAdmin || SessionUser.Has("dashboard_streams");
+            bool canSeeEmployees = SessionUser.IsSuperAdmin || SessionUser.Has("dashboard_employees");
+
             Dispatcher.Invoke(() => {
-                TxtStudents.Text = TxtDepartments.Text = TxtStreams.Text = TxtEmployees.Text = "...";
+                TxtStudents.Text    = canSeeStudents  ? "..." : "****";
+                TxtDepartments.Text = canSeeDepts     ? "..." : "****";
+                TxtStreams.Text     = canSeeStreams    ? "..." : "****";
+                TxtEmployees.Text   = canSeeEmployees ? "..." : "****";
             });
+
+            if (!canSeeStudents && !canSeeDepts && !canSeeStreams && !canSeeEmployees) return;
 
             try
             {
@@ -150,18 +199,18 @@ namespace CollegeManagementWPF.Views
                     var conn = _db.GetConnection();
                     if (conn == null) throw new Exception("DB connection returned null");
                     conn.Open();
-                    int students    = Count(conn, "SELECT COUNT(DISTINCT student_id) FROM ecc_dof_wukrostmarycollege.student_profile");
-                    int departments = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.departments");
-                    int streams     = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.streams");
-                    int employees   = Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile");
+                    int students    = canSeeStudents  ? Count(conn, "SELECT COUNT(DISTINCT student_id) FROM ecc_dof_wukrostmarycollege.student_profile") : -1;
+                    int departments = canSeeDepts     ? Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.departments") : -1;
+                    int streams     = canSeeStreams    ? Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.streams") : -1;
+                    int employees   = canSeeEmployees ? Count(conn, "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile") : -1;
                     conn.Close();
                     return (students, departments, streams, employees);
                 });
 
-                TxtStudents.Text    = result.students.ToString("N0");
-                TxtDepartments.Text = result.departments.ToString("N0");
-                TxtStreams.Text     = result.streams.ToString("N0");
-                TxtEmployees.Text   = result.employees.ToString("N0");
+                TxtStudents.Text    = result.students    >= 0 ? result.students.ToString("N0")    : "****";
+                TxtDepartments.Text = result.departments >= 0 ? result.departments.ToString("N0") : "****";
+                TxtStreams.Text     = result.streams      >= 0 ? result.streams.ToString("N0")     : "****";
+                TxtEmployees.Text   = result.employees   >= 0 ? result.employees.ToString("N0")   : "****";
             }
             catch (Exception ex)
             {

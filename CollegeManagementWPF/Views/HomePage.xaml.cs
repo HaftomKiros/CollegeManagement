@@ -75,7 +75,7 @@ namespace CollegeManagementWPF.Views
         {
             // Students section — shown if ANY student permission is granted
             { "StudentRegistration", new[]{ "student_view","student_register","student_update","student_delete","student_enroll" } },
-            { "StudentMarks",        new[]{ "marks_view","marks_add","marks_update","marks_delete" } },
+            { "StudentMarks",        new[]{ "marks_view","marks_add","marks_update","marks_delete","marks_attach" } },
             { "AssessmentRecords",   new[]{ "assess_view","assess_add","assess_update","assess_delete" } },
             { "StudentFees",         new[]{ "fees_view","fees_add","fees_update","fees_delete" } },
             { "DropoutStudents",     new[]{ "dropout_view","dropout_add","dropout_update","dropout_delete" } },
