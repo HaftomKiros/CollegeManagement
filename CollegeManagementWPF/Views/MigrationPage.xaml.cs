@@ -34,46 +34,168 @@ namespace CollegeManagementWPF.Views
         {
             if (string.IsNullOrWhiteSpace(TxtFolder.Text)) { TxtStatus.Text = "Please select a storage folder."; return; }
             BtnRun.IsEnabled = false;
-            TxtLog.Text = ""; TxtStatus.Text = "Checking migration status..."; Progress.Value = 0;
+            TxtLog.Text = ""; TxtStatus.Text = "Running migration..."; Progress.Value = 0;
 
             var log = new StringBuilder();
             var db  = new DBConnect();
-            var dir = string.IsNullOrWhiteSpace(TxtFolder.Text)
-                ? AppSettings.Current.StorageBasePath
-                : TxtFolder.Text;
-            Directory.CreateDirectory(Path.Combine(dir, "photos"));
-            Directory.CreateDirectory(Path.Combine(dir, "attachments"));
+            var dir = TxtFolder.Text.Trim();
+            var photosDir = Path.Combine(dir, "photos");
+            var attDir    = Path.Combine(dir, "attachments");
+            Directory.CreateDirectory(photosDir);
+            Directory.CreateDirectory(attDir);
+
+            AppSettings.Current.StorageBasePath = dir;
+            AppSettings.Current.Save();
 
             try
             {
                 await Task.Run(() =>
                 {
                     var conn = db.GetConnection(); conn.Open();
+
+                    // ── Step 1: Add path columns (safe — skip if already exist) ──
                     foreach (var sql in new[]
                     {
                         "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile ADD COLUMN photo_path VARCHAR(500) NULL",
                         "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile ADD COLUMN attachment_path VARCHAR(500) NULL"
                     })
-                    { try { new MySqlCommand(sql, conn).ExecuteNonQuery(); } catch { } }
+                    {
+                        try { new MySqlCommand(sql, conn).ExecuteNonQuery(); log.AppendLine("✓ Path column added."); }
+                        catch { log.AppendLine("  (path column already exists — OK)"); }
+                    }
 
-                    foreach (var sql in new[]
+                    // ── Step 2: Check if BLOB columns exist ──
+                    bool photoExists = false, attExists = false;
+                    try
                     {
-                        "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile MODIFY COLUMN photo LONGBLOB NULL",
-                        "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile MODIFY COLUMN attachment LONGBLOB NULL",
-                        "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile DROP COLUMN photo",
-                        "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile DROP COLUMN attachment",
-                    })
+                        using var chk = new MySqlCommand(
+                            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                            "WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' AND TABLE_NAME='student_profile' " +
+                            "AND COLUMN_NAME IN ('photo','attachment')", conn);
+                        int n = Convert.ToInt32(chk.ExecuteScalar());
+                        photoExists = n > 0;
+                        attExists = n > 1;
+                    }
+                    catch { }
+
+                    // ── Step 3: Extract BLOBs → save as files → update path column ──
+                    int extracted = 0, extractErrors = 0;
+                    if (photoExists || attExists)
                     {
-                        try { new MySqlCommand(sql, conn).ExecuteNonQuery(); log.AppendLine($"✓ {sql}"); }
-                        catch (Exception ex) { log.AppendLine($"  (skipped: {ex.Message.Split('\n')[0]})"); }
+                        log.AppendLine("Found BLOB columns — extracting photos and attachments...");
+                        try
+                        {
+                            string selCols = "student_id";
+                            if (photoExists)    selCols += ", photo";
+                            if (attExists)      selCols += ", attachment";
+                            using var cmdBlob = new MySqlCommand(
+                                $"SELECT {selCols} FROM ecc_dof_wukrostmarycollege.student_profile " +
+                                "WHERE photo IS NOT NULL OR attachment IS NOT NULL", conn);
+                            using var rBlob = cmdBlob.ExecuteReader();
+                            var blobRows = new System.Collections.Generic.List<(string sid, byte[]? photo, byte[]? att)>();
+                            while (rBlob.Read())
+                            {
+                                string sid = rBlob["student_id"]?.ToString() ?? "";
+                                byte[]? ph  = photoExists && rBlob["photo"] != DBNull.Value  ? (byte[])rBlob["photo"] : null;
+                                byte[]? at2 = attExists   && rBlob["attachment"] != DBNull.Value ? (byte[])rBlob["attachment"] : null;
+                                if (ph != null || at2 != null) blobRows.Add((sid, ph, at2));
+                            }
+                            rBlob.Close();
+
+                            foreach (var (sid, ph, at2) in blobRows)
+                            {
+                                try
+                                {
+                                    string safeSid = sid.Replace("/","_").Replace("\\","_").Replace(":","_");
+                                    string? ppPath = null, apPath = null;
+                                    if (ph != null && ph.Length > 0)
+                                    {
+                                        ppPath = Path.Combine(photosDir, $"{safeSid}.jpg");
+                                        File.WriteAllBytes(ppPath, ph);
+                                    }
+                                    if (at2 != null && at2.Length > 0)
+                                    {
+                                        apPath = Path.Combine(attDir, $"{safeSid}.pdf");
+                                        File.WriteAllBytes(apPath, at2);
+                                    }
+                                    using var upd = new MySqlCommand(
+                                        "UPDATE ecc_dof_wukrostmarycollege.student_profile " +
+                                        "SET photo_path=@pp, attachment_path=@ap WHERE student_id=@s", conn);
+                                    upd.Parameters.AddWithValue("@pp", (object?)ppPath ?? DBNull.Value);
+                                    upd.Parameters.AddWithValue("@ap", (object?)apPath ?? DBNull.Value);
+                                    upd.Parameters.AddWithValue("@s", sid);
+                                    upd.ExecuteNonQuery();
+                                    extracted++;
+                                }
+                                catch (Exception ex2) { extractErrors++; log.AppendLine($"  ✗ {sid}: {ex2.Message.Split('\n')[0]}"); }
+                            }
+                            log.AppendLine($"✓ Extracted {extracted} photos/attachments. Errors: {extractErrors}");
+                        }
+                        catch (Exception ex3) { log.AppendLine($"  BLOB extract error: {ex3.Message.Split('\n')[0]}"); }
+
+                        // ── Step 4: ONLY remove BLOB columns after extraction ──
+                        if (extractErrors == 0)
+                        {
+                            foreach (var sql in new[]
+                            {
+                                "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile MODIFY COLUMN photo LONGBLOB NULL",
+                                "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile DROP COLUMN photo",
+                                "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile MODIFY COLUMN attachment LONGBLOB NULL",
+                                "ALTER TABLE ecc_dof_wukrostmarycollege.student_profile DROP COLUMN attachment",
+                            })
+                            {
+                                try { new MySqlCommand(sql, conn).ExecuteNonQuery(); log.AppendLine("✓ BLOB column removed."); }
+                                catch (Exception ex) { log.AppendLine($"  (skipped: {ex.Message.Split('\n')[0]})"); }
+                            }
+                        }
+                        else
+                        {
+                            log.AppendLine($"  ⚠ {extractErrors} extraction errors — BLOB columns NOT removed to preserve data.");
+                        }
+                    }
+                    else
+                    {
+                        log.AppendLine("  (no BLOB columns — database already migrated)");
+
+                        // Re-point paths to new storage folder
+                        int repointed = 0;
+                        try
+                        {
+                            using var cmdR = new MySqlCommand(
+                                "SELECT DISTINCT student_id, photo_path, attachment_path " +
+                                "FROM ecc_dof_wukrostmarycollege.student_profile " +
+                                "WHERE (photo_path IS NOT NULL AND photo_path != '') " +
+                                "   OR (attachment_path IS NOT NULL AND attachment_path != '')", conn);
+                            using var rdr = cmdR.ExecuteReader();
+                            var list = new System.Collections.Generic.List<(string sid, string? pp, string? ap)>();
+                            while (rdr.Read())
+                                list.Add((rdr["student_id"]?.ToString()??"", rdr["photo_path"]?.ToString(), rdr["attachment_path"]?.ToString()));
+                            rdr.Close();
+                            foreach (var (sid, oldPp, oldAp) in list)
+                            {
+                                string? newPp = string.IsNullOrEmpty(oldPp) ? null : Path.Combine(photosDir, Path.GetFileName(oldPp));
+                                string? newAp = string.IsNullOrEmpty(oldAp) ? null : Path.Combine(attDir,    Path.GetFileName(oldAp));
+                                using var upd = new MySqlCommand(
+                                    "UPDATE ecc_dof_wukrostmarycollege.student_profile SET photo_path=@pp, attachment_path=@ap WHERE student_id=@s", conn);
+                                upd.Parameters.AddWithValue("@pp", (object?)newPp ?? DBNull.Value);
+                                upd.Parameters.AddWithValue("@ap", (object?)newAp ?? DBNull.Value);
+                                upd.Parameters.AddWithValue("@s", sid);
+                                upd.ExecuteNonQuery();
+                                repointed++;
+                            }
+                            log.AppendLine(repointed > 0
+                                ? $"✓ Re-pointed {repointed} paths to new storage folder."
+                                : "  (no existing paths to re-point — fresh install OK)");
+                        }
+                        catch (Exception ex) { log.AppendLine($"  (path re-point: {ex.Message.Split('\n')[0]})"); }
                     }
 
                     int total     = Convert.ToInt32(new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_profile", conn).ExecuteScalar());
                     int withPhoto = Convert.ToInt32(new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_profile WHERE photo_path IS NOT NULL AND photo_path != ''", conn).ExecuteScalar());
                     log.AppendLine($"\n✓ Total students: {total}");
                     log.AppendLine($"✓ With photo path: {withPhoto}");
-                    log.AppendLine($"✓ Storage: {dir}");
-                    log.AppendLine("\nBLOB columns removed. File paths in use.");
+                    log.AppendLine($"✓ Storage folder: {dir}");
+                    log.AppendLine("\n✓ Migration complete. Database is ready to use.");
                     conn.Close();
                 });
                 TxtLog.Text = log.ToString(); TxtStatus.Text = "Complete."; Progress.Value = 100;

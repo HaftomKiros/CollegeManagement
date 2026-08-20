@@ -11,8 +11,6 @@ Compression=lzma2/max
 SolidCompression=yes
 Uninstallable=yes
 UninstallDisplayName=College Management System
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

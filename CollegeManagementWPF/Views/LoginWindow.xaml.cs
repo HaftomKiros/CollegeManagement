@@ -102,11 +102,13 @@ namespace CollegeManagementWPF.Views
                 else
                     ShowError("Invalid username or password.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // DB is offline or unreachable → go to HomePage for UI testing
-                SessionUser.Load("admin", 1, 0, new DBConnect(host));
-                OpenHomePage();
+                // DB is offline or unreachable — show error, do NOT allow login
+                string msg = ex.Message.Contains("Unable to connect") || ex.Message.Contains("10061") || ex.Message.Contains("refused")
+                    ? $"Cannot connect to database server at {host}.\nMake sure MySQL/XAMPP is running and the host is correct."
+                    : $"Database error: {ex.Message.Split('\n')[0]}";
+                ShowError(msg);
             }
         }
 

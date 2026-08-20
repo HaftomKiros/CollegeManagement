@@ -1,42 +1,9 @@
-System.NullReferenceException: Object reference not set to an instance of an object.
-   at CollegeManagementWPF.Views.RolesPermissionsPage.TabBtnPerms_Checked(Object sender, RoutedEventArgs e) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\RolesPermissionsPage.xaml.cs:line 90
-   at System.Windows.EventRoute.InvokeHandlersImpl(Object source, RoutedEventArgs args, Boolean reRaised)
-   at System.Windows.UIElement.RaiseEventImpl(DependencyObject sender, RoutedEventArgs args)
-   at System.Windows.Controls.Primitives.ToggleButton.OnIsCheckedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-   at System.Windows.FrameworkElement.OnPropertyChanged(DependencyPropertyChangedEventArgs e)
-   at System.Windows.DependencyObject.NotifyPropertyChange(DependencyPropertyChangedEventArgs args)
-   at System.Windows.DependencyObject.UpdateEffectiveValue(EntryIndex entryIndex, DependencyProperty dp, PropertyMetadata metadata, EffectiveValueEntry oldEntry, EffectiveValueEntry& newEntry, Boolean coerceWithDeferredReference, Boolean coerceWithCurrentValue, OperationType operationType)
-   at System.Windows.DependencyObject.SetValueCommon(DependencyProperty dp, Object value, PropertyMetadata metadata, Boolean coerceWithDeferredReference, Boolean coerceWithCurrentValue, OperationType operationType, Boolean isInternal)
-   at System.Windows.Baml2006.WpfMemberInvoker.SetValue(Object instance, Object value)
-   at MS.Internal.Xaml.Runtime.ClrObjectRuntime.SetValue(Object inst, XamlMember property, Object value)
-   at MS.Internal.Xaml.Runtime.PartialTrustTolerantRuntime.SetValue(Object obj, XamlMember property, Object value)
-   at System.Xaml.XamlObjectWriter.Logic_ApplyPropertyValue(ObjectWriterContext ctx, XamlMember prop, Object value, Boolean onParent)
-   at System.Xaml.XamlObjectWriter.Logic_DoAssignmentToParentProperty(ObjectWriterContext ctx)
-   at System.Xaml.XamlObjectWriter.WriteEndMember()
-   at System.Windows.Markup.WpfXamlLoader.TransformNodes(XamlReader xamlReader, XamlObjectWriter xamlWriter, Boolean onlyLoadOneNode, Boolean skipJournaledProperties, Boolean shouldPassLineNumberInfo, IXamlLineInfo xamlLineInfo, IXamlLineInfoConsumer xamlLineInfoConsumer, XamlContextStack`1 stack, IStyleConnector styleConnector)
-   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
-   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
-   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
-   at System.Windows.Application.LoadComponent(Object component, Uri resourceLocator)
-   at CollegeManagementWPF.Views.RolesPermissionsPage.InitializeComponent() in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\RolesPermissionsPage.xaml:line 1
-   at CollegeManagementWPF.Views.RolesPermissionsPage..ctor() in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\RolesPermissionsPage.xaml.cs:line 82
-   at CollegeManagementWPF.Views.HomePage.NavButton_Click(Object sender, RoutedEventArgs e) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\HomePage.xaml.cs:line 424
-   at System.Windows.EventRoute.InvokeHandlersImpl(Object source, RoutedEventArgs args, Boolean reRaised)
-   at System.Windows.UIElement.RaiseEventImpl(DependencyObject sender, RoutedEventArgs args)
-   at System.Windows.Controls.Primitives.ButtonBase.OnClick()
-   at System.Windows.Controls.Button.OnClick()
-   at System.Windows.Controls.Primitives.ButtonBase.OnMouseLeftButtonUp(MouseButtonEventArgs e)
-   at System.Windows.RoutedEventArgs.InvokeHandler(Delegate handler, Object target)
-   at System.Windows.EventRoute.InvokeHandlersImpl(Object source, RoutedEventArgs args, Boolean reRaised)
-   at System.Windows.UIElement.ReRaiseEventAs(DependencyObject sender, RoutedEventArgs args, RoutedEvent newEvent)
-   at System.Windows.RoutedEventArgs.InvokeHandler(Delegate handler, Object target)
-   at System.Windows.EventRoute.InvokeHandlersImpl(Object source, RoutedEventArgs args, Boolean reRaised)
-   at System.Windows.UIElement.RaiseEventImpl(DependencyObject sender, RoutedEventArgs args)
-   at System.Windows.UIElement.RaiseTrustedEvent(RoutedEventArgs args)
-   at System.Windows.Input.InputManager.ProcessStagingArea()
-   at System.Windows.Interop.HwndMouseInputProvider.ReportInput(IntPtr hwnd, InputMode mode, Int32 timestamp, RawMouseActions actions, Int32 x, Int32 y, Int32 wheel)
-   at System.Windows.Interop.HwndMouseInputProvider.FilterMessage(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
-   at System.Windows.Interop.HwndSource.InputFilterMessage(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
-   at MS.Win32.HwndSubclass.DispatcherCallbackOperation(Object o)
+System.InvalidOperationException: Cannot set Owner property to a Window that has been closed.
+   at System.Windows.Window.set_Owner(Window value)
+   at CollegeManagementWPF.Views.ModernDialog.Show(Window owner, String message, String title, DialogType type) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\ModernDialog.xaml.cs:line 62
+   at CollegeManagementWPF.Views.StudentMarksPage.Msg(String m, Boolean ok) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\StudentMarksPage.xaml.cs:line 554
+   at CollegeManagementWPF.Views.StudentMarksPage.Load(String q) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\StudentMarksPage.xaml.cs:line 173
+   at CollegeManagementWPF.Views.StudentMarksPage.<.ctor>b__5_3(Object s, RoutedEventArgs e) in C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\Views\StudentMarksPage.xaml.cs:line 35
+   at System.Threading.Tasks.Task.<>c.<ThrowAsync>b__128_0(Object state)
    at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
    at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
