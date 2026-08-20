@@ -1,0 +1,218 @@
+<Window x:Class="CollegeManagementWPF.Views.AttachAssessmentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Assessment Record Documents" Width="960" Height="660"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="{DynamicResource RegCardInnerBg}">
+    <Window.Resources>
+        <Style x:Key="LB" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style x:Key="TF" TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource RegInputBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="30"/><Setter Property="Padding" Value="6,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CB" TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource RegInputBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/><Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="12"/><Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+                                <Grid>
+                                    <ToggleButton BorderThickness="0" Background="Transparent" IsChecked="{Binding IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" ClickMode="Press" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent" BorderThickness="0"/></ControlTemplate></ToggleButton.Template>
+                                    </ToggleButton>
+                                    <TextBox x:Name="PART_EditableTextBox" Background="Transparent" BorderThickness="0" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" Margin="6,0,24,0" VerticalAlignment="Center" IsReadOnly="{TemplateBinding IsReadOnly}" Visibility="Collapsed"/>
+                                    <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" Margin="8,0,24,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9" Foreground="#4A7ACC" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,7,0" IsHitTestVisible="False"/>
+                                </Grid>
+                            </Border>
+                            <Popup IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" Placement="Bottom" PopupAnimation="Slide">
+                                <Border Background="{DynamicResource RegInputBg}" BorderBrush="{DynamicResource RegInputBorder}" BorderThickness="1" CornerRadius="0,0,5,5" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="180">
+                                    <ScrollViewer><StackPanel IsItemsHost="True"/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEditable" Value="True">
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Background" Value="{DynamicResource RegInputBg}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+                    <Setter Property="Padding" Value="8,5"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Style.Resources>
+        </Style>
+        <Style x:Key="TC" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="6,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16,12,16,12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#F472B6" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock Text="Assessment Record Documents" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI"/>
+        </StackPanel>
+
+        <!-- Form card -->
+        <Border Grid.Row="1" Grid.Column="0" CornerRadius="10" Padding="14,12" Margin="0,0,10,10" BorderThickness="1">
+            <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+            <Border.Background><DynamicResource ResourceKey="RegPhotoBg"/></Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/><RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- Row 1: Dept | Stream -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Department ID" Style="{StaticResource LB}"/>
+                    <ComboBox x:Name="CmbDeptID" Style="{StaticResource CB}" IsEditable="True" SelectionChanged="CmbDeptID_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1">
+                    <TextBlock Text="Stream ID" Style="{StaticResource LB}"/>
+                    <ComboBox x:Name="CmbStreamID" Style="{StaticResource CB}" IsEditable="True" SelectionChanged="CmbStreamID_SelectionChanged"/>
+                </StackPanel>
+                <!-- Row 2: Level | Module -->
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Level ID" Style="{StaticResource LB}"/>
+                    <ComboBox x:Name="CmbLevelID" Style="{StaticResource CB}" IsEditable="True" SelectionChanged="CmbLevelID_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="1">
+                    <TextBlock Text="Module Code" Style="{StaticResource LB}"/>
+                    <ComboBox x:Name="CmbModCode" Style="{StaticResource CB}" IsEditable="True" StaysOpenOnEdit="True"/>
+                </StackPanel>
+                <!-- Row 3: Academic Year | Admission Type -->
+                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Academic Year" Style="{StaticResource LB}"/>
+                    <TextBox x:Name="TxtAcadYear" Style="{StaticResource TF}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="4" Grid.Column="1">
+                    <TextBlock Text="Admission Type" Style="{StaticResource LB}"/>
+                    <ComboBox x:Name="CmbAdmType" Style="{StaticResource CB}">
+                        <ComboBoxItem Content="Regular" IsSelected="True"/>
+                        <ComboBoxItem Content="Extension"/>
+                        <ComboBoxItem Content="Distance"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- File row + action buttons -->
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,10">
+            <TextBlock Text="Assessment Document (PDF/Word)" Style="{StaticResource LB}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="TxtFilePath" Grid.Column="0" Style="{StaticResource TF}" IsReadOnly="True" Margin="0,0,6,0"/>
+                <Button Grid.Column="1" Content="Browse" Click="BtnBrowse_Click" Height="30" FontSize="11" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="12,0" Margin="0,0,6,0">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="5" Background="#1A3A6A" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
+                </Button>
+                <Button Grid.Column="2" Content="Download" Click="BtnDownload_Click" Height="30" FontSize="11" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="12,0">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="5" Background="#1A6A3A" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
+                </Button>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Save"   Click="BtnSave_Click"   Height="32" FontSize="12" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="16,0" Margin="0,0,8,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="7" Background="#1A55DD" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                <Button Content="Update" Click="BtnUpdate_Click" Height="32" FontSize="12" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="16,0" Margin="0,0,8,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="7" Background="#1A9944" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                <Button Content="Delete" Click="BtnDelete_Click" Height="32" FontSize="12" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="16,0" Margin="0,0,8,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="7" Background="#CC2222" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                <Button Content="Reset"  Click="BtnReset_Click"  Height="32" FontSize="12" FontWeight="SemiBold" Foreground="#5577AA" Cursor="Hand" BorderThickness="0" Padding="16,0" Background="Transparent">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border Background="Transparent" Padding="{TemplateBinding Padding}"><TextBlock x:Name="txt" Text="Reset" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#5577AA" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="txt" Property="Foreground" Value="#4A9AEE"/><Setter TargetName="txt" Property="TextDecorations" Value="Underline"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Right search panel -->
+        <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" CornerRadius="10" Padding="12,14" BorderThickness="1" VerticalAlignment="Top">
+            <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+            <Border.Background><DynamicResource ResourceKey="RegPhotoBg"/></Border.Background>
+            <StackPanel>
+                <TextBlock Text="Search By:" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI" Foreground="{DynamicResource RegInputFg}" Margin="0,0,0,10"/>
+                <TextBlock Text="Dept ID"        Style="{StaticResource LB}"/><ComboBox x:Name="TxtSDept"   Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSDept_SelectionChanged"/>
+                <TextBlock Text="Stream ID"      Style="{StaticResource LB}"/><ComboBox x:Name="TxtSStream" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSStream_SelectionChanged"/>
+                <TextBlock Text="Level ID"       Style="{StaticResource LB}"/><ComboBox x:Name="TxtSLevel"  Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6" SelectionChanged="CmbSLevel_SelectionChanged"/>
+                <TextBlock Text="Module Code"    Style="{StaticResource LB}"/><ComboBox x:Name="TxtSModule" Style="{StaticResource CB}" IsEditable="True" Margin="0,0,0,6"/>
+                <TextBlock Text="Admission Type" Style="{StaticResource LB}"/>
+                <ComboBox x:Name="CmbSAdmType" Style="{StaticResource CB}" Margin="0,0,0,6">
+                    <ComboBoxItem Content="Regular" IsSelected="True"/>
+                    <ComboBoxItem Content="Extension"/>
+                    <ComboBoxItem Content="Distance"/>
+                </ComboBox>
+                <TextBlock Text="Academic Year" Style="{StaticResource LB}"/><TextBox x:Name="TxtSYear" Style="{StaticResource TF}" Margin="0,0,0,12"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Filter" Click="BtnFilter_Click" Height="30" FontSize="11" FontWeight="Bold" Foreground="White" Cursor="Hand" BorderThickness="0" Padding="12,0" Margin="0,0,6,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="6" Background="#1A55DD" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                    <Button Content="Reset"  Click="BtnFilterReset_Click" Height="30" FontSize="11" FontWeight="Bold" Foreground="#5577AA" Cursor="Hand" BorderThickness="0" Padding="10,0"><Button.Template><ControlTemplate TargetType="Button"><Border Background="Transparent" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border></ControlTemplate></Button.Template></Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Table -->
+        <Border Grid.Row="3" Grid.ColumnSpan="2" CornerRadius="10" BorderThickness="1" ClipToBounds="True" Margin="0,8,0,0">
+            <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+            <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
+            <DataGrid x:Name="GridDocs" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+                      Background="Transparent" RowBackground="{DynamicResource TableRowBg}"
+                      BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource RegInputBorder}"
+                      ColumnHeaderHeight="32" RowHeight="28" FontSize="11.5" FontFamily="Segoe UI"
+                      Foreground="{DynamicResource TableRowFg}" SelectionChanged="GridDocs_SelectionChanged">
+                <DataGrid.ColumnHeaderStyle><Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="{DynamicResource TableHeaderBg}"/><Setter Property="Foreground" Value="{DynamicResource TableHeaderFg}"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Padding" Value="8,0"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/></Style></DataGrid.ColumnHeaderStyle>
+                <DataGrid.RowStyle><Style TargetType="DataGridRow"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="Background" Value="{DynamicResource TableRowBg}"/><Style.Triggers><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource TableRowHoverBg}"/></Trigger></Style.Triggers></Style></DataGrid.RowStyle>
+                <DataGrid.CellStyle><Style TargetType="DataGridCell"><Setter Property="Foreground" Value="{DynamicResource TableRowFg}"/><Setter Property="BorderThickness" Value="0"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/><Style.Triggers><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="White"/></Trigger></Style.Triggers></Style></DataGrid.CellStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Dept ID"     Binding="{Binding doc_dept_id}"    Width="*"/>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Stream ID"   Binding="{Binding doc_stream_id}"  Width="*"/>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Level"       Binding="{Binding doc_level_id}"   Width="60"/>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Module"      Binding="{Binding doc_module_code}" Width="*"/>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Year"        Binding="{Binding doc_academic_year}" Width="70"/>
+                    <DataGridTextColumn ElementStyle="{StaticResource TC}" Header="Adm Type"    Binding="{Binding doc_admission_type}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Window>

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\App.xaml
-321115609754
+33-133912240
 
-38815802275
+39-616577222
 228-2108305584
-Resources\NavStyles.xaml;Views\AlumniPage.xaml;Views\AssessmentMarkListPage.xaml;Views\AssessmentRecordsPage.xaml;Views\AssignPathPage.xaml;Views\AttachMarkListWindow.xaml;Views\AttendanceSheetPage.xaml;Views\COCListPage.xaml;Views\COCRecordPage.xaml;Views\CoursesPage.xaml;Views\DashboardPage.xaml;Views\DepartmentsPage.xaml;Views\DropoutPage.xaml;Views\EmployeePage.xaml;Views\GradeConfigPage.xaml;Views\HomePage.xaml;Views\LevelsPage.xaml;Views\LibraryPage.xaml;Views\LoginWindow.xaml;Views\ManageAccountsPage.xaml;Views\MarkListPage.xaml;Views\MigrationPage.xaml;Views\ModernDialog.xaml;Views\PlaceholderPage.xaml;Views\RolesPermissionsPage.xaml;Views\ShortTrainingPage.xaml;Views\StreamsPage.xaml;Views\StudentFeesPage.xaml;Views\StudentMarksPage.xaml;Views\StudentRegistrationPage.xaml;Views\TVETAssessmentTranscriptPage.xaml;Views\TVETTranscriptPage.xaml;
+Resources\NavStyles.xaml;Views\AlumniPage.xaml;Views\AssessmentMarkListPage.xaml;Views\AssessmentRecordsPage.xaml;Views\AssignPathPage.xaml;Views\AttachAssessmentWindow.xaml;Views\AttachMarkListWindow.xaml;Views\AttendanceSheetPage.xaml;Views\COCListPage.xaml;Views\COCRecordPage.xaml;Views\CoursesPage.xaml;Views\DashboardPage.xaml;Views\DepartmentsPage.xaml;Views\DropoutPage.xaml;Views\EmployeePage.xaml;Views\GradeConfigPage.xaml;Views\HomePage.xaml;Views\LevelsPage.xaml;Views\LibraryPage.xaml;Views\LoginWindow.xaml;Views\ManageAccountsPage.xaml;Views\MarkListPage.xaml;Views\MigrationPage.xaml;Views\ModernDialog.xaml;Views\PlaceholderPage.xaml;Views\RolesPermissionsPage.xaml;Views\ShortTrainingPage.xaml;Views\StreamsPage.xaml;Views\StudentFeesPage.xaml;Views\StudentMarksPage.xaml;Views\StudentRegistrationPage.xaml;Views\TVETAssessmentTranscriptPage.xaml;Views\TVETTranscriptPage.xaml;
 
 False
 

@@ -72,7 +72,14 @@ namespace CollegeManagementWPF.Views
             BtnImport.Visibility   = SessionUser.Has("assess_import")   ? Visibility.Visible : Visibility.Collapsed;
             BtnTemplate.Visibility = SessionUser.Has("assess_template") ? Visibility.Visible : Visibility.Collapsed;
             BtnRemoveDup.Visibility= SessionUser.Has("assess_remove_dup") ? Visibility.Visible : Visibility.Collapsed;
+            BtnAttachAssessment.Visibility = (SessionUser.Has("assess_add") || SessionUser.Has("assess_view")) ? Visibility.Visible : Visibility.Collapsed;
             BtnClear.Visibility  = (SessionUser.Has("assess_add") || SessionUser.Has("assess_update")) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void BtnAttachAssessment_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var win = new AttachAssessmentWindow { Owner = Window.GetWindow(this) };
+            win.ShowDialog();
         }
 
         // Load all instructors from employee_profile into the dropdown on startup

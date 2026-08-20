@@ -16,6 +16,7 @@ namespace CollegeManagementWPF.Views
         private const string CREATE_SQL =
             "CREATE TABLE IF NOT EXISTS ecc_dof_wukrostmarycollege.short_training (" +
             "  id INT AUTO_INCREMENT PRIMARY KEY," +
+            "  student_id VARCHAR(50)," +
             "  full_name VARCHAR(150) NOT NULL," +
             "  sex VARCHAR(10)," +
             "  occupational_title VARCHAR(150)," +
@@ -27,7 +28,7 @@ namespace CollegeManagementWPF.Views
             ") ENGINE=InnoDB;";
 
         private const string BASE =
-            "SELECT id, full_name, sex, occupational_title, entry_year, " +
+            "SELECT id, student_id, full_name, sex, occupational_title, entry_year, " +
             "training_round, admission_type, duration, mobile_number " +
             "FROM ecc_dof_wukrostmarycollege.short_training";
 
@@ -63,7 +64,13 @@ namespace CollegeManagementWPF.Views
 
         private async Task EnsureTableAsync()
         {
-            try { await Task.Run(() => { var c=_db.GetConnection(); c.Open(); new MySqlCommand(CREATE_SQL,c).ExecuteNonQuery(); c.Close(); }); }
+            try { await Task.Run(() => {
+                var c=_db.GetConnection(); c.Open();
+                new MySqlCommand(CREATE_SQL,c).ExecuteNonQuery();
+                // Add student_id column if it doesn't exist (upgrade existing tables)
+                try { new MySqlCommand("ALTER TABLE ecc_dof_wukrostmarycollege.short_training ADD COLUMN student_id VARCHAR(50) AFTER id", c).ExecuteNonQuery(); } catch { }
+                c.Close();
+            }); }
             catch { }
         }
 
@@ -90,6 +97,7 @@ namespace CollegeManagementWPF.Views
         {
             if (Grid1.SelectedItem is not DataRowView r) return;
             _selId = r["id"] != DBNull.Value ? Convert.ToInt32(r["id"]) : -1;
+            TxtStudentId.Text    = r["student_id"]?.ToString() ?? "";
             TxtFullName.Text     = r["full_name"]?.ToString() ?? "";
             SetCombo(CmbSex,     r["sex"]?.ToString() ?? "");
             TxtOccupation.Text   = r["occupational_title"]?.ToString() ?? "";
@@ -109,14 +117,15 @@ namespace CollegeManagementWPF.Views
         // ── CRUD ──────────────────────────────────────────────────────────────
         private async void BtnSave_Click(object s, RoutedEventArgs e)
         {
-            string name  = TxtFullName.Text.Trim();
-            string sex   = CmbVal(CmbSex);
-            string occ   = TxtOccupation.Text.Trim();
-            string ey    = TxtEntryYear.Text.Trim();
-            string tr    = TxtTrainingRound.Text.Trim();
-            string at    = CmbVal(CmbAdmType);
-            string dur   = TxtDuration.Text.Trim();
-            string mob   = TxtMobile.Text.Trim();
+            string sid  = TxtStudentId.Text.Trim();
+            string name = TxtFullName.Text.Trim();
+            string sex  = CmbVal(CmbSex);
+            string occ  = TxtOccupation.Text.Trim();
+            string ey   = TxtEntryYear.Text.Trim();
+            string tr   = TxtTrainingRound.Text.Trim();
+            string at   = CmbVal(CmbAdmType);
+            string dur  = TxtDuration.Text.Trim();
+            string mob  = TxtMobile.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(name)) { Msg("Full Name is required.", false); return; }
             try
@@ -126,8 +135,9 @@ namespace CollegeManagementWPF.Views
                     var conn = _db.GetConnection(); conn.Open();
                     var cmd = new MySqlCommand(
                         "INSERT INTO ecc_dof_wukrostmarycollege.short_training " +
-                        "(full_name,sex,occupational_title,entry_year,training_round,admission_type,duration,mobile_number) " +
-                        "VALUES(@n,@sx,@oc,@ey,@tr,@at,@du,@mo)", conn);
+                        "(student_id,full_name,sex,occupational_title,entry_year,training_round,admission_type,duration,mobile_number) " +
+                        "VALUES(@si,@n,@sx,@oc,@ey,@tr,@at,@du,@mo)", conn);
+                    cmd.Parameters.AddWithValue("@si", sid);
                     cmd.Parameters.AddWithValue("@n",  name);
                     cmd.Parameters.AddWithValue("@sx", sex);
                     cmd.Parameters.AddWithValue("@oc", occ);
@@ -147,6 +157,7 @@ namespace CollegeManagementWPF.Views
         {
             if (_selId < 0) { Msg("Select a record first.", false); return; }
             int    id  = _selId;
+            string sid = TxtStudentId.Text.Trim();
             string name= TxtFullName.Text.Trim();
             string sex = CmbVal(CmbSex);
             string occ = TxtOccupation.Text.Trim();
@@ -162,9 +173,10 @@ namespace CollegeManagementWPF.Views
                     var conn = _db.GetConnection(); conn.Open();
                     var cmd = new MySqlCommand(
                         "UPDATE ecc_dof_wukrostmarycollege.short_training SET " +
-                        "full_name=@n,sex=@sx,occupational_title=@oc,entry_year=@ey," +
+                        "student_id=@si,full_name=@n,sex=@sx,occupational_title=@oc,entry_year=@ey," +
                         "training_round=@tr,admission_type=@at,duration=@du,mobile_number=@mo " +
                         "WHERE id=@id", conn);
+                    cmd.Parameters.AddWithValue("@si", sid);
                     cmd.Parameters.AddWithValue("@n",  name);
                     cmd.Parameters.AddWithValue("@sx", sex);
                     cmd.Parameters.AddWithValue("@oc", occ);
@@ -246,7 +258,7 @@ namespace CollegeManagementWPF.Views
 
         private void Clear()
         {
-            TxtFullName.Text = TxtOccupation.Text = TxtEntryYear.Text = "";
+            TxtStudentId.Text = TxtFullName.Text = TxtOccupation.Text = TxtEntryYear.Text = "";
             TxtTrainingRound.Text = TxtDuration.Text = TxtMobile.Text = "";
             CmbSex.SelectedIndex = -1; CmbAdmType.SelectedIndex = 0;
             _selId = -1;
