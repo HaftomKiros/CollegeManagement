@@ -41,7 +41,7 @@ namespace CollegeManagementWPF.Data
 
         public DBConnect(string host)
         {
-            _connString = $"Server={host};Database=ecc_dof_wukrostmarycollege;UserID=root;Password=;Connect Timeout=10;";
+            _connString = $"Server={host};Database=ecc_dof_wukrostmarycollege;UserID=root;Password=;Connect Timeout=30;Allow User Variables=True;";
         }
 
         public MySqlConnection GetConnection()
@@ -50,9 +50,9 @@ namespace CollegeManagementWPF.Data
             {
                 return new MySqlConnection(_connString);
             }
-            catch (MySqlException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Connection failed: {ex.Message}", "DB Error",
+                MessageBox.Show($"Failed to create connection:\n{_connString}\n\nError: {ex.Message}", "DB Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return null!;
             }

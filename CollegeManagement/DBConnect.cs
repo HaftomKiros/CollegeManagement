@@ -9,7 +9,6 @@ using System.Windows.Forms;
 namespace CollegeManagement
 {
 
-
     public class DBConnect
     {
         public MySqlConnection conn = null;

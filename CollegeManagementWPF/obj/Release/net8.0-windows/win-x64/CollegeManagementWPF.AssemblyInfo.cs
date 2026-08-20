@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CollegeManagementWPF")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bcdecb50264bd913675708d25998361a9bb7716a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6917b3ca0376fdc2094658f2546870f2d0ce8e09")]
 [assembly: System.Reflection.AssemblyProductAttribute("CollegeManagementWPF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CollegeManagementWPF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
