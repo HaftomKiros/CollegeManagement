@@ -38,14 +38,22 @@ namespace CollegeManagementWPF.Views
 
         // ── Path helpers: DB stores filename only, full path built at runtime ──
         private static string? ResolvePhotoPath(string? filename)
-            => string.IsNullOrWhiteSpace(filename) ? null
-               : Path.IsPathRooted(filename) ? filename   // legacy full-path fallback
-               : Path.Combine(AppSettings.Current.PhotosPath, filename);
+        {
+            if (string.IsNullOrWhiteSpace(filename)) return null;
+            filename = filename.Trim();
+            return Path.IsPathRooted(filename)
+                ? filename
+                : Path.Combine(AppSettings.Current.PhotosPath, filename);
+        }
 
         private static string? ResolveAttachPath(string? filename)
-            => string.IsNullOrWhiteSpace(filename) ? null
-               : Path.IsPathRooted(filename) ? filename   // legacy full-path fallback
-               : Path.Combine(AppSettings.Current.AttachmentsPath, filename);
+        {
+            if (string.IsNullOrWhiteSpace(filename)) return null;
+            filename = filename.Trim();
+            return Path.IsPathRooted(filename)
+                ? filename
+                : Path.Combine(AppSettings.Current.AttachmentsPath, filename);
+        }
 
         public StudentRegistrationPage()
         {
@@ -57,6 +65,8 @@ namespace CollegeManagementWPF.Views
             ApplyPermissions();
             Loaded += async (s, e) =>
             {
+                // Reload path config from DB each time the page loads
+                AppSettings.Reload();
                 await LoadDepartmentsAsync();
                 await LoadGridAsync(BASE_QUERY);
             };
@@ -362,17 +372,30 @@ namespace CollegeManagementWPF.Views
                             {
                                 try
                                 {
-                                    var bmp = new BitmapImage(new Uri(fullPp));
+                                    // Use BitmapCacheOption.OnLoad so file handle is released immediately
+                                    var bmp = new BitmapImage();
+                                    bmp.BeginInit();
+                                    bmp.UriSource        = new Uri(fullPp);
+                                    bmp.CacheOption      = BitmapCacheOption.OnLoad;
+                                    bmp.CreateOptions    = BitmapCreateOptions.IgnoreImageCache;
+                                    bmp.EndInit();
+                                    bmp.Freeze();
                                     ImgPreview.Source           = bmp;
                                     ImgPreview.Visibility       = Visibility.Visible;
                                     PhotoPlaceholder.Visibility = Visibility.Collapsed;
                                 }
-                                catch { }
+                                catch (Exception)
+                                {
+                                    ImgPreview.Visibility       = Visibility.Collapsed;
+                                    PhotoPlaceholder.Visibility = Visibility.Visible;
+                                }
                             }
                             else
                             {
                                 ImgPreview.Visibility       = Visibility.Collapsed;
                                 PhotoPlaceholder.Visibility = Visibility.Visible;
+                                if (!string.IsNullOrEmpty(pp))
+                                    TxtPhoto.Text = pp; // keep showing filename, just no preview
                             }
                         });
                     }
@@ -574,10 +597,10 @@ namespace CollegeManagementWPF.Views
                 if (_newPhotoSelected)
                 {
                     string photoExt = Path.GetExtension(TxtPhoto.Text);
-                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                    string safeId = sid.Trim().Replace("/","_").Replace("\\","_").Replace(":","_")
                                        .Replace("*","_").Replace("?","_").Replace("\"","_")
                                        .Replace("<","_").Replace(">","_").Replace("|","_");
-                    string fileName = $"{safeId}{photoExt}";   // no level suffix — shared across levels
+                    string fileName = $"{safeId}{photoExt}";
                     File.Copy(TxtPhoto.Text, Path.Combine(AppSettings.Current.PhotosPath, fileName), overwrite: true);
                     photoPath = fileName;
                 }
@@ -586,10 +609,10 @@ namespace CollegeManagementWPF.Views
                 if (_newAttachSelected)
                 {
                     string attachExt = Path.GetExtension(TxtAttach.Text);
-                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                    string safeId = sid.Trim().Replace("/","_").Replace("\\","_").Replace(":","_")
                                        .Replace("*","_").Replace("?","_").Replace("\"","_")
                                        .Replace("<","_").Replace(">","_").Replace("|","_");
-                    string fileName = $"{safeId}{attachExt}";  // no level suffix — shared across levels
+                    string fileName = $"{safeId}{attachExt}";
                     File.Copy(TxtAttach.Text, Path.Combine(AppSettings.Current.AttachmentsPath, fileName), overwrite: true);
                     attachPath = fileName;
                 }
@@ -659,20 +682,20 @@ namespace CollegeManagementWPF.Views
                 if (_newPhotoSelected && File.Exists(TxtPhoto.Text))
                 {
                     Directory.CreateDirectory(AppSettings.Current.PhotosPath);
-                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                    string safeId = sid.Trim().Replace("/","_").Replace("\\","_").Replace(":","_")
                                        .Replace("*","_").Replace("?","_").Replace("\"","_")
                                        .Replace("<","_").Replace(">","_").Replace("|","_");
-                    string fileName = $"{safeId}{Path.GetExtension(TxtPhoto.Text)}";  // no level suffix
+                    string fileName = $"{safeId}{Path.GetExtension(TxtPhoto.Text)}";
                     File.Copy(TxtPhoto.Text, Path.Combine(AppSettings.Current.PhotosPath, fileName), overwrite: true);
                     newPP = fileName;
                 }
                 if (_newAttachSelected && File.Exists(TxtAttach.Text))
                 {
                     Directory.CreateDirectory(AppSettings.Current.AttachmentsPath);
-                    string safeId = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                    string safeId = sid.Trim().Replace("/","_").Replace("\\","_").Replace(":","_")
                                        .Replace("*","_").Replace("?","_").Replace("\"","_")
                                        .Replace("<","_").Replace(">","_").Replace("|","_");
-                    string fileName = $"{safeId}{Path.GetExtension(TxtAttach.Text)}";  // no level suffix
+                    string fileName = $"{safeId}{Path.GetExtension(TxtAttach.Text)}";
                     File.Copy(TxtAttach.Text, Path.Combine(AppSettings.Current.AttachmentsPath, fileName), overwrite: true);
                     newAP = fileName;
                 }

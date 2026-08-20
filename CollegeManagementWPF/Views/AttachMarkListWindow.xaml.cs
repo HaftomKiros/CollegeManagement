@@ -291,8 +291,15 @@ namespace CollegeManagementWPF.Views
                         pathCmd.Parameters.AddWithValue("@y",_selYear); pathCmd.Parameters.AddWithValue("@at",_selAdmType);
                         string? fp = pathCmd.ExecuteScalar()?.ToString()?.Trim();
                         conn.Close();
-                        if (!string.IsNullOrEmpty(fp) && File.Exists(fp))
-                            return File.ReadAllBytes(fp);
+                        if (!string.IsNullOrEmpty(fp))
+                        {
+                            // Resolve full path: filename only → prepend configured folder
+                            string fullPath = Path.IsPathRooted(fp)
+                                ? fp
+                                : Path.Combine(AppSettings.Current.MarkListsPath, fp);
+                            if (File.Exists(fullPath))
+                                return File.ReadAllBytes(fullPath);
+                        }
                     }
                     catch { }
 
@@ -342,7 +349,7 @@ namespace CollegeManagementWPF.Views
                 if (dup) { ModernDialog.Show(this, "Error. This mark list is already attached!", "Error", ModernDialog.DialogType.Error); return; }
 
                 byte[] fileBytes = await File.ReadAllBytesAsync(path);
-                // Save to configured mark list path and store file path in DB
+                // Save to configured mark list path — store filename only in DB
                 string mlDir = AppSettings.Current.MarkListsPath;
                 Directory.CreateDirectory(mlDir);
                 string safeId(string s) => s.Replace("/","_").Replace("\\","_").Replace(":","_")
@@ -365,7 +372,7 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@d",dept); cmd.Parameters.AddWithValue("@s",stream);
                     cmd.Parameters.AddWithValue("@l",level); cmd.Parameters.AddWithValue("@m",mod);
                     cmd.Parameters.AddWithValue("@y",year); cmd.Parameters.AddWithValue("@at",adm);
-                    cmd.Parameters.AddWithValue("@fp",destPath);
+                    cmd.Parameters.AddWithValue("@fp", fname);  // filename only
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
                 ModernDialog.Show(this, "Saved successfully!", "Success", ModernDialog.DialogType.Success);
@@ -387,23 +394,28 @@ namespace CollegeManagementWPF.Views
             // Use newly browsed file if available, otherwise keep existing
             string path = TxtFilePath.Text.Trim();
             bool isNewFile = !string.IsNullOrEmpty(path) && File.Exists(path);
-            bool hasExisting = !string.IsNullOrEmpty(_existingFilePath) && File.Exists(_existingFilePath);
+            // Resolve existing stored filename to full path for existence check
+            string existingFullPath = string.IsNullOrEmpty(_existingFilePath) ? "" :
+                Path.IsPathRooted(_existingFilePath)
+                    ? _existingFilePath
+                    : Path.Combine(AppSettings.Current.MarkListsPath, _existingFilePath);
+            bool hasExisting = !string.IsNullOrEmpty(existingFullPath) && File.Exists(existingFullPath);
 
             if (!isNewFile && !hasExisting)
             { ModernDialog.Show(this, "No file available. Please Browse and select a file.", "Info", ModernDialog.DialogType.Info); return; }
 
             // Determine actual file to use
-            string sourceFile = isNewFile ? path : _existingFilePath;
+            string sourceFile = isNewFile ? path : existingFullPath;
 
             try
             {
-                // Copy to configured mark list folder
+                // Copy to configured mark list folder — store filename only in DB
                 string mlDir = AppSettings.Current.MarkListsPath;
                 Directory.CreateDirectory(mlDir);
                 string safeId(string s) => s.Replace("/","_").Replace("\\","_").Replace(":","_")
                                             .Replace("*","_").Replace("?","_").Replace(" ","_");
                 string fname = $"{safeId(_selDept)}_{safeId(_selStream)}_{safeId(_selLevel)}_{safeId(_selMod)}_{safeId(_selYear)}_{safeId(_selAdmType)}{Path.GetExtension(sourceFile)}";
-                string destPath = isNewFile ? Path.Combine(mlDir, fname) : sourceFile; // keep same path if not replacing
+                string destPath = Path.Combine(mlDir, fname);
                 if (isNewFile)
                 {
                     byte[] fileBytes = await File.ReadAllBytesAsync(sourceFile);
@@ -413,20 +425,19 @@ namespace CollegeManagementWPF.Views
                 await Task.Run(() =>
                 {
                     var conn = _db.GetConnection(); conn.Open();
-                    // Update doc_file_path
                     using var cmd = new MySqlCommand(
                         "UPDATE ecc_dof_wukrostmarycollege.mark_list_docs SET doc_file_path=@fp " +
                         "WHERE doc_dept_id=@d AND doc_stream_id=@s AND doc_level_id=@l " +
                         "AND doc_module_code=@m AND doc_academic_year=@y AND doc_admission_type=@at", conn);
-                    cmd.Parameters.AddWithValue("@fp",destPath);
+                    cmd.Parameters.AddWithValue("@fp", fname);  // filename only
                     cmd.Parameters.AddWithValue("@d",_selDept); cmd.Parameters.AddWithValue("@s",_selStream);
                     cmd.Parameters.AddWithValue("@l",_selLevel); cmd.Parameters.AddWithValue("@m",_selMod);
                     cmd.Parameters.AddWithValue("@y",_selYear); cmd.Parameters.AddWithValue("@at",_selAdmType);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
 
-                _existingFilePath = destPath;
-                TxtFilePath.Text = Path.GetFileName(destPath);
+                _existingFilePath = fname;
+                TxtFilePath.Text = fname;
                 ModernDialog.Show(this, "Update successful!", "Success", ModernDialog.DialogType.Success);
                 await LoadGrid(BASE);
             }

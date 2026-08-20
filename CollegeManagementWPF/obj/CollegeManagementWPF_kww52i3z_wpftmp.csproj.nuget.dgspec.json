@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\CollegeManagementWPF\\CollegeManagementWPF.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\CollegeManagementWPF\\CollegeManagementWPF.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\CollegeManagementWPF\\CollegeManagementWPF.csproj",
+        "projectName": "CollegeManagementWPF",
+        "projectPath": "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\CollegeManagementWPF\\CollegeManagementWPF.csproj",
+        "packagesPath": "C:\\Users\\IN-TECH\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\IN-TECH\\Desktop\\welday\\C# source code\\2018 CollegeManagement\\CollegeManagementWPF\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\IN-TECH\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0-windows7.0": {
+            "targetAlias": "net8.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.102.3, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.3.0, )"
+            },
+            "PdfSharp-MigraDoc": {
+              "target": "Package",
+              "version": "[6.1.1, )"
+            },
+            "WPF-UI": {
+              "target": "Package",
+              "version": "[3.0.5, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.424/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

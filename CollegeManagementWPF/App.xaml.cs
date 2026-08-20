@@ -24,6 +24,12 @@ namespace CollegeManagementWPF
             base.OnStartup(e);
             ThemeManager.Apply();
 
+            // Load path configuration from DB (async — non-blocking)
+            Task.Run(() =>
+            {
+                try { AppSettings.Reload(); } catch { }
+            });
+
             // One-time: drop legacy BLOB columns if they still exist
             Task.Run(() =>
             {
@@ -55,6 +61,28 @@ namespace CollegeManagementWPF
                         }
                         catch { }
                     }
+                    // Strip full path prefix from doc_file_path — keep filename only
+                    try
+                    {
+                        new MySql.Data.MySqlClient.MySqlCommand(
+                            "UPDATE ecc_dof_wukrostmarycollege.mark_list_docs " +
+                            "SET doc_file_path = SUBSTRING_INDEX(REPLACE(doc_file_path,'\\\\','/'), '/', -1) " +
+                            "WHERE doc_file_path IS NOT NULL AND doc_file_path != '' " +
+                            "AND (doc_file_path LIKE '%\\\\%' OR doc_file_path LIKE '%/%')",
+                            conn).ExecuteNonQuery();
+                    }
+                    catch { }
+                    // Same for assessment_docs
+                    try
+                    {
+                        new MySql.Data.MySqlClient.MySqlCommand(
+                            "UPDATE ecc_dof_wukrostmarycollege.assessment_docs " +
+                            "SET doc_file_path = SUBSTRING_INDEX(REPLACE(doc_file_path,'\\\\','/'), '/', -1) " +
+                            "WHERE doc_file_path IS NOT NULL AND doc_file_path != '' " +
+                            "AND (doc_file_path LIKE '%\\\\%' OR doc_file_path LIKE '%/%')",
+                            conn).ExecuteNonQuery();
+                    }
+                    catch { }
                     conn.Close();
                 }
                 catch { /* DB not available, skip */ }

@@ -14,8 +14,8 @@ namespace CollegeManagementWPF.Views
         public MigrationPage()
         {
             InitializeComponent();
-            TxtFolder.Text   = AppSettings.Current.StorageBasePath;
-            TxtMlFolder.Text = AppSettings.Current.MarkListBasePath;
+            TxtFolder.Text   = AppSettings.Current.PhotosPath;
+            TxtMlFolder.Text = AppSettings.Current.MarkListsPath;
         }
 
         // ── Tab 1: Student Profile BLOB migration ─────────────────────────────
@@ -50,14 +50,11 @@ namespace CollegeManagementWPF.Views
 
             var log       = new StringBuilder();
             var db        = new DBConnect();
-            var dir       = TxtFolder.Text.Trim();
-            var photosDir = Path.Combine(dir, "photos");
-            var attDir    = Path.Combine(dir, "attachments");
+            var photosDir = AppSettings.Current.PhotosPath;
+            var attDir    = AppSettings.Current.AttachmentsPath;
 
             Directory.CreateDirectory(photosDir);
             Directory.CreateDirectory(attDir);
-            AppSettings.Current.StorageBasePath = dir;
-            AppSettings.Current.Save();
 
             MySqlConnection NewConn()
             {
@@ -176,7 +173,8 @@ namespace CollegeManagementWPF.Views
                                 var parts  = sidLvl.Split('|');
                                 string sid = parts[0];
                                 string lvl = parts.Length > 1 ? parts[1] : "";
-                                string safeSid = sid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                string safeSid = sid.Trim()
+                                                    .Replace("/","_").Replace("\\","_").Replace(":","_")
                                                     .Replace("*","_").Replace("?","_").Replace("\"","_")
                                                     .Replace("<","_").Replace(">","_").Replace("|","_");
                                 try
@@ -311,7 +309,8 @@ namespace CollegeManagementWPF.Views
                     int withPhoto = Convert.ToInt32(new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.student_profile WHERE photo_path IS NOT NULL AND photo_path!=''", cFinal).ExecuteScalar());
                     log.AppendLine($"\n✓ Total students: {total}");
                     log.AppendLine($"✓ With photo path: {withPhoto}");
-                    log.AppendLine($"✓ Storage folder: {dir}");
+                    log.AppendLine($"✓ Photos folder: {photosDir}");
+                    log.AppendLine($"✓ Attachments folder: {attDir}");
                     log.AppendLine("\n✓ Migration complete. Database is ready to use.");
                 });
 
@@ -364,9 +363,9 @@ namespace CollegeManagementWPF.Views
 
             var log = new StringBuilder();
             var db  = new DBConnect();
-            var dir = TxtMlFolder.Text.Trim();
+            var dir = AppSettings.Current.MarkListsPath;
             Directory.CreateDirectory(dir);
-            AppSettings.Current.MarkListBasePath = dir;
+            AppSettings.Current.MarkListsPath = dir;
             AppSettings.Current.Save();
 
             try

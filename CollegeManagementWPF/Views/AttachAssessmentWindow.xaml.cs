@@ -227,8 +227,8 @@ namespace CollegeManagementWPF.Views
                     conn.Close();
                     return v ?? "";
                 });
-                _existingFilePath = fp;
-                TxtFilePath.Text = string.IsNullOrEmpty(fp) ? "[No file stored]" : Path.GetFileName(fp);
+                _existingFilePath = fp;  // filename only
+                TxtFilePath.Text = string.IsNullOrEmpty(fp) ? "[No file stored]" : fp;
             }
             catch { TxtFilePath.Text = "[No file stored]"; }
         }
@@ -245,11 +245,19 @@ namespace CollegeManagementWPF.Views
         private async void BtnDownload_Click(object sender, RoutedEventArgs e)
         {
             if (_selId < 0) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
-            if (string.IsNullOrEmpty(_existingFilePath) || !File.Exists(_existingFilePath))
+
+            // Resolve full path from stored filename
+            string fullPath = string.IsNullOrEmpty(_existingFilePath) ? "" :
+                Path.IsPathRooted(_existingFilePath)
+                    ? _existingFilePath
+                    : Path.Combine(AppSettings.Current.AssessmentsPath, _existingFilePath);
+
+            if (string.IsNullOrEmpty(fullPath) || !File.Exists(fullPath))
             { ModernDialog.Show(this, "No file found for this record.", "Info", ModernDialog.DialogType.Info); return; }
-            var dlg = new SaveFileDialog { FileName = Path.GetFileName(_existingFilePath), Filter = "All Files|*.*" };
+
+            var dlg = new SaveFileDialog { FileName = Path.GetFileName(fullPath), Filter = "All Files|*.*" };
             if (dlg.ShowDialog() != true) return;
-            try { File.Copy(_existingFilePath, dlg.FileName, true); ModernDialog.Show(this, "Downloaded!", "Success", ModernDialog.DialogType.Success); }
+            try { File.Copy(fullPath, dlg.FileName, true); ModernDialog.Show(this, "Downloaded!", "Success", ModernDialog.DialogType.Success); }
             catch (Exception ex) { ModernDialog.Show(this, ex.Message, "Error", ModernDialog.DialogType.Error); }
             await Task.CompletedTask;
         }
@@ -270,7 +278,7 @@ namespace CollegeManagementWPF.Views
 
             try
             {
-                string mlDir = Path.Combine(AppSettings.Current.MarkListsPath, "assessments");
+                string mlDir = AppSettings.Current.AssessmentsPath;
                 Directory.CreateDirectory(mlDir);
                 string fname = SafeName(dept) + "_" + SafeName(lv) + "_" + SafeName(mod) + "_" + SafeName(year) + "_" + SafeName(adm) + Path.GetExtension(path);
                 string dest  = Path.Combine(mlDir, fname);
@@ -289,7 +297,7 @@ namespace CollegeManagementWPF.Views
                     cmd.Parameters.AddWithValue("@m",  mod);
                     cmd.Parameters.AddWithValue("@y",  year);
                     cmd.Parameters.AddWithValue("@at", adm);
-                    cmd.Parameters.AddWithValue("@fp", dest);
+                    cmd.Parameters.AddWithValue("@fp", fname);  // filename only
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
                 ModernDialog.Show(this, "Saved successfully!", "Success", ModernDialog.DialogType.Success);
@@ -303,18 +311,27 @@ namespace CollegeManagementWPF.Views
             if (_selId < 0) { ModernDialog.Show(this, "Select a record first.", "Info", ModernDialog.DialogType.Info); return; }
             string path = TxtFilePath.Text.Trim();
             bool isNewFile = !string.IsNullOrEmpty(path) && File.Exists(path) && path != _existingFilePath;
+            // Resolve stored filename to full path for existence check
+            string existingFull = string.IsNullOrEmpty(_existingFilePath) ? "" :
+                Path.IsPathRooted(_existingFilePath)
+                    ? _existingFilePath
+                    : Path.Combine(AppSettings.Current.AssessmentsPath, _existingFilePath);
+            if (!isNewFile && !File.Exists(existingFull))
+            { ModernDialog.Show(this, "No file available. Please Browse and select a file.", "Info", ModernDialog.DialogType.Info); return; }
+
             string destPath = _existingFilePath;
 
             if (isNewFile)
             {
                 try
                 {
-                    string mlDir = Path.Combine(AppSettings.Current.MarkListsPath, "assessments");
+                    string mlDir = AppSettings.Current.AssessmentsPath;
                     Directory.CreateDirectory(mlDir);
                     string fname = SafeName(_selDept) + "_" + SafeName(_selLevel) + "_" + SafeName(_selMod) + "_" + SafeName(_selYear) + "_" + SafeName(_selAdmType) + Path.GetExtension(path);
-                    destPath = Path.Combine(mlDir, fname);
+                    string dest = Path.Combine(mlDir, fname);
                     byte[] bytes = await File.ReadAllBytesAsync(path);
-                    await File.WriteAllBytesAsync(destPath, bytes);
+                    await File.WriteAllBytesAsync(dest, bytes);
+                    destPath = fname;  // store filename only
                 }
                 catch (Exception ex) { ModernDialog.Show(this, ex.Message, "Error", ModernDialog.DialogType.Error); return; }
             }
@@ -325,7 +342,7 @@ namespace CollegeManagementWPF.Views
                 {
                     var conn = _db.GetConnection(); conn.Open();
                     var cmd = new MySqlCommand("UPDATE " + TABLE + " SET doc_file_path=@fp WHERE id=@id", conn);
-                    cmd.Parameters.AddWithValue("@fp", destPath);
+                    cmd.Parameters.AddWithValue("@fp", destPath);  // filename only
                     cmd.Parameters.AddWithValue("@id", _selId);
                     cmd.ExecuteNonQuery(); conn.Close();
                 });
