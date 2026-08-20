@@ -583,3 +583,5 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Release\net8.0-windows\win-x64\CollegeManagementWPF.pdb
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Release\net8.0-windows\win-x64\CollegeManagementWPF.genruntimeconfig.cache
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Release\net8.0-windows\win-x64\ref\CollegeManagementWPF.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Release\net8.0-windows\win-x64\Views\AttachAssessmentWindow.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Release\net8.0-windows\win-x64\Views\AttachAssessmentWindow.g.cs
