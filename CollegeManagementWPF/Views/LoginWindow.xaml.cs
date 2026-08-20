@@ -10,9 +10,28 @@ namespace CollegeManagementWPF.Views
 {
     public partial class LoginWindow : FluentWindow
     {
+        private static readonly string HostFile = System.IO.Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "StMaryCollege", "lasthost.txt");
+
         public LoginWindow()
         {
             InitializeComponent();
+            // Restore last used host
+            try
+            {
+                if (System.IO.File.Exists(HostFile))
+                {
+                    string saved = System.IO.File.ReadAllText(HostFile).Trim();
+                    var parts = saved.Split('.');
+                    if (parts.Length == 4)
+                    {
+                        IP_a.Text = parts[0]; IP_b.Text = parts[1];
+                        IP_c.Text = parts[2]; IP_d.Text = parts[3];
+                    }
+                }
+            }
+            catch { }
         }
 
         private void Input_KeyDown(object sender, KeyEventArgs e)
@@ -45,7 +64,11 @@ namespace CollegeManagementWPF.Views
                    c = IP_c.Text.Trim(), d = IP_d.Text.Trim();
             if (!string.IsNullOrEmpty(a) && !string.IsNullOrEmpty(b) &&
                 !string.IsNullOrEmpty(c) && !string.IsNullOrEmpty(d))
+            {
                 host = $"{a}.{b}.{c}.{d}";
+                // Persist host for next launch
+                try { System.IO.File.WriteAllText(HostFile, host); } catch { }
+            }
 
             // Try DB login — catch ALL exceptions, not just MySqlException
             try

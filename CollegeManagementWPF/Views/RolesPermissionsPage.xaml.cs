@@ -62,6 +62,13 @@ namespace CollegeManagementWPF.Views
                 ("coc_update", "Update"),
                 ("coc_delete", "Delete")}),
 
+            ("Short Training",     "\uE736", "#F59E0B", new List<(string,string)>{
+                ("short_view",   "View"),
+                ("short_add",    "Register"),
+                ("short_update", "Update"),
+                ("short_delete", "Delete"),
+                ("short_report", "Generate Report")}),
+
             ("Departments",        "\uE731", "#67E8F9", new List<(string,string)>{
                 ("dept_view",   "View"),
                 ("dept_add",    "Add"),

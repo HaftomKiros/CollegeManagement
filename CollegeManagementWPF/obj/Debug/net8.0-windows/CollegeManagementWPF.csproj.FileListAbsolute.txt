@@ -122,3 +122,5 @@ C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeMan
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\bin\Debug\net8.0-windows\CollegeManagementWPF.pdb
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\CollegeManagementWPF.genruntimeconfig.cache
 C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\ref\CollegeManagementWPF.dll
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\ShortTrainingPage.baml
+C:\Users\IN-TECH\Desktop\welday\C# source code\2018 CollegeManagement\CollegeManagementWPF\obj\Debug\net8.0-windows\Views\ShortTrainingPage.g.cs

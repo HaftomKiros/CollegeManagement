@@ -80,6 +80,7 @@ namespace CollegeManagementWPF.Views
             { "StudentFees",         new[]{ "fees_view","fees_add","fees_update","fees_delete" } },
             { "DropoutStudents",     new[]{ "dropout_view","dropout_add","dropout_update","dropout_delete" } },
             { "COCRecord",           new[]{ "coc_view","coc_add","coc_update","coc_delete" } },
+            { "ShortTraining",       new[]{ "short_view","short_add","short_update","short_delete" } },
             // Departments section
             { "Departments",         new[]{ "dept_view","dept_add","dept_update","dept_delete" } },
             { "Streams",             new[]{ "stream_view","stream_add","stream_update","stream_delete" } },
@@ -389,6 +390,7 @@ namespace CollegeManagementWPF.Views
                 "GradeConfig"         => "Grade Configuration",
                 "DropoutStudents"     => "Dropout Students",
                 "COCRecord"           => "COC Record",
+                "ShortTraining"       => "Short Training",
                 _                     => tag
             };
 
@@ -403,6 +405,7 @@ namespace CollegeManagementWPF.Views
                 "StudentFees"         => "Record, Update, Delete Student Fees",
                 "DropoutStudents"     => "Manage Dropout Student Records",
                 "COCRecord"           => "Manage COC Records",
+                "ShortTraining"       => "Register Short Training Students",
                 "Departments"         => "Add, Update, Delete Departments",
                 "Streams"             => "Add, Update, Delete Streams",
                 "Levels"              => "Add, Update, Delete Levels",
@@ -438,6 +441,7 @@ namespace CollegeManagementWPF.Views
                 "StudentFees"         => new StudentFeesPage(),
                 "DropoutStudents"     => new DropoutPage(),
                 "COCRecord"           => new COCRecordPage(),
+                "ShortTraining"       => new ShortTrainingPage(),
                 "Departments"         => new DepartmentsPage(),
                 "Streams"             => new StreamsPage(),
                 "Levels"              => new LevelsPage(),

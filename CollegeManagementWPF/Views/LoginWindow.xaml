@@ -79,18 +79,19 @@
                     <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#1166AA" Offset="0"/><GradientStop Color="Transparent" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
                 </Ellipse>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="30,0">
-                    <Image Source="/Assets/st_mary_logo.png" Width="100" Height="100" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,0,16"/>
-                    <TextBlock Text="Wukro St. Mary College" FontSize="20" FontWeight="Bold" Foreground="White" TextAlignment="Center" FontFamily="Segoe UI" Margin="0,0,0,6"/>
-                    <TextBlock Text="Solutions for a better tomorrow" FontSize="11" FontStyle="Italic" Foreground="#5577AA" TextAlignment="Center" FontFamily="Segoe UI"/>
-                    <Rectangle Height="2" Width="60" Margin="0,14,0,14" HorizontalAlignment="Center">
-                        <Rectangle.Fill>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="Transparent" Offset="0"/><GradientStop Color="#2255DD" Offset="0.5"/><GradientStop Color="Transparent" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-                    <TextBlock Text="Welcome Back!" FontSize="17" FontWeight="Bold" Foreground="White" TextAlignment="Center" FontFamily="Segoe UI"/>
-                    <TextBlock Text="Please sign in to continue" FontSize="11" Foreground="#5577AA" TextAlignment="Center" FontFamily="Segoe UI" Margin="0,5,0,0"/>
+                    <Image Source="/Assets/st_mary_logo.png" Width="110" Height="110" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,0,24"/>
+                    <TextBlock Text="Welcome to Ethiopian Catholic Diocese of Adigrat"
+                               FontSize="16" FontWeight="Bold" Foreground="White"
+                               TextAlignment="Center" FontFamily="Segoe UI"
+                               TextWrapping="Wrap" Margin="0,0,0,10"/>
+                    <TextBlock Text="Wukro St.Mary's College"
+                               FontSize="18" FontWeight="Bold" Foreground="White"
+                               TextAlignment="Center" FontFamily="Segoe UI"
+                               Margin="0,0,0,10"/>
+                    <TextBlock Text="College Management System"
+                               FontSize="13" FontStyle="Italic" FontWeight="SemiBold"
+                               Foreground="#A0AEC0"
+                               TextAlignment="Center" FontFamily="Segoe UI"/>
                 </StackPanel>
                 <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="16,0,0,16" CornerRadius="20" Padding="12,6" BorderThickness="1" BorderBrush="#3A3A6A">
                     <Border.Background><SolidColorBrush Color="#1A1A3A"/></Border.Background>
@@ -123,18 +124,30 @@
                                 <ui:PasswordBox.Icon><ui:SymbolIcon Symbol="LockClosed24"/></ui:PasswordBox.Icon>
                             </ui:PasswordBox>
                             <Expander Header="Database Host  (optional)" Foreground="#8888AA" FontFamily="Segoe UI" FontSize="11" Margin="0,8,0,20" IsExpanded="False">
-                                <StackPanel Margin="0,12,0,4">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:TextBox x:Name="IP_a" Style="{StaticResource IpBox}" PlaceholderText="127"/>
-                                        <TextBlock Text="." FontSize="22" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="3,0"/>
-                                        <ui:TextBox x:Name="IP_b" Style="{StaticResource IpBox}" PlaceholderText="0"/>
-                                        <TextBlock Text="." FontSize="22" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="3,0"/>
-                                        <ui:TextBox x:Name="IP_c" Style="{StaticResource IpBox}" PlaceholderText="0"/>
-                                        <TextBlock Text="." FontSize="22" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="3,0"/>
-                                        <ui:TextBox x:Name="IP_d" Style="{StaticResource IpBox}" PlaceholderText="1"/>
+                                <Border Margin="0,10,0,4" CornerRadius="8" Padding="14,12" BorderThickness="1" BorderBrush="#2A2A4A">
+                                    <Border.Background><SolidColorBrush Color="#0D0D22"/></Border.Background>
+                                    <StackPanel>
+                                        <TextBlock Text="Enter DB Server IP Address" FontSize="10" Foreground="#5577AA" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <TextBox x:Name="IP_a" Width="60" MaxLength="3" TextAlignment="Center" FontSize="13"
+                                                     Background="#1A1A3A" Foreground="White" BorderBrush="#3A3A6A" BorderThickness="1"
+                                                     Padding="4,6" FontFamily="Segoe UI" CaretBrush="White" Text=""/>
+                                            <TextBlock Text="." FontSize="20" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="4,0"/>
+                                            <TextBox x:Name="IP_b" Width="60" MaxLength="3" TextAlignment="Center" FontSize="13"
+                                                     Background="#1A1A3A" Foreground="White" BorderBrush="#3A3A6A" BorderThickness="1"
+                                                     Padding="4,6" FontFamily="Segoe UI" CaretBrush="White" Text=""/>
+                                            <TextBlock Text="." FontSize="20" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="4,0"/>
+                                            <TextBox x:Name="IP_c" Width="60" MaxLength="3" TextAlignment="Center" FontSize="13"
+                                                     Background="#1A1A3A" Foreground="White" BorderBrush="#3A3A6A" BorderThickness="1"
+                                                     Padding="4,6" FontFamily="Segoe UI" CaretBrush="White" Text=""/>
+                                            <TextBlock Text="." FontSize="20" FontWeight="Bold" Foreground="#7C3AED" VerticalAlignment="Center" Margin="4,0"/>
+                                            <TextBox x:Name="IP_d" Width="60" MaxLength="3" TextAlignment="Center" FontSize="13"
+                                                     Background="#1A1A3A" Foreground="White" BorderBrush="#3A3A6A" BorderThickness="1"
+                                                     Padding="4,6" FontFamily="Segoe UI" CaretBrush="White" Text=""/>
+                                        </StackPanel>
+                                        <TextBlock Text="Leave blank to use 127.0.0.1 (localhost)" FontSize="10" Foreground="#444466" FontStyle="Italic" FontFamily="Segoe UI" Margin="0,8,0,0"/>
                                     </StackPanel>
-                                    <TextBlock Text="Leave blank to use 127.0.0.1 (localhost)" FontSize="10" Foreground="#555570" FontStyle="Italic" FontFamily="Segoe UI" Margin="0,8,0,0"/>
-                                </StackPanel>
+                                </Border>
                             </Expander>
                             <Border x:Name="ErrorBorder" Background="#2D1020" CornerRadius="6" Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
                                 <TextBlock x:Name="TxtError" FontSize="12" Foreground="#FF5070" FontFamily="Segoe UI"/>

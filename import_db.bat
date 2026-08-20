@@ -1,0 +1,6 @@
+@echo off
+echo Step 1: Create database...
+"D:\xampp\mysql\bin\mysqladmin.exe" -u root create ecc_dof_wukrostmarycollege 2>nul
+echo Step 2: Importing SQL...
+"D:\xampp\mysql\bin\mysql.exe" -u root ecc_dof_wukrostmarycollege < "C:\Users\IN-TECH\Desktop\welday\ecc_dof_wukrostmarycollege.sql"
+echo Import finished with exit code: %ERRORLEVEL%
