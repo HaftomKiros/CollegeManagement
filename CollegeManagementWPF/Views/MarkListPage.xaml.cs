@@ -131,7 +131,7 @@ namespace CollegeManagementWPF.Views
                     return list;
                 });
                 RefreshStreamDropdown("");
-                if (CmbStream.Items.Count > 0) CmbStream.SelectedIndex = 0;
+                // No auto-selection — user picks stream manually
             }
             catch { }
         }
@@ -162,6 +162,12 @@ namespace CollegeManagementWPF.Views
             RefreshStreamDropdown(CmbStream.Text?.Trim() ?? "");
             if (CmbStream.Items.Count > 0 && !string.IsNullOrEmpty(CmbStream.Text))
                 CmbStream.IsDropDownOpen = true;
+        }
+
+        private void CmbStream_DropDownOpened(object sender, EventArgs e)
+        {
+            // Show all streams when dropdown is opened — don't filter by current text
+            RefreshStreamDropdown("");
         }
 
         private async void CmbStream_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -200,10 +206,10 @@ namespace CollegeManagementWPF.Views
                 });
 
                 RefreshLevelDropdown("");
-                if (CmbLevel.Items.Count > 0) CmbLevel.SelectedIndex = 0;
+                // No auto-selection — user picks level manually
 
-                string lvlId  = (CmbLevel.SelectedItem as ComboBoxItem)?.Tag?.ToString()     ?? "";
-                string lvlNum = (CmbLevel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "";
+                string lvlId  = "";
+                string lvlNum = "";
                 if (!string.IsNullOrEmpty(lvlId))
                     await Task.WhenAll(LoadModulesAsync(lvlId), LoadInstructorsAsync(GetDeptId(), lvlNum));
             }
@@ -236,6 +242,27 @@ namespace CollegeManagementWPF.Views
             RefreshLevelDropdown(CmbLevel.Text?.Trim() ?? "");
             if (CmbLevel.Items.Count > 0 && !string.IsNullOrEmpty(CmbLevel.Text))
                 CmbLevel.IsDropDownOpen = true;
+        }
+
+        private void CmbLevel_DropDownOpened(object sender, EventArgs e)
+        {
+            // Show all levels when dropdown is opened
+            RefreshLevelDropdown("");
+        }
+
+        private void CmbDept_DropDownOpened(object sender, EventArgs e)
+        {
+            RefreshDeptDropdown("");
+        }
+
+        private void CmbModCode_DropDownOpened(object sender, EventArgs e)
+        {
+            RefreshModuleDropdown("");
+        }
+
+        private void CmbInstructor_DropDownOpened(object sender, EventArgs e)
+        {
+            RefreshInstructorDropdown("");
         }
 
         private async void CmbLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -456,7 +483,7 @@ namespace CollegeManagementWPF.Views
                 CmbAcadYear.Items.Add(new ComboBoxItem { Content = "" });
                 foreach (var y in years)
                     CmbAcadYear.Items.Add(new ComboBoxItem { Content = y });
-                if (CmbAcadYear.Items.Count > 1) CmbAcadYear.SelectedIndex = 1;
+                if (CmbAcadYear.Items.Count > 0) CmbAcadYear.SelectedIndex = 0;
             }
             catch { }
         }

@@ -154,11 +154,9 @@
                 <!-- Assessments path -->
                 <TextBlock Text="&#xE9D5;  Assessment Documents Folder" FontSize="11" FontWeight="SemiBold"
                            Foreground="#34D399" FontFamily="Segoe UI" Margin="0,0,0,5"/>
-                <Grid Margin="0,0,0,20">
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" CornerRadius="8" Padding="12,0" Height="36" BorderThickness="1">
                         <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
@@ -166,18 +164,26 @@
                         <TextBlock x:Name="TxtAssessPath" VerticalAlignment="Center" FontFamily="Segoe UI" FontSize="12"
                                    Foreground="{DynamicResource RegInputFg}" TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="2" Click="BtnBrowseAssess_Click" Height="36" Padding="14,0" Cursor="Hand"
-                            Foreground="White" BorderThickness="0">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="bd" CornerRadius="8" Background="#0D6B6B" Padding="{TemplateBinding Padding}">
-                                    <TextBlock Text="Browse" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
+                    <Button Grid.Column="2" Click="BtnBrowseAssess_Click" Height="36" Padding="14,0" Cursor="Hand" Foreground="White" BorderThickness="0">
+                        <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="8" Background="#0D6B6B" Padding="{TemplateBinding Padding}"><TextBlock Text="Browse" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Employee photos path -->
+                <TextBlock Text="&#xE716;  Employee Photos Folder" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#FB923C" FontFamily="Segoe UI" Margin="0,0,0,5"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" CornerRadius="8" Padding="12,0" Height="36" BorderThickness="1">
+                        <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                        <Border.Background><DynamicResource ResourceKey="RegInputBg"/></Border.Background>
+                        <TextBlock x:Name="TxtEmpPhotosPath" VerticalAlignment="Center" FontFamily="Segoe UI" FontSize="12"
+                                   Foreground="{DynamicResource RegInputFg}" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <Button Grid.Column="2" Click="BtnBrowseEmpPhotos_Click" Height="36" Padding="14,0" Cursor="Hand" Foreground="White" BorderThickness="0">
+                        <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="bd" CornerRadius="8" Background="#0D6B6B" Padding="{TemplateBinding Padding}"><TextBlock Text="Browse" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
                     </Button>
                 </Grid>
 

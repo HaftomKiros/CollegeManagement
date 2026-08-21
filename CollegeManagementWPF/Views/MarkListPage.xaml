@@ -114,6 +114,7 @@
                             <TextBlock Text="Department" Style="{StaticResource FL}"/>
                             <ComboBox x:Name="CmbDept" Style="{StaticResource SDD}"
                                       TextBoxBase.TextChanged="CmbDept_TextChanged"
+                                      DropDownOpened="CmbDept_DropDownOpened"
                                       SelectionChanged="CmbDept_SelectionChanged"/>
                         </StackPanel>
                         <!-- Stream — cascades from dept, searchable by ID or name -->
@@ -121,6 +122,7 @@
                             <TextBlock Text="Stream" Style="{StaticResource FL}"/>
                             <ComboBox x:Name="CmbStream" Style="{StaticResource SDD}"
                                       TextBoxBase.TextChanged="CmbStream_TextChanged"
+                                      DropDownOpened="CmbStream_DropDownOpened"
                                       SelectionChanged="CmbStream_SelectionChanged"/>
                         </StackPanel>
                         <!-- Level — cascades from stream, searchable by level_id or number -->
@@ -128,6 +130,7 @@
                             <TextBlock Text="Level" Style="{StaticResource FL}"/>
                             <ComboBox x:Name="CmbLevel" Style="{StaticResource SDD}"
                                       TextBoxBase.TextChanged="CmbLevel_TextChanged"
+                                      DropDownOpened="CmbLevel_DropDownOpened"
                                       SelectionChanged="CmbLevel_SelectionChanged"/>
                         </StackPanel>
                         <!-- Module Code — searchable by code or title -->
@@ -135,6 +138,7 @@
                             <TextBlock Text="Module Code" Style="{StaticResource FL}"/>
                             <ComboBox x:Name="CmbModCode" Style="{StaticResource SDD}"
                                       TextBoxBase.TextChanged="CmbModCode_TextChanged"
+                                      DropDownOpened="CmbModCode_DropDownOpened"
                                       SelectionChanged="CmbModCode_SelectionChanged"/>
                         </StackPanel>
                         <!-- Instructor — searchable by name or ID -->
@@ -142,6 +146,7 @@
                             <TextBlock Text="Instructor" Style="{StaticResource FL}"/>
                             <ComboBox x:Name="CmbInstructor" Style="{StaticResource SDD}"
                                       TextBoxBase.TextChanged="CmbInstructor_TextChanged"
+                                      DropDownOpened="CmbInstructor_DropDownOpened"
                                       SelectionChanged="CmbInstructor_SelectionChanged"/>
                         </StackPanel>
                         <!-- Academic Year — cascades from instructor as distinct dropdown -->

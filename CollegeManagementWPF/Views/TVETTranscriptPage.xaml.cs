@@ -61,32 +61,66 @@ namespace CollegeManagementWPF.Views
             catch { /* DB offline — skip */ }
         }
 
-        // Populate CmbStudID items filtered by typed text
+        // Populate SuggestList items filtered by typed text
         private void RefreshStudentDropdown(string filter)
         {
-            _suppress = true;
-            CmbStudID.Items.Clear();
+            SuggestList.Items.Clear();
             foreach (var id in _allStudentIds)
                 if (string.IsNullOrEmpty(filter) || id.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                    CmbStudID.Items.Add(new ComboBoxItem { Content = id });
-            _suppress = false;
+                    SuggestList.Items.Add(id);
+            SuggestPopup.IsOpen = SuggestList.Items.Count > 0 && !string.IsNullOrEmpty(filter);
         }
 
-        // ── Student ID text changed — filter dropdown list ───────────────────
+        // ── Student ID text changed — filter suggestion list ─────────────────
         private void CmbStudID_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_suppress) return;
             string typed = CmbStudID.Text?.Trim() ?? "";
             RefreshStudentDropdown(typed);
-
-            // Open dropdown to show matches if there's something typed
-            if (!string.IsNullOrEmpty(typed) && CmbStudID.Items.Count > 0)
-                CmbStudID.IsDropDownOpen = true;
-
-            // Clear cascades and name until a valid ID is committed
+            // Clear cascades until a valid ID is committed
             CmbLevel.Items.Clear();
             CmbAcadYear.Items.Clear();
             TxtStudentName.Visibility = Visibility.Collapsed;
+        }
+
+        // ── Key navigation in suggestion popup ───────────────────────────────
+        private void CmbStudID_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (!SuggestPopup.IsOpen) return;
+            if (e.Key == System.Windows.Input.Key.Down)
+            {
+                SuggestList.Focus();
+                if (SuggestList.Items.Count > 0)
+                    SuggestList.SelectedIndex = 0;
+                e.Handled = true;
+            }
+            else if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                SuggestPopup.IsOpen = false;
+                e.Handled = true;
+            }
+            else if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SuggestPopup.IsOpen = false;
+                _ = LoadStudentNameAsync(CmbStudID.Text.Trim())
+                      .ContinueWith(_ => LoadLevelsAsync(CmbStudID.Text.Trim()));
+                e.Handled = true;
+            }
+        }
+
+        // ── Mouse click on suggestion item ────────────────────────────────────
+        private void SuggestList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (SuggestList.SelectedItem is string id)
+            {
+                _suppress = true;
+                CmbStudID.Text = id;
+                CmbStudID.CaretIndex = id.Length;
+                _suppress = false;
+                SuggestPopup.IsOpen = false;
+                CmbStudID.Focus();
+                _ = LoadStudentNameAsync(id).ContinueWith(_ => LoadLevelsAsync(id));
+            }
         }
 
         // ── Focus-out: resolve student ID, show name, cascade Level ──────────
@@ -113,9 +147,6 @@ namespace CollegeManagementWPF.Views
 
         private string GetStudentId()
         {
-            // Prefer selected item; fall back to typed text
-            if (CmbStudID.SelectedItem is ComboBoxItem sel)
-                return sel.Content?.ToString()?.Trim() ?? "";
             return CmbStudID.Text?.Trim() ?? "";
         }
 

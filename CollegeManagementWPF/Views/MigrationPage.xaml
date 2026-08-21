@@ -196,6 +196,80 @@
                 </ScrollViewer>
             </TabItem>
 
+            <!-- ══ Tab 3: Employee Profile ══ -->
+            <TabItem Header="&#xE716;  Employee Profile">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,20,0,0" MaxWidth="680">
+                    <TextBlock Text="Migrates employee photo BLOBs to local files, saves file paths, then removes BLOB columns."
+                               FontSize="12" Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI"
+                               TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+                    <TextBlock Text="Photos Folder" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" Margin="0,0,0,5"/>
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" CornerRadius="7" BorderThickness="1" BorderBrush="{DynamicResource RegInputBorder}">
+                            <Border.Background><DynamicResource ResourceKey="RegInputBg"/></Border.Background>
+                            <TextBox x:Name="TxtEmpFolder" Background="Transparent" BorderThickness="0"
+                                     Foreground="{DynamicResource RegInputFg}" FontSize="12" FontFamily="Segoe UI"
+                                     Height="34" Padding="10,0" VerticalContentAlignment="Center"/>
+                        </Border>
+                        <Button Grid.Column="2" Content="Browse Folder" Height="34" FontSize="12" FontFamily="Segoe UI"
+                                Foreground="White" Cursor="Hand" Padding="14,0" BorderThickness="0" Click="BrowseEmpFolder_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="bd" CornerRadius="7" Background="#1A3A6B" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.82"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+
+                    <TextBlock x:Name="TxtEmpStatus" Text="Ready." FontSize="12"
+                               Foreground="{DynamicResource RegLabelFg}" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+                    <ProgressBar x:Name="EmpProgress" Height="8" Minimum="0" Maximum="100" Value="0"
+                                 Margin="0,0,0,16" BorderThickness="0"/>
+
+                    <Button x:Name="BtnEmpRun" Content="Run Migration" Height="42" FontSize="14" FontWeight="Bold"
+                            FontFamily="Segoe UI" Foreground="White" Cursor="Hand" Padding="28,0"
+                            BorderThickness="0" HorizontalAlignment="Left" Margin="0,0,0,20" Click="BtnEmpRun_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" CornerRadius="9" Padding="{TemplateBinding Padding}">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#7C3AED" Offset="0"/>
+                                            <GradientStop Color="#5B21B6" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.85"/></Trigger>
+                                    <Trigger Property="IsPressed"   Value="True"><Setter TargetName="bd" Property="Opacity" Value="0.65"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Border CornerRadius="10" BorderThickness="1" Padding="12" MaxHeight="320">
+                        <Border.BorderBrush><DynamicResource ResourceKey="RegInputBorder"/></Border.BorderBrush>
+                        <Border.Background><DynamicResource ResourceKey="RegTableBg"/></Border.Background>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBox x:Name="TxtEmpLog" Background="Transparent" BorderThickness="0"
+                                     Foreground="{DynamicResource RegLabelFg}" FontFamily="Consolas" FontSize="11"
+                                     IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+                                     Text="Migration log will appear here..."/>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
         </TabControl>
     </Grid>
 </Page>

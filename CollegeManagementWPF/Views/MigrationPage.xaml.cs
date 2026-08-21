@@ -14,8 +14,9 @@ namespace CollegeManagementWPF.Views
         public MigrationPage()
         {
             InitializeComponent();
-            TxtFolder.Text   = AppSettings.Current.PhotosPath;
-            TxtMlFolder.Text = AppSettings.Current.MarkListsPath;
+            TxtFolder.Text    = AppSettings.Current.PhotosPath;
+            TxtMlFolder.Text  = AppSettings.Current.MarkListsPath;
+            TxtEmpFolder.Text = AppSettings.Current.EmployeePhotosPath;
         }
 
         // ── Tab 1: Student Profile BLOB migration ─────────────────────────────
@@ -545,6 +546,188 @@ namespace CollegeManagementWPF.Views
             finally
             {
                 BtnMlRun.IsEnabled = true;
+            }
+        }
+        // ── Tab 3: Employee Profile BLOB migration ────────────────────────────
+
+        private void BrowseEmpFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select photos folder for employees", CheckFileExists = false, CheckPathExists = true,
+                FileName = "Select Folder", Filter = "Folder|*.none", InitialDirectory = TxtEmpFolder.Text
+            };
+            if (dlg.ShowDialog() == true)
+                TxtEmpFolder.Text = Path.GetDirectoryName(dlg.FileName) ?? TxtEmpFolder.Text;
+        }
+
+        private async void BtnEmpRun_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(TxtEmpFolder.Text))
+            { TxtEmpStatus.Text = "Please select a photos folder."; return; }
+
+            BtnEmpRun.IsEnabled = false;
+            TxtEmpLog.Text      = "";
+            TxtEmpStatus.Text   = "Running employee migration...";
+            EmpProgress.Value   = 0;
+
+            var log       = new StringBuilder();
+            var db        = new DBConnect();
+            var photosDir = TxtEmpFolder.Text.Trim();
+            Directory.CreateDirectory(photosDir);
+
+            MySqlConnection NewConn()
+            {
+                var c = db.GetConnection();
+                if (c == null) throw new Exception("Cannot connect to MySQL.");
+                c.Open();
+                try { new MySqlCommand("SET SESSION max_allowed_packet=268435456", c).ExecuteNonQuery(); } catch { }
+                try { new MySqlCommand("SET SESSION net_read_timeout=600",         c).ExecuteNonQuery(); } catch { }
+                try { new MySqlCommand("SET SESSION net_write_timeout=600",        c).ExecuteNonQuery(); } catch { }
+                return c;
+            }
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    // ── Step 1: Add photo_path column if missing ──
+                    using (var c1 = NewConn())
+                    {
+                        bool colExists = Convert.ToInt32(new MySqlCommand(
+                            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                            "WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' " +
+                            "AND TABLE_NAME='employee_profile' AND COLUMN_NAME='photo_path'", c1).ExecuteScalar()) > 0;
+                        if (!colExists)
+                        {
+                            new MySqlCommand(
+                                "ALTER TABLE ecc_dof_wukrostmarycollege.employee_profile ADD COLUMN photo_path VARCHAR(500) NULL",
+                                c1).ExecuteNonQuery();
+                            log.AppendLine("✓ photo_path column added.");
+                        }
+                        else log.AppendLine("  (photo_path already exists — OK)");
+                    }
+
+                    // ── Step 2: Detect photo BLOB column ──
+                    bool photoExists;
+                    using (var c2 = NewConn())
+                    {
+                        photoExists = Convert.ToInt32(new MySqlCommand(
+                            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                            "WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' " +
+                            "AND TABLE_NAME='employee_profile' AND COLUMN_NAME='photo'", c2).ExecuteScalar()) > 0;
+                        log.AppendLine(photoExists ? "✓ photo BLOB column detected." : "  (photo column not found — already migrated)");
+                    }
+
+                    if (!photoExists)
+                    {
+                        log.AppendLine("  (no BLOB column — nothing to migrate)");
+                        return;
+                    }
+
+                    // ── Step 3: Read BLOBs ──
+                    var rows = new System.Collections.Generic.List<(string eid, byte[]? ph)>();
+                    using (var c3 = NewConn())
+                    {
+                        var cmd = new MySqlCommand(
+                            "SELECT employee_id, photo FROM ecc_dof_wukrostmarycollege.employee_profile " +
+                            "WHERE photo IS NOT NULL", c3);
+                        cmd.CommandTimeout = 600;
+                        using var r = cmd.ExecuteReader();
+                        while (r.Read())
+                        {
+                            string eid = r["employee_id"]?.ToString() ?? "";
+                            byte[]? ph = r["photo"] != DBNull.Value ? (byte[])r["photo"] : null;
+                            if (ph != null && ph.Length > 0) rows.Add((eid, ph));
+                        }
+                        log.AppendLine($"✓ Read {rows.Count} employee rows with photo BLOB.");
+                    }
+
+                    // ── Step 4: Save files + update photo_path ──
+                    int extracted = 0, errors = 0;
+                    var writtenFiles = new System.Collections.Generic.HashSet<string>();
+                    using (var c4 = NewConn())
+                    {
+                        var updCmd = new MySqlCommand(
+                            "UPDATE ecc_dof_wukrostmarycollege.employee_profile " +
+                            "SET photo_path=@pp WHERE employee_id=@eid", c4);
+
+                        foreach (var (eid, ph) in rows)
+                        {
+                            try
+                            {
+                                string safeEid = eid.Trim()
+                                    .Replace("/","_").Replace("\\","_").Replace(":","_")
+                                    .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                    .Replace("<","_").Replace(">","_").Replace("|","_");
+                                string fname = safeEid + ".jpg";
+                                if (!writtenFiles.Contains(fname))
+                                {
+                                    File.WriteAllBytes(Path.Combine(photosDir, fname), ph!);
+                                    writtenFiles.Add(fname);
+                                }
+                                updCmd.Parameters.Clear();
+                                updCmd.Parameters.AddWithValue("@pp",  fname);
+                                updCmd.Parameters.AddWithValue("@eid", eid);
+                                updCmd.ExecuteNonQuery();
+                                extracted++;
+                            }
+                            catch (Exception ex2) { errors++; log.AppendLine($"  ✗ {eid}: {ex2.Message.Split('\n')[0]}"); }
+                        }
+                        log.AppendLine($"✓ Extracted {extracted} photos. Files written: {writtenFiles.Count}. Errors: {errors}");
+                    }
+
+                    // ── Step 5: Drop BLOB column only if no errors ──
+                    if (errors == 0 && extracted > 0)
+                    {
+                        foreach (var col in new[] { "photo", "attachment" })
+                        {
+                            bool colExists;
+                            using (var cChk = NewConn())
+                                colExists = Convert.ToInt32(new MySqlCommand(
+                                    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                                    $"WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' " +
+                                    $"AND TABLE_NAME='employee_profile' AND COLUMN_NAME='{col}'", cChk).ExecuteScalar()) > 0;
+                            if (!colExists) { log.AppendLine($"  ({col} already gone — OK)"); continue; }
+                            using var cDrop = NewConn();
+                            try
+                            {
+                                new MySqlCommand(
+                                    $"ALTER TABLE ecc_dof_wukrostmarycollege.employee_profile DROP COLUMN {col}",
+                                    cDrop).ExecuteNonQuery();
+                                log.AppendLine($"✓ {col} BLOB column removed.");
+                            }
+                            catch (Exception ex) { log.AppendLine($"  (skip DROP {col}: {ex.Message.Split('\n')[0]})"); }
+                        }
+                    }
+                    else if (errors > 0)
+                        log.AppendLine($"  ⚠ {errors} errors — BLOB columns kept.");
+
+                    // Final stats
+                    using var cF = NewConn();
+                    int total = Convert.ToInt32(new MySqlCommand(
+                        "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile", cF).ExecuteScalar());
+                    int withPhoto = Convert.ToInt32(new MySqlCommand(
+                        "SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile WHERE photo_path IS NOT NULL AND photo_path!=''", cF).ExecuteScalar());
+                    log.AppendLine($"\n✓ Total employees: {total}");
+                    log.AppendLine($"✓ With photo path: {withPhoto}");
+                    log.AppendLine($"✓ Photos folder: {photosDir}");
+                    log.AppendLine("\n✓ Employee migration complete.");
+                });
+
+                TxtEmpLog.Text    = log.ToString();
+                TxtEmpStatus.Text = "Complete.";
+                EmpProgress.Value = 100;
+            }
+            catch (Exception ex)
+            {
+                var inner = ex.InnerException ?? ex;
+                TxtEmpLog.Text    = $"Error: {ex.Message}\n\nDetail: {inner.Message}";
+                TxtEmpStatus.Text = "Failed.";
+            }
+            finally
+            {
+                BtnEmpRun.IsEnabled = true;
             }
         }
     }

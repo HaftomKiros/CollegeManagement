@@ -64,20 +64,54 @@ namespace CollegeManagementWPF.Views
 
         private void RefreshStudentDropdown(string filter)
         {
-            _suppress = true;
-            CmbStudID.Items.Clear();
+            SuggestList.Items.Clear();
             foreach (var id in _allStudentIds)
                 if (string.IsNullOrEmpty(filter) || id.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                    CmbStudID.Items.Add(new ComboBoxItem { Content = id });
-            _suppress = false;
+                    SuggestList.Items.Add(id);
+            SuggestPopup.IsOpen = SuggestList.Items.Count > 0 && !string.IsNullOrEmpty(filter);
         }
 
         private void CmbStudID_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_suppress) return;
             RefreshStudentDropdown(CmbStudID.Text?.Trim() ?? "");
-            if (!string.IsNullOrEmpty(CmbStudID.Text) && CmbStudID.Items.Count > 0)
-                CmbStudID.IsDropDownOpen = true;
+            CmbLevel.Items.Clear();
+            CmbAcadYear.Items.Clear();
+            TxtStudentName.Visibility = Visibility.Collapsed;
+        }
+
+        private void CmbStudID_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (!SuggestPopup.IsOpen) return;
+            if (e.Key == System.Windows.Input.Key.Down)
+            {
+                SuggestList.Focus();
+                if (SuggestList.Items.Count > 0) SuggestList.SelectedIndex = 0;
+                e.Handled = true;
+            }
+            else if (e.Key == System.Windows.Input.Key.Escape)
+            { SuggestPopup.IsOpen = false; e.Handled = true; }
+            else if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SuggestPopup.IsOpen = false;
+                _ = LoadStudentNameAsync(CmbStudID.Text.Trim())
+                      .ContinueWith(_ => LoadLevelsAsync(CmbStudID.Text.Trim()));
+                e.Handled = true;
+            }
+        }
+
+        private void SuggestList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (SuggestList.SelectedItem is string id)
+            {
+                _suppress = true;
+                CmbStudID.Text = id;
+                CmbStudID.CaretIndex = id.Length;
+                _suppress = false;
+                SuggestPopup.IsOpen = false;
+                CmbStudID.Focus();
+                _ = LoadStudentNameAsync(id).ContinueWith(_ => LoadLevelsAsync(id));
+            }
         }
 
         private async void CmbStudID_LostFocus(object sender, RoutedEventArgs e)
@@ -168,7 +202,6 @@ namespace CollegeManagementWPF.Views
 
         private string GetStudentId()
         {
-            if (CmbStudID.SelectedItem is ComboBoxItem sel) return sel.Content?.ToString()?.Trim() ?? "";
             return CmbStudID.Text?.Trim() ?? "";
         }
 

@@ -78,9 +78,37 @@
                     <UniformGrid Rows="1" Columns="3">
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Student ID" Style="{StaticResource FL}"/>
-                            <ComboBox x:Name="CmbStudID" Style="{StaticResource SDD}"
-                                      TextBoxBase.TextChanged="CmbStudID_TextChanged"
-                                      LostFocus="CmbStudID_LostFocus"/>
+                            <Grid>
+                                <TextBox x:Name="CmbStudID" Style="{StaticResource WI}"
+                                         TextChanged="CmbStudID_TextChanged"
+                                         LostFocus="CmbStudID_LostFocus"
+                                         KeyDown="CmbStudID_KeyDown"/>
+                                <Popup x:Name="SuggestPopup"
+                                       PlacementTarget="{Binding ElementName=CmbStudID}"
+                                       Placement="Bottom" StaysOpen="False"
+                                       AllowsTransparency="True" Focusable="False">
+                                    <Border Background="{DynamicResource RegInputBg}"
+                                            BorderBrush="{DynamicResource RegInputBorder}"
+                                            BorderThickness="1" CornerRadius="0,0,8,8" MaxHeight="200">
+                                        <ListBox x:Name="SuggestList" Background="Transparent"
+                                                 BorderThickness="0" FontFamily="Segoe UI" FontSize="12"
+                                                 Foreground="{DynamicResource RegInputFg}"
+                                                 MaxHeight="200" MouseUp="SuggestList_MouseUp">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Padding" Value="10,6"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#1A3A6B"/><Setter Property="Foreground" Value="White"/></Trigger>
+                                                        <Trigger Property="IsSelected"  Value="True"><Setter Property="Background" Value="#1A55DD"/><Setter Property="Foreground" Value="White"/></Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                        </ListBox>
+                                    </Border>
+                                </Popup>
+                            </Grid>
                             <TextBlock x:Name="TxtStudentName" FontSize="10.5" FontStyle="Italic"
                                        Foreground="#4A9AEE" FontFamily="Segoe UI" Margin="2,4,0,0"
                                        Visibility="Collapsed"/>

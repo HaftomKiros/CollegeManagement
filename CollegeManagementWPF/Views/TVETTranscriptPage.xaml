@@ -7,6 +7,8 @@
     <Page.Resources>
         <Style x:Key="FL" TargetType="TextBlock"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource RegLabelFg}"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Margin" Value="0,0,0,3"/></Style>
         <Style x:Key="WI" TargetType="TextBox"><Setter Property="Background" Value="{DynamicResource RegInputBg}"/><Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/><Setter Property="BorderBrush" Value="{DynamicResource RegInputBorder}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Height" Value="32"/><Setter Property="Padding" Value="8,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6"><ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+        <!-- Standard TextBox style for inputs (alias for WI) -->
+        <Style x:Key="TI" TargetType="TextBox" BasedOn="{StaticResource WI}"/>
         <!-- Searchable ComboBox style -->
         <Style x:Key="SDD" TargetType="ComboBox">
             <Setter Property="Background" Value="{DynamicResource RegInputBg}"/>
@@ -101,19 +103,57 @@
                 <StackPanel>
                     <TextBlock Text="Report Parameters" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource RegInputFg}" FontFamily="Segoe UI" Margin="0,0,0,16"/>
                     <UniformGrid Rows="1" Columns="3">
-                        <!-- Student ID — searchable dropdown with name hint below -->
+                        <!-- Student ID — plain text field with live suggestion popup -->
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Student ID" Style="{StaticResource FL}"/>
-                            <ComboBox x:Name="CmbStudID" Style="{StaticResource SDD}"
-                                      TextBoxBase.TextChanged="CmbStudID_TextChanged"
-                                      LostFocus="CmbStudID_LostFocus"/>
-                            <!-- Student name shown after focus-out -->
+                            <Grid>
+                                <TextBox x:Name="CmbStudID"
+                                         Style="{StaticResource TI}"
+                                         TextChanged="CmbStudID_TextChanged"
+                                         LostFocus="CmbStudID_LostFocus"
+                                         KeyDown="CmbStudID_KeyDown"/>
+                                <Popup x:Name="SuggestPopup"
+                                       PlacementTarget="{Binding ElementName=CmbStudID}"
+                                       Placement="Bottom"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       Focusable="False">
+                                    <Border Background="{DynamicResource RegInputBg}"
+                                            BorderBrush="{DynamicResource RegInputBorder}"
+                                            BorderThickness="1" CornerRadius="0,0,8,8"
+                                            MaxHeight="200">
+                                        <ListBox x:Name="SuggestList"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 FontFamily="Segoe UI" FontSize="12"
+                                                 Foreground="{DynamicResource RegInputFg}"
+                                                 MaxHeight="200"
+                                                 MouseUp="SuggestList_MouseUp">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Padding"    Value="10,6"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource RegInputFg}"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#1A3A6B"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter Property="Background" Value="#1A55DD"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                        </ListBox>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                            <!-- Student name shown after ID confirmed -->
                             <TextBlock x:Name="TxtStudentName"
                                        FontSize="10.5" FontStyle="Italic"
-                                       Foreground="#4A9AEE"
-                                       FontFamily="Segoe UI"
-                                       Margin="2,4,0,0"
-                                       Visibility="Collapsed"/>
+                                       Foreground="#4A9AEE" FontFamily="Segoe UI"
+                                       Margin="2,4,0,0" Visibility="Collapsed"/>
                         </StackPanel>
                         <!-- Level — cascades from Student ID -->
                         <StackPanel Margin="0,0,12,0">

@@ -35,11 +35,16 @@ namespace CollegeManagementWPF
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "StMaryCollege", "assessments");
 
+        private static readonly string DefaultEmployeePhotos =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "StMaryCollege", "employee_photos");
+
         // ── Properties (each stored independently in DB) ──────────────────────
-        public string PhotosPath      { get; set; } = DefaultPhotos;
-        public string AttachmentsPath { get; set; } = DefaultAttachments;
-        public string MarkListsPath   { get; set; } = DefaultMarkLists;
-        public string AssessmentsPath { get; set; } = DefaultAssessments;
+        public string PhotosPath         { get; set; } = DefaultPhotos;
+        public string AttachmentsPath    { get; set; } = DefaultAttachments;
+        public string MarkListsPath      { get; set; } = DefaultMarkLists;
+        public string AssessmentsPath    { get; set; } = DefaultAssessments;
+        public string EmployeePhotosPath { get; set; } = DefaultEmployeePhotos;
 
         // ── Back-compat: StorageBasePath still usable where needed ────────────
         public string StorageBasePath
@@ -71,7 +76,7 @@ namespace CollegeManagementWPF
                 var s = new AppSettings();
                 using var cmd = new MySqlCommand(
                     "SELECT config_key, config_value FROM ecc_dof_wukrostmarycollege.path_config " +
-                    "WHERE config_key IN ('photos_path','attachments_path','mark_list_path','assessments_path'," +
+                    "WHERE config_key IN ('photos_path','attachments_path','mark_list_path','assessments_path','employee_photos_path'," +
                     "'storage_base_path','mark_list_base_path')", conn);
                 using var r = cmd.ExecuteReader();
                 string? legacyBase = null, legacyMl = null;
@@ -80,10 +85,11 @@ namespace CollegeManagementWPF
                     string key = r["config_key"]?.ToString()   ?? "";
                     string val = r["config_value"]?.ToString() ?? "";
                     if (string.IsNullOrWhiteSpace(val)) continue;
-                    if (key == "photos_path")         s.PhotosPath      = val;
-                    if (key == "attachments_path")    s.AttachmentsPath = val;
-                    if (key == "mark_list_path")      s.MarkListsPath   = val;
-                    if (key == "assessments_path")    s.AssessmentsPath = val;
+                    if (key == "photos_path")         s.PhotosPath         = val;
+                    if (key == "attachments_path")    s.AttachmentsPath    = val;
+                    if (key == "mark_list_path")      s.MarkListsPath      = val;
+                    if (key == "assessments_path")    s.AssessmentsPath    = val;
+                    if (key == "employee_photos_path") s.EmployeePhotosPath = val;
                     if (key == "storage_base_path")   legacyBase        = val;
                     if (key == "mark_list_base_path") legacyMl          = val;
                 }
@@ -126,10 +132,11 @@ namespace CollegeManagementWPF
                 using var conn = db.GetConnection();
                 conn.Open();
                 EnsureTableExists(conn);
-                Upsert(conn, "photos_path",      PhotosPath);
-                Upsert(conn, "attachments_path", AttachmentsPath);
-                Upsert(conn, "mark_list_path",   MarkListsPath);
-                Upsert(conn, "assessments_path", AssessmentsPath);
+                Upsert(conn, "photos_path",          PhotosPath);
+                Upsert(conn, "attachments_path",     AttachmentsPath);
+                Upsert(conn, "mark_list_path",       MarkListsPath);
+                Upsert(conn, "assessments_path",     AssessmentsPath);
+                Upsert(conn, "employee_photos_path", EmployeePhotosPath);
             }
             catch { }
 

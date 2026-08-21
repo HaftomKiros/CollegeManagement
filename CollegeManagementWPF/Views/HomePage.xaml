@@ -259,7 +259,9 @@
                             <StackPanel x:Name="PanConfig" Visibility="Collapsed" Margin="0,2,0,4">
                                 <Button Tag="AssignPath" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="FolderOpen24" FontSize="13" Foreground="#67E8F9" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Assign Path" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
                                 <Button Tag="GradeConfig" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="DataArea24" FontSize="13" Foreground="#34D399" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Grade Configuration" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                <!-- BLOB Migration hidden — migration complete
                                 <Button Tag="Migration" Style="{StaticResource SubBtn}" Click="NavButton_Click"><StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowSync24" FontSize="13" Foreground="#FCD34D" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="BLOB Migration" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></StackPanel></Button>
+                                -->
                             </StackPanel></StackPanel>
                     </ScrollViewer>
                 </DockPanel>

@@ -12,10 +12,11 @@ namespace CollegeManagementWPF.Views
 {
     public partial class AssignPathPage : Page
     {
-        private string _photosPath  = "";
-        private string _attachPath  = "";
-        private string _mlPath      = "";
-        private string _assessPath  = "";
+        private string _photosPath    = "";
+        private string _attachPath    = "";
+        private string _mlPath        = "";
+        private string _assessPath    = "";
+        private string _empPhotosPath = "";
 
         public AssignPathPage()
         {
@@ -39,19 +40,21 @@ namespace CollegeManagementWPF.Views
         {
             AppSettings.Reload();
             var s = AppSettings.Current;
-            _photosPath = s.PhotosPath;
-            _attachPath = s.AttachmentsPath;
-            _mlPath     = s.MarkListsPath;
-            _assessPath = s.AssessmentsPath;
+            _photosPath    = s.PhotosPath;
+            _attachPath    = s.AttachmentsPath;
+            _mlPath        = s.MarkListsPath;
+            _assessPath    = s.AssessmentsPath;
+            _empPhotosPath = s.EmployeePhotosPath;
             UpdateDisplay();
         }
 
         private void UpdateDisplay()
         {
-            TxtPhotosPath.Text = _photosPath;
-            TxtAttachPath.Text = _attachPath;
-            TxtMlPath.Text     = _mlPath;
-            TxtAssessPath.Text = _assessPath;
+            TxtPhotosPath.Text  = _photosPath;
+            TxtAttachPath.Text  = _attachPath;
+            TxtMlPath.Text      = _mlPath;
+            TxtAssessPath.Text  = _assessPath;
+            TxtEmpPhotosPath.Text = _empPhotosPath;
         }
 
         private void BtnBrowsePhotos_Click(object sender, RoutedEventArgs e)
@@ -78,6 +81,12 @@ namespace CollegeManagementWPF.Views
             if (dlg.ShowDialog() == true) { _assessPath = dlg.FolderName; UpdateDisplay(); }
         }
 
+        private void BtnBrowseEmpPhotos_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFolderDialog { Title = "Select Employee Photos folder", InitialDirectory = _empPhotosPath };
+            if (dlg.ShowDialog() == true) { _empPhotosPath = dlg.FolderName; UpdateDisplay(); }
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_photosPath) || string.IsNullOrWhiteSpace(_attachPath))
@@ -88,21 +97,21 @@ namespace CollegeManagementWPF.Views
             }
 
             var s = AppSettings.Current;
-            s.PhotosPath      = _photosPath;
-            s.AttachmentsPath = _attachPath;
-            s.MarkListsPath   = _mlPath;
-            s.AssessmentsPath = _assessPath;
+            s.PhotosPath         = _photosPath;
+            s.AttachmentsPath    = _attachPath;
+            s.MarkListsPath      = _mlPath;
+            s.AssessmentsPath    = _assessPath;
+            s.EmployeePhotosPath = _empPhotosPath;
             s.Save();
 
             Directory.CreateDirectory(s.PhotosPath);
             Directory.CreateDirectory(s.AttachmentsPath);
-            if (!string.IsNullOrWhiteSpace(s.MarkListsPath))
-                Directory.CreateDirectory(s.MarkListsPath);
-            if (!string.IsNullOrWhiteSpace(s.AssessmentsPath))
-                Directory.CreateDirectory(s.AssessmentsPath);
+            if (!string.IsNullOrWhiteSpace(s.MarkListsPath))   Directory.CreateDirectory(s.MarkListsPath);
+            if (!string.IsNullOrWhiteSpace(s.AssessmentsPath)) Directory.CreateDirectory(s.AssessmentsPath);
+            if (!string.IsNullOrWhiteSpace(s.EmployeePhotosPath)) Directory.CreateDirectory(s.EmployeePhotosPath);
 
             ModernDialog.Show(Window.GetWindow(this),
-                $"Configuration saved to database!\n\nPhotos:      {s.PhotosPath}\nAttachments: {s.AttachmentsPath}\nMark Lists:  {s.MarkListsPath}\nAssessments: {s.AssessmentsPath}",
+                $"Configuration saved!\n\nPhotos: {s.PhotosPath}\nAttachments: {s.AttachmentsPath}\nMark Lists: {s.MarkListsPath}\nAssessments: {s.AssessmentsPath}\nEmployee Photos: {s.EmployeePhotosPath}",
                 "Saved", ModernDialog.DialogType.Success);
 
             _ = CheckDbStatusAsync();
@@ -128,24 +137,25 @@ namespace CollegeManagementWPF.Views
                         "WHERE TABLE_SCHEMA='ecc_dof_wukrostmarycollege' AND TABLE_NAME='path_config'", conn
                         ).ExecuteScalar()) > 0;
 
-                    if (!tableExists) return (false, "", "", "", "");
+                    if (!tableExists) return (false, "", "", "", "", "");
 
-                    string photos = "", attach = "", ml = "", assess = "";
+                    string photos = "", attach = "", ml = "", assess = "", empPhotos = "";
                     using var r = new MySqlCommand(
                         "SELECT config_key, config_value FROM ecc_dof_wukrostmarycollege.path_config " +
-                        "WHERE config_key IN ('photos_path','attachments_path','mark_list_path','assessments_path')", conn).ExecuteReader();
+                        "WHERE config_key IN ('photos_path','attachments_path','mark_list_path','assessments_path','employee_photos_path')", conn).ExecuteReader();
                     while (r.Read())
                     {
                         string k = r["config_key"]?.ToString()   ?? "";
                         string v = r["config_value"]?.ToString() ?? "";
-                        if (k == "photos_path")      photos = v;
-                        if (k == "attachments_path") attach = v;
-                        if (k == "mark_list_path")   ml     = v;
-                        if (k == "assessments_path") assess = v;
+                        if (k == "photos_path")          photos    = v;
+                        if (k == "attachments_path")     attach    = v;
+                        if (k == "mark_list_path")       ml        = v;
+                        if (k == "assessments_path")     assess    = v;
+                        if (k == "employee_photos_path") empPhotos = v;
                     }
-                    return (true, photos, attach, ml, assess);
+                    return (true, photos, attach, ml, assess, empPhotos);
                 }
-                catch { return (false, "", "", "", ""); }
+                catch { return (false, "", "", "", "", ""); }
             });
 
             if (!result.Item1)
@@ -157,12 +167,13 @@ namespace CollegeManagementWPF.Views
             }
             else
             {
-                string ph = string.IsNullOrEmpty(result.Item2) ? "(not set)" : result.Item2;
-                string at = string.IsNullOrEmpty(result.Item3) ? "(not set)" : result.Item3;
-                string ml = string.IsNullOrEmpty(result.Item4) ? "(not set)" : result.Item4;
-                string as2= string.IsNullOrEmpty(result.Item5) ? "(not set)" : result.Item5;
+                string ph  = string.IsNullOrEmpty(result.Item2) ? "(not set)" : result.Item2;
+                string at  = string.IsNullOrEmpty(result.Item3) ? "(not set)" : result.Item3;
+                string ml  = string.IsNullOrEmpty(result.Item4) ? "(not set)" : result.Item4;
+                string as2 = string.IsNullOrEmpty(result.Item5) ? "(not set)" : result.Item5;
+                string ep  = string.IsNullOrEmpty(result.Item6) ? "(not set)" : result.Item6;
                 DbStatusIcon.Text         = "✓";
-                DbStatusText.Text         = $"DB ✓  photos: {ph}  |  attachments: {at}  |  mark lists: {ml}  |  assessments: {as2}";
+                DbStatusText.Text         = $"DB ✓  photos: {ph}  |  attachments: {at}  |  mark lists: {ml}  |  assessments: {as2}  |  emp photos: {ep}";
                 DbStatusText.Foreground   = new SolidColorBrush(Color.FromRgb(0x2D,0xD4,0xBF));
                 DbStatusBorder.Background = new SolidColorBrush(Color.FromRgb(0x05,0x15,0x0F));
             }

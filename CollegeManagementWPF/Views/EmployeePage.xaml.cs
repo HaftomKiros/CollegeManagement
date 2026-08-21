@@ -13,11 +13,21 @@ namespace CollegeManagementWPF.Views
     public partial class EmployeePage : Page
     {
         private string _selKey = "";
+        private bool   _newPhotoSelected = false;
         private DBConnect _db = new DBConnect();
         private const string Q =
             "SELECT employee_id,department_id,first_name,middle_name,last_name,sex," +
-            "birth_date,employee_date,level,qualification_title,mobile_number " +
+            "birth_date,employee_date,level,qualification_title,mobile_number,photo_path " +
             "FROM ecc_dof_wukrostmarycollege.employee_profile";
+
+        // Resolve filename → full path using configured photos folder
+        private static string? ResolvePhotoPath(string? filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename)) return null;
+            filename = filename.Trim();
+            return Path.IsPathRooted(filename) ? filename
+                : Path.Combine(AppSettings.Current.EmployeePhotosPath, filename);
+        }
 
         public EmployeePage() { InitializeComponent(); ThemeManager.ThemeChanged += ApplyTheme; ApplyTheme(); ApplyPermissions(); Loaded += async (s,e) => await Load(Q); }
 
@@ -48,23 +58,69 @@ namespace CollegeManagementWPF.Views
         private void Grid1_SelectionChanged(object s, SelectionChangedEventArgs e) {
             if (Grid1.SelectedItem is not DataRowView r) return;
             _selKey = r["employee_id"]?.ToString() ?? "";
-            TxtEmpID.Text       = _selKey;
-            TxtDeptID.Text      = r["department_id"]?.ToString() ?? "";
-            TxtFName.Text       = r["first_name"]?.ToString() ?? "";
-            TxtMName.Text       = r["middle_name"]?.ToString() ?? "";
-            TxtLName.Text       = r["last_name"]?.ToString() ?? "";
-            TxtSex.Text         = r["sex"]?.ToString() ?? "";
-            TxtBirthDate.Text   = r["birth_date"]?.ToString() ?? "";
-            TxtEmpDate.Text     = r["employee_date"]?.ToString() ?? "";
-            TxtLevel.Text       = r["level"]?.ToString() ?? "";
+            TxtEmpID.Text         = _selKey;
+            TxtDeptID.Text        = r["department_id"]?.ToString() ?? "";
+            TxtFName.Text         = r["first_name"]?.ToString() ?? "";
+            TxtMName.Text         = r["middle_name"]?.ToString() ?? "";
+            TxtLName.Text         = r["last_name"]?.ToString() ?? "";
+            TxtSex.Text           = r["sex"]?.ToString() ?? "";
+            TxtBirthDate.Text     = r["birth_date"]?.ToString() ?? "";
+            TxtEmpDate.Text       = r["employee_date"]?.ToString() ?? "";
+            TxtLevel.Text         = r["level"]?.ToString() ?? "";
             TxtQualification.Text = r["qualification_title"]?.ToString() ?? "";
-            TxtMobile.Text      = r["mobile_number"]?.ToString() ?? "";
-            TxtPhoto.Text       = "";
+            TxtMobile.Text        = r["mobile_number"]?.ToString() ?? "";
+            _newPhotoSelected     = false;
+
+            string pp = r["photo_path"]?.ToString()?.Trim() ?? "";
+            TxtPhoto.Text = string.IsNullOrEmpty(pp) ? "" : pp;
+            TxtEmpName.Text = $"{r["first_name"]} {r["middle_name"]} {r["last_name"]}".Trim();
+            ShowPhoto(pp);
+        }
+
+        private void ShowNoPhoto() 
+        {
+            ImgPhoto.Visibility         = Visibility.Collapsed;
+            PhotoPlaceholder.Visibility = Visibility.Visible;
+        }
+
+        private void ShowPhoto(string? filename)
+        {
+            string? fullPath = ResolvePhotoPath(filename);
+            if (!string.IsNullOrEmpty(fullPath) && File.Exists(fullPath))
+            {
+                try
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.UriSource     = new Uri(fullPath);
+                    bmp.CacheOption   = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    ImgPhoto.Source             = bmp;
+                    ImgPhoto.Visibility         = Visibility.Visible;
+                    PhotoPlaceholder.Visibility = Visibility.Collapsed;
+                    return;
+                }
+                catch { }
+            }
+            ShowNoPhoto();
         }
 
         private void BtnBrowsePhoto_Click(object sender, RoutedEventArgs e) {
             var dlg = new OpenFileDialog { Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp" };
-            if (dlg.ShowDialog() == true) TxtPhoto.Text = dlg.FileName;
+            if (dlg.ShowDialog() != true) return;
+            TxtPhoto.Text     = dlg.FileName;
+            _newPhotoSelected = true;
+            // Preview the selected image directly (full path before save)
+            try
+            {
+                var bmp = new System.Windows.Media.Imaging.BitmapImage(new Uri(dlg.FileName));
+                ImgPhoto.Source             = bmp;
+                ImgPhoto.Visibility         = Visibility.Visible;
+                PhotoPlaceholder.Visibility = Visibility.Collapsed;
+            }
+            catch { ShowNoPhoto(); }
         }
 
         private async void BtnSave_Click(object s, RoutedEventArgs e) {
@@ -79,22 +135,34 @@ namespace CollegeManagementWPF.Views
                 bool dup = await Task.Run(() => { var c=_db.GetConnection(); c.Open(); var cmd=new MySqlCommand("SELECT COUNT(*) FROM ecc_dof_wukrostmarycollege.employee_profile WHERE employee_id=@k",c); cmd.Parameters.AddWithValue("@k",eid2); int n=Convert.ToInt32(cmd.ExecuteScalar()); c.Close(); return n>0; });
                 if(dup){Msg("There is already an employee with the same ID!",false);return;}
 
-                // Store file path (WPF uses file paths, not BLOB)
-                string photoPath = TxtPhoto.Text.Trim();
                 string eid=TxtEmpID.Text.Trim(), did=TxtDeptID.Text.Trim(), fn=TxtFName.Text.Trim(),
                        mn=TxtMName.Text.Trim(), ln=TxtLName.Text.Trim(), sx=TxtSex.Text.Trim(),
                        bd=TxtBirthDate.Text.Trim(), ed=TxtEmpDate.Text.Trim(), lv=TxtLevel.Text.Trim(),
                        qt=TxtQualification.Text.Trim(), mob=TxtMobile.Text.Trim();
 
+                // Copy photo to configured folder — store filename only in DB
+                string? photoFileName = null;
+                if (_newPhotoSelected && File.Exists(TxtPhoto.Text))
+                {
+                    Directory.CreateDirectory(AppSettings.Current.EmployeePhotosPath);
+                    string safeEid = eid.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                        .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                        .Replace("<","_").Replace(">","_").Replace("|","_");
+                    string fname = safeEid + Path.GetExtension(TxtPhoto.Text);
+                    File.Copy(TxtPhoto.Text, Path.Combine(AppSettings.Current.EmployeePhotosPath, fname), overwrite: true);
+                    photoFileName = fname;
+                }
+
                 await Task.Run(() => {
                     var c=_db.GetConnection(); c.Open();
-                    var cmd=new MySqlCommand("INSERT INTO ecc_dof_wukrostmarycollege.employee_profile (employee_id,department_id,first_name,middle_name,last_name,sex,birth_date,employee_date,level,qualification_title,mobile_number) VALUES(@ei,@di,@fn,@mn,@ln,@sx,@bd,@ed,@lv,@qt,@mob)",c);
+                    var cmd=new MySqlCommand("INSERT INTO ecc_dof_wukrostmarycollege.employee_profile (employee_id,department_id,first_name,middle_name,last_name,sex,birth_date,employee_date,level,qualification_title,mobile_number,photo_path) VALUES(@ei,@di,@fn,@mn,@ln,@sx,@bd,@ed,@lv,@qt,@mob,@pp)",c);
                     cmd.Parameters.AddWithValue("@ei",eid); cmd.Parameters.AddWithValue("@di",did);
                     cmd.Parameters.AddWithValue("@fn",fn);  cmd.Parameters.AddWithValue("@mn",mn);
                     cmd.Parameters.AddWithValue("@ln",ln);  cmd.Parameters.AddWithValue("@sx",sx);
                     cmd.Parameters.AddWithValue("@bd",bd);  cmd.Parameters.AddWithValue("@ed",ed);
                     cmd.Parameters.AddWithValue("@lv",lv);  cmd.Parameters.AddWithValue("@qt",qt);
                     cmd.Parameters.AddWithValue("@mob",mob);
+                    cmd.Parameters.AddWithValue("@pp",(object?)photoFileName ?? DBNull.Value);
                     cmd.ExecuteNonQuery(); c.Close();
                 });
                 Msg("Saved successfully!",true); await Load(Q); Clear();
@@ -107,16 +175,33 @@ namespace CollegeManagementWPF.Views
             string key=_selKey, did=TxtDeptID.Text.Trim(), fn=TxtFName.Text.Trim(), mn=TxtMName.Text.Trim(),
                    ln=TxtLName.Text.Trim(), sx=TxtSex.Text.Trim(), bd=TxtBirthDate.Text.Trim(),
                    ed=TxtEmpDate.Text.Trim(), lv=TxtLevel.Text.Trim(), qt=TxtQualification.Text.Trim(), mob=TxtMobile.Text.Trim();
+            string? newPhotoFile = null;
+            if (_newPhotoSelected && File.Exists(TxtPhoto.Text))
+            {
+                Directory.CreateDirectory(AppSettings.Current.EmployeePhotosPath);
+                string safeKey = key.Replace("/","_").Replace("\\","_").Replace(":","_")
+                                    .Replace("*","_").Replace("?","_").Replace("\"","_")
+                                    .Replace("<","_").Replace(">","_").Replace("|","_");
+                newPhotoFile = safeKey + Path.GetExtension(TxtPhoto.Text);
+                File.Copy(TxtPhoto.Text, Path.Combine(AppSettings.Current.EmployeePhotosPath, newPhotoFile), overwrite: true);
+            }
             try {
                 await Task.Run(() => {
                     var c=_db.GetConnection(); c.Open();
-                    var cmd=new MySqlCommand("UPDATE ecc_dof_wukrostmarycollege.employee_profile SET department_id=@di,first_name=@fn,middle_name=@mn,last_name=@ln,sex=@sx,birth_date=@bd,employee_date=@ed,level=@lv,qualification_title=@qt,mobile_number=@mob WHERE employee_id=@k",c);
+                    string sql = "UPDATE ecc_dof_wukrostmarycollege.employee_profile SET " +
+                        "department_id=@di,first_name=@fn,middle_name=@mn,last_name=@ln,sex=@sx," +
+                        "birth_date=@bd,employee_date=@ed,level=@lv,qualification_title=@qt,mobile_number=@mob" +
+                        (newPhotoFile != null ? ",photo_path=@pp" : "") +
+                        " WHERE employee_id=@k";
+                    var cmd=new MySqlCommand(sql,c);
                     cmd.Parameters.AddWithValue("@di",did); cmd.Parameters.AddWithValue("@fn",fn);
                     cmd.Parameters.AddWithValue("@mn",mn);  cmd.Parameters.AddWithValue("@ln",ln);
                     cmd.Parameters.AddWithValue("@sx",sx);  cmd.Parameters.AddWithValue("@bd",bd);
                     cmd.Parameters.AddWithValue("@ed",ed);  cmd.Parameters.AddWithValue("@lv",lv);
                     cmd.Parameters.AddWithValue("@qt",qt);  cmd.Parameters.AddWithValue("@mob",mob);
-                    cmd.Parameters.AddWithValue("@k",key);  cmd.ExecuteNonQuery(); c.Close();
+                    cmd.Parameters.AddWithValue("@k",key);
+                    if (newPhotoFile != null) cmd.Parameters.AddWithValue("@pp", newPhotoFile);
+                    cmd.ExecuteNonQuery(); c.Close();
                 });
                 Msg("Update successful!",true); await Load(Q);
             } catch(Exception ex){Msg("Connection failed! "+ex.Message,false);}
@@ -165,7 +250,7 @@ namespace CollegeManagementWPF.Views
             await Load(Q);
         }
         private void BtnClear_Click(object s, RoutedEventArgs e)=>Clear();
-        private void Clear(){TxtEmpID.Text=TxtDeptID.Text=TxtFName.Text=TxtMName.Text=TxtLName.Text=TxtSex.Text=TxtBirthDate.Text=TxtEmpDate.Text=TxtLevel.Text=TxtQualification.Text=TxtMobile.Text=TxtPhoto.Text="";_selKey="";}
+        private void Clear(){TxtEmpID.Text=TxtDeptID.Text=TxtFName.Text=TxtMName.Text=TxtLName.Text=TxtSex.Text=TxtBirthDate.Text=TxtEmpDate.Text=TxtLevel.Text=TxtQualification.Text=TxtMobile.Text=TxtPhoto.Text="";TxtEmpName.Text="";_selKey="";_newPhotoSelected=false;ShowNoPhoto();}
         private void Msg(string m,bool ok){var o=Window.GetWindow(this);if(ok)ModernDialog.Show(o,m,"Success",ModernDialog.DialogType.Success);else ModernDialog.Show(o,m,"Error",ModernDialog.DialogType.Error);}
     }
 }
